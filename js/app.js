@@ -1193,6 +1193,23 @@ function buildEcoBot() {
     const mOrange = new THREE.MeshBasicMaterial({ color: 0xfbbf24 });
     const mSolar = new THREE.MeshLambertMaterial({ color: 0x1e3a8a });
 
+    // Track Materials
+    const trackCanvas = document.createElement('canvas');
+    trackCanvas.width = 64; trackCanvas.height = 128;
+    const trackCtx = trackCanvas.getContext('2d');
+    trackCtx.fillStyle = '#1e293b';
+    trackCtx.fillRect(0,0,64,128);
+    trackCtx.fillStyle = '#0f172a';
+    for(let i=0; i<128; i+=16) trackCtx.fillRect(0,i,64,8);
+    const trackTex = new THREE.CanvasTexture(trackCanvas);
+    trackTex.wrapS = THREE.RepeatWrapping; trackTex.wrapT = THREE.RepeatWrapping;
+    trackTex.repeat.set(1, 4);
+    const mTrackL = new THREE.MeshLambertMaterial({ map: trackTex.clone() });
+    const mTrackR = new THREE.MeshLambertMaterial({ map: trackTex.clone() });
+    roverGroup.userData.trackMatL = mTrackL;
+    roverGroup.userData.trackMatR = mTrackR;
+    roverGroup.userData.wheels = [];
+
     const base = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.8, 3.2), mWhite); base.position.y = 1.0; roverGroup.add(base);
     const waist = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.4, 2.8), mDark); waist.position.y = 1.6; roverGroup.add(waist);
     const chest = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.0, 2.8), mWhite); chest.position.set(0, 2.3, 0.2); roverGroup.add(chest);
@@ -1240,22 +1257,25 @@ function buildEcoBot() {
     roverGroup.userData.armR = armR;
 
     // Tracks
-    function buildTrack() {
+    function buildTrack(isLeft) {
         const g = new THREE.Group(); const r = 0.6, a = 1.6;
-        g.add(new THREE.Mesh(new THREE.BoxGeometry(0.7, r*2, a*2), mDark));
-        const fc = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.7, 24), mDark); fc.rotation.z = Math.PI/2; fc.position.z = a; g.add(fc);
-        const bc = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.7, 24), mDark); bc.rotation.z = Math.PI/2; bc.position.z = -a; g.add(bc);
-        for (let z = -a; z <= a; z += 0.3) {
-            g.add(meshAt(new THREE.BoxGeometry(0.75, 0.08, 0.12), mDark, 0, r, z));
-            g.add(meshAt(new THREE.BoxGeometry(0.75, 0.08, 0.12), mDark, 0, -r, z));
-        }
+        const mat = isLeft ? roverGroup.userData.trackMatL : roverGroup.userData.trackMatR;
+        g.add(new THREE.Mesh(new THREE.BoxGeometry(0.7, r*2, a*2), mat));
+        const fc = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.7, 24), mat); fc.rotation.z = Math.PI/2; fc.position.z = a; g.add(fc);
+        const bc = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.7, 24), mat); bc.rotation.z = Math.PI/2; bc.position.z = -a; g.add(bc);
         const hg = new THREE.CylinderGeometry(0.35, 0.35, 0.75, 16);
-        const w1 = new THREE.Mesh(hg, mSilver); w1.rotation.z = Math.PI/2; w1.position.z = a; g.add(w1);
-        const w2 = new THREE.Mesh(hg, mSilver); w2.rotation.z = Math.PI/2; w2.position.z = -a; g.add(w2);
+        const w1 = new THREE.Mesh(hg, mSilver); w1.rotation.z = Math.PI/2; w1.position.z = a; 
+        const w2 = new THREE.Mesh(hg, mSilver); w2.rotation.z = Math.PI/2; w2.position.z = -a; 
+        const spokeGeo = new THREE.BoxGeometry(0.1, 0.75, 0.75);
+        w1.add(new THREE.Mesh(spokeGeo, mDark));
+        w2.add(new THREE.Mesh(spokeGeo, mDark));
+        g.add(w1); g.add(w2);
+        roverGroup.userData.wheels.push({ wheel: w1, side: isLeft ? 'L' : 'R' });
+        roverGroup.userData.wheels.push({ wheel: w2, side: isLeft ? 'L' : 'R' });
         return g;
     }
-    trackLeft = buildTrack(); trackLeft.position.set(-1.6, 0.6, 0); roverGroup.add(trackLeft);
-    trackRight = buildTrack(); trackRight.position.set(1.6, 0.6, 0); roverGroup.add(trackRight);
+    trackLeft = buildTrack(true); trackLeft.position.set(-1.6, 0.6, 0); roverGroup.add(trackLeft);
+    trackRight = buildTrack(false); trackRight.position.set(1.6, 0.6, 0); roverGroup.add(trackRight);
 
     // Upgrade Slots (hidden by default)
     const upgradeGroup = new THREE.Group(); upgradeGroup.name = "upgrades";
@@ -1456,6 +1476,7 @@ function onWindowResize() {
 let fogUpdateTimer = 0;
 let coverageUpdateTimer = 0;
 let sensorDisplayTimer = 0;
+let lastTrailPos = new THREE.Vector3();
 
 function updateLiveSensors() {
     if (!roverGroup || isRunning) return; // Don't override program output
@@ -1613,6 +1634,42 @@ function animate() {
         if (isMoving && Math.random() < 0.2) {
             const rx = roverGroup.position.x, rz = roverGroup.position.z;
             spawnDust(rx, rz);
+        }
+
+        // Track and Wheel Animation
+        let tDirL = 0, tDirR = 0;
+        if (anyInput || anyProgramInput) {
+            const fwd = inputState.forward || programMotorState.forward;
+            const bwd = inputState.backward || programMotorState.backward;
+            const lft = inputState.left || programMotorState.left;
+            const rgt = inputState.right || programMotorState.right;
+            if (fwd) { tDirL = 1; tDirR = 1; }
+            if (bwd) { tDirL = -1; tDirR = -1; }
+            if (lft) { tDirL = -1; tDirR = 1; }
+            if (rgt) { tDirL = 1; tDirR = -1; }
+        } else if (isRunning && currentCommandObj) {
+            if (currentCommand === 'move' || currentCommand === 'push') { tDirL = 1; tDirR = 1; }
+            else if (currentCommand === 'moveBackward') { tDirL = -1; tDirR = -1; }
+            else if (currentCommand === 'turnLeft') { tDirL = -1; tDirR = 1; }
+            else if (currentCommand === 'turnRight') { tDirL = 1; tDirR = -1; }
+        }
+
+        if (tDirL !== 0 || tDirR !== 0) {
+            if (roverGroup.userData.wheels) {
+                roverGroup.userData.wheels.forEach(w => {
+                    w.wheel.rotation.y += (w.side === 'L' ? tDirL : tDirR) * 6 * delta;
+                });
+            }
+            if (roverGroup.userData.trackMatL && roverGroup.userData.trackMatR) {
+                roverGroup.userData.trackMatL.map.offset.y -= tDirL * 1.5 * delta;
+                roverGroup.userData.trackMatR.map.offset.y -= tDirR * 1.5 * delta;
+            }
+        }
+
+        // Trail generation
+        if (isMoving && roverGroup.position.distanceTo(lastTrailPos) > 0.4) {
+            spawnTrailMark();
+            lastTrailPos.copy(roverGroup.position);
         }
 
         checkGoal(delta);

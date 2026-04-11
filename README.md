@@ -1,8 +1,13 @@
-# RoboQuest 3D — Forest Expedition (v16 Story Edition)
+# RoboQuest 3D — Forest Expedition (v17 Visuals Update)
 
 Ein interaktives 3D-Lernspiel für Kinder. Der Eco-Bot erkundet einen kranken Wald, sammelt Proben und löst Missionen. Die Programmierung erfolgt visuell über Google Blockly mit Fokus auf Code-Effizienz und Sensor-Logik.
 
-## 🚀 Neue Features (v16 Update)
+## 🚀 Neue Features (v17 Update)
+
+### 🏎️ Animierte Ketten & Bodenspuren
+- **Dynamische Ketten (Texture Scrolling)**: Der Antrieb des Eco-Bots ist ab sofort visuell vollständig animiert. Eine geriffelte Endlos-Textur scrollt performant und proportional zur Fahrtgeschwindigkeit über die Laufwerke.
+- **Physische Rad-Rotation**: Die inneren Antriebsräder verfügen über Speichen und drehen sich physikalisch korrekt mit. Bei Linksdrehungen rotieren die rechte Kette nach vorne und die linke Kette nach hinten.
+- **Fahrspuren (Trails)**: Der Roboter zieht auf Sand und Gras nun deutliche, langsam verblassende Bodenspuren hinter sich her, was der Spielwelt zusätzliches Leben einhaucht.
 
 ### ⚙️ Motor-Dauerlauf & Autonomie
 - **Motor Start/Stopp Blöcke**: Der Eco-Bot kann nun ohne feste Zeitvorgabe fahren. Dies ermöglicht komplexere, reaktive Verhaltensweisen.
@@ -52,4 +57,4 @@ Ein interaktives 3D-Lernspiel für Kinder. Der Eco-Bot erkundet einen kranken Wa
 - Der Blockly-Workspace wird automatisch im `localStorage` gesichert.
 
 ---
-*Entwickelt für pädagogische Anwendungen in der Robotik. v16 Checkpoint - April 2026.*
+*Entwickelt für pädagogische Anwendungen in der Robotik. v17 Checkpoint - April 2026.*
