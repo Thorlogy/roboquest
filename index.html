@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>RoboQuest 3D - Forest Expedition</title>
-    <meta name="description" content="Steuere den Eco-Bot durch den Wald und löse Programmier-Quests!">
+    <title>RoboQuest 3D - Waldabenteuer</title>
+    <meta name="description" content="Steuere den Eco-Bot durch den Wald, entdecke Geheimnisse und löse Story-Quests!">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=14">
+    <link rel="stylesheet" href="css/style.css?v=15">
     <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <!-- Google Blockly CDN -->
@@ -29,19 +29,42 @@
             <!-- Container for WebGL -->
             <div id="canvas-container"></div>
 
+            <!-- Fog of War Canvas Overlay -->
+            <canvas id="fog-canvas"></canvas>
+
             <!-- HUD: Score + Quest -->
             <div class="hud-panel" id="hud-panel" style="pointer-events: auto;">
-                <div class="hud-score">⭐ <span id="score-display">0</span> Punkte</div>
+                <div class="hud-score">
+                    ⭐ <span id="score-display">0</span> Punkte
+                    <span class="multiplier-badge hidden" id="multiplier-badge">×2 💥</span>
+                </div>
                 <div class="hud-quest" id="quest-display">
-                    <span class="level-badge" id="level-badge">Level 1</span>
-                    <span id="quest-text">🎯 Fahre zum Ziel!</span>
+                    <span class="level-badge" id="level-badge">Akt 1</span>
+                    <span id="quest-text">🎯 Erkunde den Wald!</span>
+                </div>
+                <div class="hud-map-coverage" id="hud-map-coverage">
+                    🗺 <span id="map-coverage">0</span>% erkundet
                 </div>
                 <div class="hud-btns">
                     <button class="hud-action-btn" id="cam-toggle-btn">🎥 Ansicht: Follow</button>
                     <button class="hud-action-btn" id="reset-btn">🔄 Reset</button>
                 </div>
             </div>
-            
+
+            <!-- Mini Map -->
+            <div id="minimap-container" class="glass-panel">
+                <canvas id="minimap-canvas"></canvas>
+            </div>
+
+            <!-- Story Panel (bottom-left, above D-Pad) -->
+            <div class="story-panel glass-panel" id="story-panel">
+                <div class="story-act" id="story-act">📖 Akt 1: Der kranke Wald</div>
+                <div class="story-objectives" id="story-objectives">
+                    <div class="story-obj" id="obj-0">⬜ Sammle 3 Müll-Objekte</div>
+                    <div class="story-obj" id="obj-1">⬜ Finde die alte Hütte</div>
+                </div>
+            </div>
+
             <!-- Sensor Overlay -->
             <div class="sensor-overlay glass-panel">
                 <div class="overlay-header">
@@ -70,11 +93,25 @@
             <!-- Success Overlay -->
             <div class="success-overlay" id="success-overlay" style="display:none;">
                 <div class="success-content glass-panel">
-                    <div class="success-emoji">🎉</div>
-                    <h2>Ziel erreicht!</h2>
+                    <div class="success-emoji" id="success-emoji">🎉</div>
+                    <h2 id="success-title">Ziel erreicht!</h2>
+                    <div class="code-analysis-results">
+                        <div id="code-result-blocks">Blöcke genutzt: 0</div>
+                        <div id="code-result-stars" class="stars">⭐⭐⭐</div>
+                        <p id="code-result-msg">Sauberes Programm! Effizienz-Bonus: +150</p>
+                    </div>
                     <p id="success-points">+100 Punkte</p>
                     <button class="success-btn" id="btn-next-quest">Weiter →</button>
                 </div>
+            </div>
+
+            <!-- Zone Discovery Popup -->
+            <div class="zone-discovery glass-panel" id="zone-discovery" style="display:none;">
+                <div class="zone-icon" id="zone-icon">🏚</div>
+                <div class="zone-title" id="zone-title">Geheimzone entdeckt!</div>
+                <div class="zone-story" id="zone-story">Ein alter verlassener Platz...</div>
+                <div class="zone-reward" id="zone-reward">+200 Punkte • ×3 Multiplikator!</div>
+                <button class="success-btn" id="btn-zone-close">Weiter erkunden →</button>
             </div>
 
             <!-- Reward Popup -->
@@ -92,7 +129,13 @@
         <div id="ide-header">
             <h3>Eco-Bot Programmierer</h3>
         </div>
-        <div id="blocklyDiv"></div>
+        <div class="ide-body">
+            <div id="blocklyDiv"></div>
+            <div id="live-code-panel" class="glass-panel">
+                <div class="live-panel-header">Live Code (Python)</div>
+                <pre><code id="live-code-content"></code></pre>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -104,7 +147,7 @@
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="js/blockly_setup.js?v=14"></script>
-    <script src="js/app.js?v=14"></script>
+    <script src="js/blockly_setup.js?v=15"></script>
+    <script src="js/app.js?v=15"></script>
 </body>
 </html>

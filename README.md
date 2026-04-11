@@ -1,84 +1,55 @@
-# RoboQuest 3D - Forest Expedition
+# RoboQuest 3D — Forest Expedition (v16 Story Edition)
 
-Ein interaktives 3D-Lernspiel für Kinder, bei dem ein Eco-Bot durch einen Wald gesteuert wird. Die Programmierung erfolgt visuell über Google Blockly mit einer **Flyout-Sidebar** und einem echten **AST-Interpreter** für Echtzeit-Ausführung.
+Ein interaktives 3D-Lernspiel für Kinder. Der Eco-Bot erkundet einen kranken Wald, sammelt Proben und löst Missionen. Die Programmierung erfolgt visuell über Google Blockly mit Fokus auf Code-Effizienz und Sensor-Logik.
 
-## 🚀 Features
+## 🚀 Neue Features (v16 Update)
 
-### 3D-Umgebung
-- Realistische Waldumgebung mit Hügeln, Tälern, Seen und dynamischem Terrain
-- Eco-Bot v4 mit Kettenantrieb, Solarpanel und reaktiver Neigungsphysik (Pitch & Roll)
-- Level-Progression (6 Level: Ebene → See → Canyon → Sammel-Quest → Slalom → Höhle)
-- Infinite-World-Illusion mit 450×450 Map und Horizon-Nebel
+### ⚙️ Motor-Dauerlauf & Autonomie
+- **Motor Start/Stopp Blöcke**: Der Eco-Bot kann nun ohne feste Zeitvorgabe fahren. Dies ermöglicht komplexere, reaktive Verhaltensweisen.
+- **Echtzeit-Sensorik (60Hz)**: Der "Warte bis"-Block wurde von zeitbasierten Ticks auf Frame-basierte Echtzeit-Überprüfung umgestellt. Der Roboter stoppt nun verzögerungsfrei vor Hindernissen.
+- **Präzise Logik-Echtzeit-Analyse**: Der Interpreter unterstützt nun alle Standard-Blockly-Zahlentypen und führt Vergleiche (Abstand < X) in Mikrosekunden-Geschwindigkeit aus.
 
-### Blockly IDE
-- **Flyout-Sidebar**: 6 farbige Kategorie-Buttons am linken Rand steuern direkt den Block-Flyout
-- **18 benutzerdefinierte Blöcke** in 6 Kategorien
-- **Zelos-Renderer** für kindgerechte, abgerundete Block-Optik
-- Kompakte Darstellung (Skalierung 0.65)
-- Automatische Speicherung des Workspace in `localStorage`
+### 📖 Story-Quests (Akt 1-3)
+- **Akt 1: Der kranke Wald**: Sammle Müll und finde die alte Hütte. (Fog: Off)
+- **Akt 2: Die Schatzsuche**: Finde Datenchips und den versteckten See. (Fog: On - Missions-spezifisch!)
+- **Akt 3: Der Waldgeist**: Erreiche den Eulenbaum.
+- **Missions-Fog**: Der Nebel ist nun kein globales Feature mehr, sondern wird gezielt pro Akt aktiviert.
 
-### Programmier-Kategorien & Blöcke
+### 🗺️ Navigation & HUD
+- **Mini-Map (Top-Right)**: Echtzeit-2D-Karte mit Anzeige von Roboter, Hindernissen und entdeckten Objekten.
+- **Live Sensor-HUD**: Kontinuierliche Anzeige von Distanz, Licht, Rotation und Objekterkennung.
+- **Sammel-Items**: 4 Typen (Müll, Samen, Datenchips, Schlüssel) mit Sound-Feedback und UI-Zähler.
 
-| Sidebar | Kategorie | Blöcke |
-|---------|-----------|--------|
-| 🚗 Grün | **Bewegung** | Fahre vorwärts/rückwärts, Drehe links/rechts |
-| 🔁 Orange | **Schleifen** | Wiederhole N mal, Wiederhole solange... |
-| ⑂ Blau | **Logik** | WENN/DANN/SONST, Vergleiche (<, >, =), NICHT, Zahlenwert |
-| ⏳ Gelb | **Warten** | Warte N Sekunden, Warte bis Sensor-Bedingung |
-| 🤖 Lila | **Aktionen** | Greifer öffnen/schließen, Schieben, Scanne Umgebung |
-| 📡 Teal | **Sensoren** | Berührung, Ultraschall, Kamera, Licht, Drehsensor, Neigungssensor, Hindernis |
+### 💻 Live-Code Preview (Python)
+- **Echtzeit Code-Vorschau**: Die blockbasierten Skripte werden nun dynamisch als lesbarer (Python-ähnlicher) Code in einem dedizierten Panel dargestellt. Dies erleichtert den Übergang zur textbasierten Programmierung.
+- **Custom Generator**: Ein spezieller Blockly-Generator wandelt Bewegungs-, Sensor- und Logikblöcke sofort in Code-Text um, mit Syntax-Highlighting im Glassmorphism-Design.
 
-### Sensor-Simulation
-- **Ultraschall**: Echte Distanzmessung via Three.js Raycasting
-- **Kamera**: Erkennt Objekte (Batterien, Ziele, Felsen, Bäume) im Umkreis
-- **Licht**: Helligkeitswert basierend auf Umgebung (Wald vs. offener Pfad)
-- **Rotation/Tilt**: Physikalische Werte des Roboters aus der 3D-Engine
-- **Berührung**: Kollisionserkennung
+### 📊 Code-Analyse & Upgrades
+- **Effizienz-Check**: Nach dem Run bewertet das System die Anzahl der genutzten Blöcke mit **1 bis 3 Sternen**.
+- **Block-Statistik**: Alle neuen Motor- und Logik-Blöcke werden in die finale Effizienz-Bewertung einbezogen.
+- **Visuelle Upgrades**: Der Eco-Bot erhält Module (Kühlrippen, CPU-Kern) direkt am 3D-Modell, sobald Meilensteine erreicht werden.
 
-## 📁 Projektstruktur
-
-```
-roboquest/
-├── index.html              # Einstiegspunkt (v14)
-├── css/
-│   └── style.css           # UI-Design mit Glassmorphism, Sidebar-Farben
-├── js/
-│   ├── app.js              # 3D-Engine, Physik, Welt-Generation, AST-Interpreter
-│   ├── blockly_setup.js    # Block-Definitionen, Flyout-Toolbox, Kategorie-Verwaltung
-│   └── archive/            # Veraltete 2D/2.5D Prototypen
-└── backups/
-    └── v4_stable/          # Snapshot der stabilen v4 (vor Blockly-Erweiterung)
-```
+### ✨ Welt-Details (Aesthetics)
+- **Flora**: Hunderte bunte Blumen und Pilze (randomisiert generiert).
+- **FX**: Leuchtende Glühwürmchen in Geheimzonen und Staubwolken hinter den Ketten beim Fahren.
 
 ## 🔧 Installation & Betrieb
 
 1. Terminal im Verzeichnis `/roboquest` öffnen.
-2. Lokalen Server starten:
-   ```bash
-   python3 -m http.server 8000
-   ```
-3. Im Browser öffnen: `http://localhost:8000`
-
-> **Hinweis**: Alternativ kann die `index.html` direkt im Browser geöffnet werden (`file://`-Protokoll).
+2. Lokalen Server starten: `python3 -m http.server 8080` (Standardport).
+3. Im Browser öffnen: `http://localhost:8080`
 
 ## 💡 Technische Architektur
 
-### AST-Interpreter
-Der stapelbasierte Interpreter (`rStack` / `rStep()`) wertet jeden Blockly-Block zur Laufzeit aus:
-- Unendliche Schleifen mit Sensor-Bedingungen
-- Bedingte Anweisungen (IF/ELSE) mit Raycasts in die 3D-Szene
-- Rekursive `evaluateSensorBlock()`-Funktion für verschachtelte Logik-Ausdrücke
-- Unterbrechbare Ausführung durch den Benutzer
+### Stack
+- **Engine**: Three.js (WebGL)
+- **Logik**: Vanilla JavaScript (ES6)
+- **IDE**: Google Blockly (Custom Blocks)
+- **UI**: HTML5 / CSS3 (Glassmorphism Design)
 
-### Sidebar → Flyout-System
-Statt einer internen Blockly-Kategorie-Liste werden die Blöcke über externe Sidebar-Buttons gesteuert:
-1. Klick auf farbigen Button → IDE öffnet sich + Flyout zeigt passende Blöcke
-2. Klick auf anderen Button → Flyout-Inhalt wird via `updateToolbox()` gewechselt
-3. Erneuter Klick auf aktiven Button → IDE schließt sich
-
-### Versionierung
-- **v14**: Cache-Busting-Version für CSS/JS-Dateien
-- **Git**: Lokales Repository mit Initial-Commit `v1.4`
+### Speicher-System
+- Alle Quest-Fortschritte, Item-Zähler und freigeschaltete Features werden im `storyState`-Objekt verwaltet.
+- Der Blockly-Workspace wird automatisch im `localStorage` gesichert.
 
 ---
-*Entwickelt für pädagogische Anwendungen in der Robotik.*
+*Entwickelt für pädagogische Anwendungen in der Robotik. v16 Checkpoint - April 2026.*

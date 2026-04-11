@@ -75,6 +75,38 @@ Blockly.defineBlocksWithJsonArray([
     "helpUrl": ""
   },
 
+  {
+    "type": "start_motor",
+    "message0": "Motor starten: %1 ⚙️",
+    "args0": [
+      {
+        "type": "field_dropdown",
+        "name": "DIRECTION",
+        "options": [
+          [ "vorwärts ⬆️", "FORWARD" ],
+          [ "rückwärts ⬇️", "BACKWARD" ],
+          [ "links drehen ↺", "LEFT" ],
+          [ "rechts drehen ↻", "RIGHT" ]
+        ]
+      }
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": 160,
+    "tooltip": "Schaltet die Motoren dauerhaft ein. Muss mit 'Motor stoppen' beendet werden.",
+    "helpUrl": ""
+  },
+
+  {
+    "type": "stop_motor",
+    "message0": "Motor stoppen 🛑",
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": 160,
+    "tooltip": "Schaltet alle Motoren am Eco-Bot sofort aus.",
+    "helpUrl": ""
+  },
+
   // ── 🔁 SCHLEIFEN ──────────────────────────────────────────────
 
   {
@@ -338,7 +370,9 @@ Blockly.defineBlocksWithJsonArray([
 const CATEGORY_BLOCKS = {
   "🚗 Bewegung": [
     { "kind": "block", "type": "move_robot" },
-    { "kind": "block", "type": "turn_robot" }
+    { "kind": "block", "type": "turn_robot" },
+    { "kind": "block", "type": "start_motor" },
+    { "kind": "block", "type": "stop_motor" }
   ],
   "🔁 Schleifen": [
     { "kind": "block", "type": "repeat_n" },
@@ -478,6 +512,10 @@ window.injectBlockly = function(unlockedFeatures = []) {
             if (e.isUiEvent) return;
             const state = Blockly.serialization.workspaces.save(blocklyWorkspace);
             localStorage.setItem('roboquest_workspace', JSON.stringify(state));
+            
+            if (window.updateLiveCodePanel) {
+                window.updateLiveCodePanel();
+            }
         });
 
         // Add ResizeObserver to update Blockly SVG size dynamically
@@ -520,4 +558,122 @@ window.selectBlocklyCategory = function(categoryName) {
     } catch (e) {
         console.warn('Could not select category:', categoryName, e);
     }
+};
+
+// ════════════════════════════════════════════════════════════════
+// LIVE CODE GENERATOR
+// ════════════════════════════════════════════════════════════════
+
+window.generateLiveCode = function(block, indentLevel = 0) {
+    if (!block) return '';
+    let code = '';
+    const indent = '  '.repeat(indentLevel);
+    
+    const getCond = (b) => {
+        if (!b) return 'False';
+        if (b.type === 'sensor_obstacle_ahead') return '<span class="sync-function">eco_bot.obstacle_ahead</span>()';
+        if (b.type === 'sensor_touch') return '<span class="sync-function">eco_bot.touch_sensor</span>()';
+        if (b.type === 'sensor_ultrasonic') return '<span class="sync-function">eco_bot.ultrasonic</span>()';
+        if (b.type === 'sensor_camera') return '<span class="sync-function">eco_bot.camera</span>()';
+        if (b.type === 'sensor_light') return '<span class="sync-function">eco_bot.light</span>()';
+        if (b.type === 'sensor_rotation') return '<span class="sync-function">eco_bot.rotation</span>()';
+        if (b.type === 'sensor_tilt') return '<span class="sync-function">eco_bot.tilt</span>()';
+        if (b.type === 'number_value') return `<span class="sync-number">${b.getFieldValue('NUM')}</span>`;
+        if (b.type === 'logic_compare') {
+            const l = getCond(b.getInputTargetBlock('LEFT'));
+            const r = getCond(b.getInputTargetBlock('RIGHT'));
+            const op = {'LT':'&lt;','GT':'&gt;','EQ':'==','LTE':'&lt;=','GTE':'&gt;='}[b.getFieldValue('OP')] || '==';
+            return `${l} ${op} ${r}`;
+        }
+        if (b.type === 'logic_not') {
+            return `<span class="sync-keyword">not</span> (${getCond(b.getInputTargetBlock('BOOL'))})`;
+        }
+        return 'False';
+    };
+
+    switch(block.type) {
+        case 'move_robot':
+            code += `${indent}<span class="sync-comment"># Roboter bewegen</span>\n`;
+            code += `${indent}<span class="sync-function">eco_bot.move</span>(<span class="sync-string">"${block.getFieldValue('DIRECTION')}"</span>, <span class="sync-number">${block.getFieldValue('DISTANCE')}</span>)\n`;
+            break;
+        case 'turn_robot':
+            code += `${indent}<span class="sync-comment"># Roboter drehen</span>\n`;
+            code += `${indent}<span class="sync-function">eco_bot.turn</span>(<span class="sync-string">"${block.getFieldValue('DIRECTION')}"</span>, <span class="sync-number">${block.getFieldValue('DISTANCE')}</span>)\n`;
+            break;
+        case 'start_motor':
+            code += `${indent}<span class="sync-function">eco_bot.start_motor</span>(<span class="sync-string">"${block.getFieldValue('DIRECTION')}"</span>)\n`;
+            break;
+        case 'stop_motor':
+            code += `${indent}<span class="sync-function">eco_bot.stop_motor</span>()\n`;
+            break;
+        case 'wait_seconds':
+            code += `${indent}<span class="sync-comment"># Warten</span>\n`;
+            code += `${indent}<span class="sync-function">eco_bot.sleep</span>(<span class="sync-number">${block.getFieldValue('SECONDS')}</span>)\n`;
+            break;
+        case 'gripper_action':
+            code += `${indent}<span class="sync-function">eco_bot.gripper</span>(<span class="sync-string">"${block.getFieldValue('ACTION')}"</span>)\n`;
+            break;
+        case 'push_action':
+            code += `${indent}<span class="sync-function">eco_bot.push</span>(<span class="sync-number">${block.getFieldValue('DURATION')}</span>)\n`;
+            break;
+        case 'scan_object':
+            code += `${indent}<span class="sync-comment"># Umgebung scannen</span>\n`;
+            code += `${indent}<span class="sync-function">eco_bot.scan</span>()\n`;
+            break;
+        case 'repeat_n':
+            code += `${indent}<span class="sync-keyword">for</span> i <span class="sync-keyword">in</span> <span class="sync-function">range</span>(<span class="sync-number">${block.getFieldValue('TIMES')}</span>):\n`;
+            const doBlock = block.getInputTargetBlock('DO');
+            if (doBlock) code += window.generateLiveCode(doBlock, indentLevel + 1);
+            else code += `${indent}  <span class="sync-keyword">pass</span>\n`;
+            break;
+        case 'while_sensor':
+            code += `${indent}<span class="sync-keyword">while</span> ${getCond(block.getInputTargetBlock('CONDITION'))}:\n`;
+            const whileDo = block.getInputTargetBlock('DO');
+            if (whileDo) code += window.generateLiveCode(whileDo, indentLevel + 1);
+            else code += `${indent}  <span class="sync-keyword">pass</span>\n`;
+            break;
+        case 'logic_if_else':
+            code += `${indent}<span class="sync-keyword">if</span> ${getCond(block.getInputTargetBlock('IF_COND'))}:\n`;
+            const ifDo = block.getInputTargetBlock('DO_IF');
+            if (ifDo) code += window.generateLiveCode(ifDo, indentLevel + 1);
+            else code += `${indent}  <span class="sync-keyword">pass</span>\n`;
+            const elseDo = block.getInputTargetBlock('DO_ELSE');
+            if (elseDo) {
+                code += `${indent}<span class="sync-keyword">else</span>:\n`;
+                code += window.generateLiveCode(elseDo, indentLevel + 1);
+            }
+            break;
+        case 'wait_until_sensor':
+            code += `${indent}<span class="sync-keyword">while</span> <span class="sync-keyword">not</span> ${getCond(block.getInputTargetBlock('CONDITION'))}:\n`;
+            code += `${indent}  <span class="sync-function">eco_bot.sleep</span>(<span class="sync-number">0.1</span>)\n`;
+            break;
+        default:
+            code += `${indent}<span class="sync-comment"># Unbekannter Block: ${block.type}</span>\n`;
+    }
+
+    if (block.getNextBlock()) {
+        code += window.generateLiveCode(block.getNextBlock(), indentLevel);
+    }
+    return code;
+};
+
+window.updateLiveCodePanel = function() {
+    const panel = document.getElementById('live-code-content');
+    if (!panel) return;
+    const root = window.getBlocklyAST();
+    if (!root) {
+        panel.innerHTML = '<span class="sync-comment"># Baue Blöcke in der IDE,\n# um den Code zu sehen!</span>\n\neco_bot = EcoBot()\neco_bot.boot()';
+    } else {
+        let text = '<span class="sync-comment"># --- ECO-BOT PROGRAMM ---</span>\n\n';
+        text += window.generateLiveCode(root, 0);
+        text += '\n<span class="sync-comment"># Programmende</span>';
+        panel.innerHTML = text;
+    }
+};
+
+// Override injectBlockly to immediately trigger an update after init
+const originalInject = window.injectBlockly;
+window.injectBlockly = function(unlockedFeatures = []) {
+    originalInject(unlockedFeatures);
+    setTimeout(window.updateLiveCodePanel, 200);
 };
