@@ -204,6 +204,26 @@ body {
   color: #94a3b8;
 }
 
+.hud-energy {
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4ade80; /* Starts green */
+  transition: color 0.3s;
+}
+.hud-energy.warn { color: #fbbf24; }
+.hud-energy.crit { color: #ef4444; animation: blinkCrit 1s infinite alternate; }
+
+@keyframes blinkCrit {
+  from { opacity: 1; }
+  to { opacity: 0.5; }
+}
+
+
 .level-badge {
   background: #3b82f6;
   color: white;

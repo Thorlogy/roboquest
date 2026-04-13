@@ -67,7 +67,8 @@ var storyState = {
     totalItemsCollected: 0,
     seedsPlanted: 0,
     blocksUsedLastRun: 0,
-    blocksDetailed: { move: 0, turn: 0, loop: 0, logic: 0, action: 0 }
+    blocksDetailed: { move: 0, turn: 0, loop: 0, logic: 0, action: 0 },
+    batteryLevel: 100
 };
 
 const STORY_ACTS = {
@@ -857,6 +858,23 @@ function showReward(reward) {
 function updateHUD() {
     updateStoryUI();
     updateMapCoverage();
+    updateEnergyHUD();
+}
+
+function updateEnergyHUD() {
+    const el = document.getElementById('energy-level');
+    const icon = document.getElementById('energy-icon');
+    const container = document.getElementById('hud-energy');
+    if (!el || !icon || !container) return;
+    
+    el.innerText = Math.round(storyState.batteryLevel);
+    
+    container.classList.remove('warn', 'crit');
+    if (storyState.batteryLevel <= 20) {
+        container.classList.add('crit');
+    } else if (storyState.batteryLevel <= 50) {
+        container.classList.add('warn');
+    }
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1538,11 +1556,30 @@ function animate() {
             if (targetMesh.userData.beam) targetMesh.userData.beam.material.opacity = 0.15 + pulse * 0.2;
         }
 
+        // --- NEW: Solar Energy Logic ---
+        let inSun = true;
+        for (const obs of obstacles) {
+            if (Math.hypot(roverGroup.position.x - obs.x, roverGroup.position.z - obs.z) < obs.radius + 4) {
+                inSun = false; break;
+            }
+        }
+        
+        const eIcon = document.getElementById('energy-icon');
+        if (inSun) {
+            storyState.batteryLevel += 6.0 * delta;
+            if (eIcon) eIcon.innerText = '☀️';
+        } else {
+            storyState.batteryLevel += 0.5 * delta;
+            if (eIcon) eIcon.innerText = '☁️';
+        }
+
+        const canMove = storyState.batteryLevel > 0;
+
         // Manual & Continuous Program input
         const anyInput = inputState.forward || inputState.backward || inputState.left || inputState.right;
         const anyProgramInput = programMotorState.forward || programMotorState.backward || programMotorState.left || programMotorState.right;
         
-        if (anyInput || anyProgramInput) {
+        if ((anyInput || anyProgramInput) && canMove) {
             if (anyInput) programDriven = false;
             const fwd = inputState.forward || programMotorState.forward;
             const bwd = inputState.backward || programMotorState.backward;
@@ -1559,7 +1596,12 @@ function animate() {
 
         // Program execution
         if (isRunning) {
-            if (!currentCommandObj && rStack.length > 0) {
+            if (!canMove) {
+                document.getElementById('sensor-output').innerText = '⚠️ Batterie leer! Unterbreche Programm...';
+                isRunning = false;
+                programMotorState = { forward: false, backward: false, left: false, right: false }; // Auto-stop
+                if (window.highlightBlock) window.highlightBlock(null);
+            } else if (!currentCommandObj && rStack.length > 0) {
                 currentCommandObj = rStep();
                 if (currentCommandObj) {
                     currentCommand = currentCommandObj.action;
@@ -1635,6 +1677,14 @@ function animate() {
             const rx = roverGroup.position.x, rz = roverGroup.position.z;
             spawnDust(rx, rz);
         }
+
+        if (isMoving) {
+            storyState.batteryLevel -= 8.0 * delta;
+        }
+        if (storyState.batteryLevel > 100) storyState.batteryLevel = 100;
+        if (storyState.batteryLevel < 0) storyState.batteryLevel = 0;
+        
+        updateEnergyHUD();
 
         // Track and Wheel Animation
         let tDirL = 0, tDirR = 0;
