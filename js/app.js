@@ -627,7 +627,7 @@ function sensorUltrasonic() {
     const fDX = Math.sin(yaw), fDZ = Math.cos(yaw);
     for (let d = 1; d <= 100; d += 2.0) { // step=2 for performance (still accurate to ~20cm)
         const px = rx + fDX * d, pz = rz + fDZ * d;
-        if (checkCollision(px, pz, yaw) || Math.abs(px) > 215 || Math.abs(pz) > 215) {
+        if (checkCollision(px, pz, yaw) || Math.abs(px) > 440 || Math.abs(pz) > 440) {
             return Math.min(255, Math.round(d * 10)); // 1 Unit = 10cm
         }
     }
@@ -908,7 +908,13 @@ function buildTargetRing() {
     beam.position.set(targetPosition.x, ty + 4, targetPosition.z);
     scene.add(beam);
     targetMesh.userData.beam = beam;
-    const circle = new THREE.Mesh(new THREE.RingGeometry(1, 3, 32), new THREE.MeshBasicMaterial({ color: 0x4ade80, transparent: true, opacity: 0.2, side: THREE.DoubleSide }));
+
+    const cGeo = new THREE.RingGeometry(1, 3, 32, 4);
+    const cpos = cGeo.attributes.position;
+    for(let j=0; j<cpos.count; j++) {
+        cpos.setZ(j, getTerrainYGlobal(targetPosition.x + cpos.getX(j), targetPosition.z - cpos.getY(j)) - ty);
+    }
+    const circle = new THREE.Mesh(cGeo, new THREE.MeshBasicMaterial({ color: 0x4ade80, transparent: true, opacity: 0.2, side: THREE.DoubleSide }));
     circle.rotation.x = -Math.PI / 2;
     circle.position.set(targetPosition.x, ty + 0.15, targetPosition.z);
     scene.add(circle);
@@ -926,8 +932,8 @@ function spawnNextTarget() {
     const rx = roverGroup.position.x, rz = roverGroup.position.z;
     let tx, tz, attempts = 0;
     do {
-        tx = (Math.random() - 0.5) * 80;
-        tz = (Math.random() - 0.5) * 120 + 20;
+        tx = (Math.random() - 0.5) * 300;
+        tz = (Math.random() - 0.5) * 400 + 40;
         attempts++;
     } while (Math.hypot(tx-rx, tz-rz) < 30 && attempts < 20);
     targetPosition.set(tx, 0, tz);
@@ -946,7 +952,7 @@ function applyGoldSkin() {
 function tryMove(distance) {
     const oldX = roverGroup.position.x, oldZ = roverGroup.position.z;
     roverGroup.translateZ(distance);
-    if (Math.abs(roverGroup.position.x) > 215 || Math.abs(roverGroup.position.z) > 215) {
+    if (Math.abs(roverGroup.position.x) > 440 || Math.abs(roverGroup.position.z) > 440) {
         roverGroup.position.x = oldX; roverGroup.position.z = oldZ;
         document.getElementById('sensor-output').innerText = "Warnung: Ende des erforschten Waldes!";
         return false;
@@ -964,7 +970,12 @@ function getTerrainVisualYGlobal(x, z) {
 }
 
 function getTerrainYGlobal(x, z) {
-    return getTerrainVisualYGlobal(x, z);
+    let y = getTerrainVisualYGlobal(x, z);
+    // Add path elevation so objects and trails on the path aren't clipping
+    if (Math.abs(x) < 6.0) {
+        y += 0.1;
+    }
+    return y;
 }
 
 // ── Tire Trails ───────────────────────────────────────
@@ -1015,7 +1026,7 @@ function checkGoal(delta) {
 // ════════════════════════════════════════════════════════════════
 function buildClouds() {
     const cloudMat = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, flatShading: true, fog: false });
-    for(let i=0; i<35; i++) {
+    for(let i=0; i<70; i++) {
         const cg = new THREE.Group();
         for(let j=0; j<Math.floor(Math.random()*4)+3; j++) {
             const p = new THREE.Mesh(new THREE.IcosahedronGeometry(Math.random()*4+2.5, 0), cloudMat);
@@ -1023,7 +1034,7 @@ function buildClouds() {
             p.position.set((Math.random()-0.5)*8, (Math.random()-0.5)*2, (Math.random()-0.5)*8);
             p.castShadow = true; cg.add(p);
         }
-        cg.position.set((Math.random()-0.5)*250, Math.random()*15+25, (Math.random()-0.5)*250);
+        cg.position.set((Math.random()-0.5)*800, Math.random()*15+25, (Math.random()-0.5)*800);
         scene.add(cg);
     }
 }
@@ -1035,7 +1046,7 @@ function buildEnvironment() {
     environmentGroup = new THREE.Group();
     obstacles = [];
 
-    const groundGeo = new THREE.PlaneGeometry(450, 450, 100, 100);
+    const groundGeo = new THREE.PlaneGeometry(900, 900, 150, 150);
     const pos = groundGeo.attributes.position;
     for(let i=0; i < pos.count; i++) {
         pos.setZ(i, getTerrainVisualYGlobal(pos.getX(i), -pos.getY(i)));
@@ -1046,7 +1057,7 @@ function buildEnvironment() {
     environmentGroup.add(ground);
 
     // Main path
-    const pathGeo = new THREE.PlaneGeometry(12, 450, 32, 100);
+    const pathGeo = new THREE.PlaneGeometry(12, 900, 32, 150);
     const pathPos = pathGeo.attributes.position;
     for(let i=0; i < pathPos.count; i++) {
         pathPos.setZ(i, getTerrainVisualYGlobal(pathPos.getX(i), -pathPos.getY(i)) + 0.1);
@@ -1057,11 +1068,18 @@ function buildEnvironment() {
     environmentGroup.add(path);
 
     // Branch paths
-    const branchGeo = new THREE.PlaneGeometry(8, 100, 16, 20);
+    const baseBranchGeo = new THREE.PlaneGeometry(8, 100, 16, 40);
     const branchMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b, flatShading: true });
     [[40, -20, Math.PI/4], [-60, 40, -Math.PI/3], [-20, -40, Math.PI/2.5], [20, 80, -Math.PI/4]].forEach(([bx, bz, rot]) => {
-        const b = new THREE.Mesh(branchGeo, branchMat);
-        b.rotation.x = -Math.PI/2; b.rotation.z = rot;
+        const geom = baseBranchGeo.clone();
+        geom.rotateZ(rot);
+        const bpos = geom.attributes.position;
+        for(let j=0; j<bpos.count; j++) {
+            bpos.setZ(j, getTerrainYGlobal(bx + bpos.getX(j), bz - bpos.getY(j)));
+        }
+        geom.computeVertexNormals();
+        const b = new THREE.Mesh(geom, branchMat);
+        b.rotation.x = -Math.PI/2;
         b.position.set(bx, 0.1, bz);
         environmentGroup.add(b);
     });
@@ -1069,13 +1087,15 @@ function buildEnvironment() {
     // Secret zone markers (subtle glow on ground)
     SECRET_ZONES.forEach(zone => {
         if (!storyState.zonesDiscovered.includes(zone.id)) {
-            // Subtle hint ring
-            const hint = new THREE.Mesh(
-                new THREE.RingGeometry(zone.radius - 2, zone.radius, 32),
-                new THREE.MeshBasicMaterial({ color: 0xa78bfa, transparent: true, opacity: 0.15, side: THREE.DoubleSide })
-            );
+            const zTy = getTerrainYGlobal(zone.x, zone.z);
+            const hintGeo = new THREE.RingGeometry(zone.radius - 2, zone.radius, 32, 4);
+            const hpos = hintGeo.attributes.position;
+            for(let j=0; j<hpos.count; j++) {
+                hpos.setZ(j, getTerrainYGlobal(zone.x + hpos.getX(j), zone.z - hpos.getY(j)) - zTy);
+            }
+            const hint = new THREE.Mesh(hintGeo, new THREE.MeshBasicMaterial({ color: 0xa78bfa, transparent: true, opacity: 0.15, side: THREE.DoubleSide }));
             hint.rotation.x = -Math.PI / 2;
-            hint.position.set(zone.x, getTerrainYGlobal(zone.x, zone.z) + 0.2, zone.z);
+            hint.position.set(zone.x, zTy + 0.2, zone.z);
             environmentGroup.add(hint);
         } else {
             // Discovered zone: glowing marker
@@ -1095,8 +1115,8 @@ function buildEnvironment() {
     const leaB = new THREE.MeshStandardMaterial({ color: 0x1b5e20, flatShading: true });
     const rckM = new THREE.MeshStandardMaterial({ color: 0x9e9e9e, flatShading: true });
 
-    for(let i=0; i<800; i++) {
-        let rx = (Math.random()-0.5)*430, rz = (Math.random()-0.5)*430;
+    for(let i=0; i<1600; i++) {
+        let rx = (Math.random()-0.5)*880, rz = (Math.random()-0.5)*880;
         if (Math.abs(rx) < 12) rx = rx >= 0 ? rx + 12 : rx - 12;
         if (Math.abs(rx) < 15 && Math.abs(rz) < 15) rz += 20;
         let tY = getTerrainYGlobal(rx, rz);
@@ -1113,10 +1133,12 @@ function buildEnvironment() {
             environmentGroup.add(tree); obstacles.push({ x: rx, z: rz, radius: 1.5*s });
             // Shadow circle under tree
             const shadowR = 3.5 * s;
-            const shadow = new THREE.Mesh(
-                new THREE.CircleGeometry(shadowR, 16),
-                new THREE.MeshBasicMaterial({ color: 0x0a1628, transparent: true, opacity: 0.35, side: THREE.DoubleSide })
-            );
+            const shadowGeo = new THREE.CircleGeometry(shadowR, 16);
+            const spos = shadowGeo.attributes.position;
+            for(let j=0; j<spos.count; j++) {
+                spos.setZ(j, getTerrainYGlobal(rx + spos.getX(j), rz - spos.getY(j)) - tY);
+            }
+            const shadow = new THREE.Mesh(shadowGeo, new THREE.MeshBasicMaterial({ color: 0x0a1628, transparent: true, opacity: 0.35, side: THREE.DoubleSide }));
             shadow.rotation.x = -Math.PI / 2;
             shadow.position.set(rx, tY + 0.06, rz);
             environmentGroup.add(shadow);
@@ -1128,10 +1150,12 @@ function buildEnvironment() {
             environmentGroup.add(tree); obstacles.push({ x: rx, z: rz, radius: 1.5*s });
             // Shadow circle under round tree
             const shadowR2 = 3.0 * s;
-            const shadow2 = new THREE.Mesh(
-                new THREE.CircleGeometry(shadowR2, 16),
-                new THREE.MeshBasicMaterial({ color: 0x0a1628, transparent: true, opacity: 0.3, side: THREE.DoubleSide })
-            );
+            const shadowGeo2 = new THREE.CircleGeometry(shadowR2, 16);
+            const spos2 = shadowGeo2.attributes.position;
+            for(let j=0; j<spos2.count; j++) {
+                spos2.setZ(j, getTerrainYGlobal(rx + spos2.getX(j), rz - spos2.getY(j)) - tY);
+            }
+            const shadow2 = new THREE.Mesh(shadowGeo2, new THREE.MeshBasicMaterial({ color: 0x0a1628, transparent: true, opacity: 0.3, side: THREE.DoubleSide }));
             shadow2.rotation.x = -Math.PI / 2;
             shadow2.position.set(rx, tY + 0.06, rz);
             environmentGroup.add(shadow2);
@@ -1204,37 +1228,12 @@ function buildEnvironment() {
 }
 
 let fireflies = [];
-let dustParticles = [];
 
 function updateAtmosphere(delta, time) {
     fireflies.forEach(f => {
         f.position.y += Math.sin(time * f.userData.speed + f.userData.phase) * 0.01;
         f.material.opacity = 0.4 + Math.sin(time * 2 + f.userData.phase) * 0.4;
     });
-    
-    // Update dust
-    for (let i = dustParticles.length - 1; i >= 0; i--) {
-        const p = dustParticles[i];
-        p.life -= delta;
-        p.position.y += delta * 0.5;
-        p.scale.multiplyScalar(1.02);
-        p.material.opacity = p.life / 1.5;
-        if (p.life <= 0) {
-            scene.remove(p);
-            dustParticles.splice(i, 1);
-        }
-    }
-}
-
-function spawnDust(x, z) {
-    const p = new THREE.Mesh(
-        new THREE.SphereGeometry(0.3, 8, 8),
-        new THREE.MeshBasicMaterial({ color: 0x999999, transparent: true, opacity: 0.5 })
-    );
-    p.position.set(x + (Math.random()-0.5), getTerrainYGlobal(x, z) + 0.1, z + (Math.random()-0.5));
-    p.life = 1.0 + Math.random()*0.5;
-    scene.add(p);
-    dustParticles.push(p);
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1242,10 +1241,10 @@ function spawnDust(x, z) {
 // ════════════════════════════════════════════════════════════════
 let chargingStations = [];
 const CHARGING_STATION_POSITIONS = [
-    { x: 0, z: 0 },       // Start area
-    { x: -50, z: 60 },    // Near forest
-    { x: 60, z: -50 },    // Near lake path
-    { x: -30, z: -80 }    // Near hut
+    { x: 0, z: 0 },         // Start area
+    { x: -140, z: 160 },    // Expanded map points
+    { x: 160, z: -150 },    
+    { x: -130, z: -200 }    
 ];
 const CHARGE_STATION_RADIUS = 6;
 const CHARGE_STATION_RATE = 20.0; // per second
@@ -1456,6 +1455,22 @@ function buildEcoBot() {
 
     roverGroup.add(upgradeGroup);
     roverGroup.traverse(child => { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; } });
+
+    // Forward projection arrow (spatial awareness helper)
+    const arrowGeo = new THREE.PlaneGeometry(1.6, 1.6);
+    const actxCanvas = document.createElement('canvas');
+    actxCanvas.width = 128; actxCanvas.height = 128;
+    const actx = actxCanvas.getContext('2d');
+    actx.fillStyle = 'rgba(34, 211, 238, 0.6)'; // cyan glow
+    actx.beginPath(); 
+    actx.moveTo(64, 110); actx.lineTo(16, 20); actx.lineTo(64, 40); actx.lineTo(112, 20);
+    actx.closePath(); actx.fill();
+    const arrowTex = new THREE.CanvasTexture(actxCanvas);
+    const mArrow = new THREE.MeshBasicMaterial({ map: arrowTex, transparent: true, depthWrite: false });
+    const arrowMesh = new THREE.Mesh(arrowGeo, mArrow);
+    arrowMesh.rotation.x = -Math.PI / 2;
+    arrowMesh.position.set(0, -0.6, 3.2); // Just above wheels, in front of rover
+    roverGroup.add(arrowMesh);
 }
 
 function updateRoverUpgrades() {
@@ -1769,14 +1784,17 @@ function animate() {
                 document.getElementById('sensor-output').innerText = '✅ Programm beendet!';
             }
             if (currentCommandObj) {
-                let animSpeed = 1.0 * delta;
+                // Adjust ALL automated speeds by programSpeed for debugging
+                let speedM = typeof programSpeed !== 'undefined' ? programSpeed : 1.0;
+                let animSpeed = 1.0 * delta * speedM;
                 let cmdDuration = currentCommandObj.duration || 1.0;
-                if (currentCommand === 'move') { tryMove(5.0 * delta); commandProgress += delta; isMoving = true; }
-                else if (currentCommand === 'moveBackward') { tryMove(-5.0 * delta); commandProgress += delta; isMoving = true; }
+
+                if (currentCommand === 'move') { tryMove(5.0 * delta * speedM); commandProgress += delta * speedM; isMoving = true; }
+                else if (currentCommand === 'moveBackward') { tryMove(-5.0 * delta * speedM); commandProgress += delta * speedM; isMoving = true; }
                 else if (currentCommand === 'turnLeft') { const ny = roverGroup.rotation.y + (Math.PI/2)*animSpeed; if(!checkCollision(roverGroup.position.x, roverGroup.position.z, ny, true)) roverGroup.rotation.y = ny; commandProgress += animSpeed; isMoving = true; }
                 else if (currentCommand === 'turnRight') { const ny = roverGroup.rotation.y - (Math.PI/2)*animSpeed; if(!checkCollision(roverGroup.position.x, roverGroup.position.z, ny, true)) roverGroup.rotation.y = ny; commandProgress += animSpeed; isMoving = true; }
-                else if (currentCommand === 'scan') { commandProgress += animSpeed; if (lidar) lidar.rotation.y += 12 * delta; }
-                else if (currentCommand === 'wait') { commandProgress += delta / cmdDuration; }
+                else if (currentCommand === 'scan') { commandProgress += animSpeed; if (lidar) lidar.rotation.y += 12 * delta * speedM; }
+                else if (currentCommand === 'wait') { commandProgress += (delta * speedM) / cmdDuration; }
                 else if (currentCommand === 'waitUntil') { 
                     // REAL-TIME CHECK: Evaluated every frame instead of once per tick
                     if (evaluateSensorBlock(currentCommandObj.conditionBlock)) {
@@ -1784,7 +1802,7 @@ function animate() {
                     }
                 }
                 else if (currentCommand === 'gripper') { commandProgress += animSpeed; }
-                else if (currentCommand === 'push') { tryMove(2.5 * delta); commandProgress += delta; isMoving = true; }
+                else if (currentCommand === 'push') { tryMove(2.5 * delta * speedM); commandProgress += delta * speedM; isMoving = true; }
                 else if (currentCommand === 'startMotor' || currentCommand === 'stopMotor') { commandProgress = 1.0; } // Immediate blocks
 
                 if (commandProgress >= 1.0) {
@@ -1825,11 +1843,6 @@ function animate() {
         drawMiniMap();
         updateAtmosphere(delta, clock.elapsedTime);
         updateChargingStations(clock.elapsedTime);
-        
-        // Dust while moving (use rx/rz already declared above from physics block)
-        if (isMoving && Math.random() < 0.2) {
-            spawnDust(rx, rz);
-        }
 
         if (isMoving) {
             storyState.batteryLevel -= 8.0 * delta;
@@ -1894,6 +1907,8 @@ function animate() {
     } catch (err) { console.error("ANIMATE ERROR:", err); }
 }
 
+let programSpeed = 1.0;
+
 function setupDPad() {
     document.getElementById('reset-btn').addEventListener('click', () => {
         roverGroup.position.set(0, 0.2, 0); roverGroup.rotation.set(0, 0, 0);
@@ -1903,6 +1918,14 @@ function setupDPad() {
         cameraChaseMode = !cameraChaseMode;
         e.target.innerText = cameraChaseMode ? '🎥 Ansicht: Follow' : '🎥 Ansicht: Orbit';
     });
+    const speedBtn = document.getElementById('speed-toggle-btn');
+    if (speedBtn) {
+        speedBtn.addEventListener('click', (e) => {
+            if (programSpeed === 1.0) { programSpeed = 0.2; e.target.innerText = '🐢 Tempo: 0.2x'; }
+            else if (programSpeed === 0.2) { programSpeed = 2.0; e.target.innerText = '🐇 Tempo: 2x'; }
+            else { programSpeed = 1.0; e.target.innerText = '🏃 Tempo: 1x'; }
+        });
+    }
 }
 
 init();
