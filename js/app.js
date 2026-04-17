@@ -1000,6 +1000,26 @@ function tryMove(distance) {
     return true;
 }
 
+const BRANCH_PATHS = [
+    {x: 40, z: -20, r: Math.PI/4},
+    {x: -60, z: 40, r: -Math.PI/3}, 
+    {x: -20, z: -40, r: Math.PI/2.5}, 
+    {x: 20, z: 80, r: -Math.PI/4}
+];
+
+function isOnBranchPath(px, pz) {
+    for (const b of BRANCH_PATHS) {
+        // transform px, pz into local coords of the branch
+        const dx = px - b.x;
+        const dz = pz - b.z;
+        // inverse rotation
+        const lx = dx * Math.cos(-b.r) - dz * Math.sin(-b.r);
+        const lz = dx * Math.sin(-b.r) + dz * Math.cos(-b.r);
+        if (Math.abs(lx) < 4.0 && Math.abs(lz) < 50.0) return true; // width 8, height 100
+    }
+    return false;
+}
+
 function getTerrainVisualYGlobal(x, z) {
     const hills = Math.sin(x*0.15) * Math.cos(z*0.15) * 0.4;
     return Math.sin(x*0.05) * Math.cos(z*0.05) * 1.5 + Math.sin(x*0.01) * 2 + hills;
