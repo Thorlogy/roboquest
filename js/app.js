@@ -7,6 +7,18 @@ let roverGroup, trackLeft, trackRight, lidar;
 let isRunning = false;
 let clock = new THREE.Clock();
 let controls;
+let animals = [];
+let worldModifications = [];
+
+// Load saved world mods
+try {
+    const savedMods = localStorage.getItem('roboquest_world_mods');
+    if (savedMods) worldModifications = JSON.parse(savedMods);
+} catch(e) {}
+
+function saveWorldModifications() {
+    localStorage.setItem('roboquest_world_mods', JSON.stringify(worldModifications));
+}
 
 // ── Input State ─────────────────────────────────────────────────
 let inputState = { forward: false, backward: false, left: false, right: false };
@@ -86,10 +98,10 @@ const STORY_ACTS = {
         ]
     },
     2: {
-        title: "📖 Akt 2: Die Schatz-Suche",
+        title: "📖 Akt 2: Die tiefe Schlucht",
         hasFog: true,
         objectives: [
-            { id: "collect_chips", text: "Sammle 2 Datenchips (mit Scan!)", target: 2, type: "datachip", icon: "💾" },
+            { id: "build_bridge", text: "Erschaffe 3 Bau-Blöcke (Treppe/Brücke)", target: 3, type: "build", icon: "🧱" },
             { id: "find_lake", text: "Finde den versteckten See", type: "zone", zoneId: "lake", icon: "🌊" }
         ],
         reward: { id: 'logic', title: "Logik-Modul!", desc: "WENN/DANN Blöcke sind jetzt freigeschaltet.", icon: "⑂" },
@@ -517,6 +529,7 @@ function checkQuestProgress() {
         else if (obj.type === 'datachip') done = storyState.itemsCollected.datachip >= obj.target;
         else if (obj.type === 'seed_plant') done = storyState.seedsPlanted >= obj.target;
         else if (obj.type === 'zone') done = storyState.zonesDiscovered.includes(obj.zoneId);
+        else if (obj.type === 'build') done = (storyState.blocksBuilt || 0) >= obj.target;
 
         const el = document.getElementById('obj-' + idx);
         if (el) {
@@ -835,6 +848,18 @@ function rStep() {
         // Evaluation happens in animate loop for real-time response!
         return { action: 'waitUntil', id: b.id, conditionBlock: b.getInputTargetBlock('CONDITION') };
     }
+    else if (b.type === 'action_build') {
+        if (ctx.state === 0) { ctx.state = 1; return { action: 'build', id: b.id }; }
+        else { rStack.pop(); rPush(b.getNextBlock()); return rStep(); }
+    }
+    else if (b.type === 'action_dig') {
+        if (ctx.state === 0) { ctx.state = 1; return { action: 'dig', id: b.id }; }
+        else { rStack.pop(); rPush(b.getNextBlock()); return rStep(); }
+    }
+    else if (b.type === 'action_remove') {
+        if (ctx.state === 0) { ctx.state = 1; return { action: 'remove', id: b.id }; }
+        else { rStack.pop(); rPush(b.getNextBlock()); return rStep(); }
+    }
     else if (b.type === 'gripper_action') {
         if (ctx.state === 0) { ctx.state = 1; gripperState = b.getFieldValue('ACTION'); return { action: 'gripper', id: b.id }; }
         else { rStack.pop(); rPush(b.getNextBlock()); return rStep(); }
@@ -951,7 +976,18 @@ function applyGoldSkin() {
 
 function tryMove(distance) {
     const oldX = roverGroup.position.x, oldZ = roverGroup.position.z;
+    const oldY = getTerrainYGlobal(oldX, oldZ);
     roverGroup.translateZ(distance);
+    const newY = getTerrainYGlobal(roverGroup.position.x, roverGroup.position.z);
+    
+    // Stufen-Logik (Minecraft-Treppen/Gräben): 
+    // Der Bot darf Steigungen oder Abgründe > 1.2 Einheiten (ein ganzer Block) nicht einfach befahren.
+    if (Math.abs(newY - oldY) > 1.2) {
+        roverGroup.position.x = oldX; roverGroup.position.z = oldZ;
+        document.getElementById('sensor-output').innerText = "⚠️ Weg zu steil/tief! Baue eine Treppe/Brücke.";
+        return false;
+    }
+
     if (Math.abs(roverGroup.position.x) > 440 || Math.abs(roverGroup.position.z) > 440) {
         roverGroup.position.x = oldX; roverGroup.position.z = oldZ;
         document.getElementById('sensor-output').innerText = "Warnung: Ende des erforschten Waldes!";
@@ -971,10 +1007,30 @@ function getTerrainVisualYGlobal(x, z) {
 
 function getTerrainYGlobal(x, z) {
     let y = getTerrainVisualYGlobal(x, z);
-    // Add path elevation so objects and trails on the path aren't clipping
-    if (Math.abs(x) < 6.0) {
+    if (Math.abs(x) < 6.0 || isOnBranchPath(x, z)) {
         y += 0.1;
     }
+    let blockMax = -999;
+    for (let i = 0; i < worldModifications.length; i++) {
+        const mod = worldModifications[i];
+        if (mod.type === 'dig') {
+            const dist = Math.hypot(x - mod.x, z - mod.z);
+            if (dist < 3.0) y -= Math.cos((dist / 3.0) * (Math.PI / 2)) * 1.5;
+        } else if (mod.type === 'build') {
+            if (Math.abs(x - mod.x) < 1.0 && Math.abs(z - mod.z) < 1.0) {
+                 if (mod.y + 0.5 > blockMax) blockMax = mod.y + 0.5; // Top of the block
+            }
+        }
+    }
+    
+    // Moat (Graben) um den See für Akt 2
+    const dLake = Math.hypot(x - 90, z - (-30));
+    if (dLake > 20 && dLake < 35 && isOnBranchPath(x, z) === false) {
+        // Absenkung: tiefe Schlucht von 4m
+        y -= 4.0;
+    }
+    
+    if (blockMax > -999) return blockMax;
     return y;
 }
 
@@ -1049,7 +1105,17 @@ function buildEnvironment() {
     const groundGeo = new THREE.PlaneGeometry(900, 900, 150, 150);
     const pos = groundGeo.attributes.position;
     for(let i=0; i < pos.count; i++) {
-        pos.setZ(i, getTerrainVisualYGlobal(pos.getX(i), -pos.getY(i)));
+        // Here we explicitly DO NOT use getTerrainYGlobal for vertex heights initially
+        // because we want block built to be separate meshes, but we DO want dug holes to be in the mesh!
+        let ty = getTerrainVisualYGlobal(pos.getX(i), -pos.getY(i));
+        // Apply dig only to visual mesh
+        for (const mod of worldModifications) {
+            if (mod.type === 'dig') {
+                const dist = Math.hypot(pos.getX(i) - mod.x, -pos.getY(i) - mod.z);
+                if (dist < 3.0) ty -= Math.cos((dist / 3.0) * (Math.PI / 2)) * 1.5;
+            }
+        }
+        pos.setZ(i, ty);
     }
     groundGeo.computeVertexNormals();
     const ground = new THREE.Mesh(groundGeo, new THREE.MeshStandardMaterial({ color: 0x4ade80, flatShading: true }));
@@ -1804,6 +1870,42 @@ function animate() {
                 else if (currentCommand === 'gripper') { commandProgress += animSpeed; }
                 else if (currentCommand === 'push') { tryMove(2.5 * delta * speedM); commandProgress += delta * speedM; isMoving = true; }
                 else if (currentCommand === 'startMotor' || currentCommand === 'stopMotor') { commandProgress = 1.0; } // Immediate blocks
+                else if (currentCommand === 'build') {
+                    // Place block 2 units in front
+                    const py = getTerrainYGlobal(roverGroup.position.x, roverGroup.position.z);
+                    const fx = Math.sin(roverGroup.rotation.y) * 2.0;
+                    const fz = Math.cos(roverGroup.rotation.y) * 2.0;
+                    worldModifications.push({ type: 'build', x: roverGroup.position.x + fx, y: py + 0.5, z: roverGroup.position.z + fz, id: Date.now() });
+                    saveWorldModifications();
+                    storyState.blocksBuilt = (storyState.blocksBuilt || 0) + 1;
+                    buildEnvironment(); // Rebuild visually
+                    document.getElementById('sensor-output').innerText = '🧱 Block erfolgreich gebaut!';
+                    commandProgress = 1.0;
+                }
+                else if (currentCommand === 'dig') {
+                    const fx = Math.sin(roverGroup.rotation.y) * 2.0;
+                    const fz = Math.cos(roverGroup.rotation.y) * 2.0;
+                    worldModifications.push({ type: 'dig', x: roverGroup.position.x + fx, z: roverGroup.position.z + fz, id: Date.now() });
+                    saveWorldModifications();
+                    buildEnvironment();
+                    document.getElementById('sensor-output').innerText = '⛏️ Loch erfolgreich gegraben!';
+                    commandProgress = 1.0;
+                }
+                else if (currentCommand === 'remove') {
+                    const py = getTerrainYGlobal(roverGroup.position.x, roverGroup.position.z);
+                    const fx = Math.sin(roverGroup.rotation.y) * 2.0;
+                    const fz = Math.cos(roverGroup.rotation.y) * 2.0;
+                    const targetX = roverGroup.position.x + fx;
+                    const targetZ = roverGroup.position.z + fz;
+                    // Find built block nearby
+                    const modIdx = worldModifications.findIndex(m => m.type === 'build' && Math.hypot(m.x - targetX, m.z - targetZ) < 1.5);
+                    if(modIdx > -1) {
+                        worldModifications.splice(modIdx, 1);
+                        saveWorldModifications();
+                        buildEnvironment();
+                    }
+                    commandProgress = 1.0;
+                }
 
                 if (commandProgress >= 1.0) {
                     if (currentCommand === 'gripper' && gripperState === 'CLOSE') tryGrabItem();
@@ -1843,6 +1945,55 @@ function animate() {
         drawMiniMap();
         updateAtmosphere(delta, clock.elapsedTime);
         updateChargingStations(clock.elapsedTime);
+
+        // Update Animals (Foxes)
+        const rp = roverGroup ? roverGroup.position : null;
+        animals.forEach(fox => {
+            const ud = fox.userData;
+            ud.timer -= delta;
+            
+            let fleeing = false;
+            if (rp && Math.hypot(fox.position.x - rp.x, fox.position.z - rp.z) < 15) {
+                ud.state = 'flee';
+                ud.timer = 1.5;
+                const ang = Math.atan2(fox.position.x - rp.x, fox.position.z - rp.z);
+                ud.tx = fox.position.x + Math.sin(ang) * 12;
+                ud.tz = fox.position.z + Math.cos(ang) * 12;
+                fleeing = true;
+            }
+
+            if (ud.timer <= 0) {
+                if (Math.random() < 0.4) {
+                    ud.state = 'wander'; ud.timer = 2.0 + Math.random()*3.0;
+                    ud.tx = fox.position.x + (Math.random()-0.5)*15; ud.tz = fox.position.z + (Math.random()-0.5)*15;
+                } else {
+                    ud.state = 'idle'; ud.timer = 1.0 + Math.random()*2.0;
+                }
+            }
+
+            if (ud.state === 'wander' || ud.state === 'flee') {
+                const moveSpeed = fleeing ? ud.speed * 2.5 : ud.speed;
+                const dx = ud.tx - fox.position.x, dz = ud.tz - fox.position.z;
+                const dist = Math.hypot(dx, dz);
+                if (dist > 0.1) {
+                    const ax = dx / dist, az = dz / dist;
+                    fox.position.x += ax * moveSpeed * delta;
+                    fox.position.z += az * moveSpeed * delta;
+                    let tYaw = Math.atan2(ax, az);
+                    let diff = tYaw - fox.rotation.y;
+                    while(diff < -Math.PI) diff += Math.PI*2;
+                    while(diff > Math.PI) diff -= Math.PI*2;
+                    fox.rotation.y += diff * 5.0 * delta;
+                    
+                    ud.jumpPhase += moveSpeed * delta * 5.0;
+                    fox.position.y = getTerrainYGlobal(fox.position.x, fox.position.z) + Math.abs(Math.sin(ud.jumpPhase)) * 0.4;
+                } else {
+                    ud.timer = 0;
+                }
+            } else {
+                fox.position.y = getTerrainYGlobal(fox.position.x, fox.position.z);
+            }
+        });
 
         if (isMoving) {
             storyState.batteryLevel -= 8.0 * delta;

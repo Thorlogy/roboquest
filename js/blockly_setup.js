@@ -303,6 +303,36 @@ Blockly.defineBlocksWithJsonArray([
     "helpUrl": ""
   },
 
+  {
+    "type": "action_build",
+    "message0": "Erschaffen (Block) 🧱",
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": 280,
+    "tooltip": "Platziert einen festen Block direkt vor dem Roboter. Gut für Treppen oder Brücken.",
+    "helpUrl": ""
+  },
+
+  {
+    "type": "action_dig",
+    "message0": "Graben (Loch) ⛏️",
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": 280,
+    "tooltip": "Gräbt ein Loch in das weiche Terrain vor dem Roboter.",
+    "helpUrl": ""
+  },
+
+  {
+    "type": "action_remove",
+    "message0": "Wegräumen (Block) 🧹",
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": 280,
+    "tooltip": "Entfernt einen künstlich erschaffenen Block, der vor dem Roboter steht.",
+    "helpUrl": ""
+  },
+
   // ── 📡 SENSOREN ───────────────────────────────────────────────
 
   {
@@ -434,7 +464,10 @@ const CATEGORY_BLOCKS = {
   "🤖 Aktionen": [
     { "kind": "block", "type": "gripper_action" },
     { "kind": "block", "type": "push_action" },
-    { "kind": "block", "type": "scan_object" }
+    { "kind": "block", "type": "scan_object" },
+    { "kind": "block", "type": "action_build" },
+    { "kind": "block", "type": "action_dig" },
+    { "kind": "block", "type": "action_remove" }
   ],
   "📡 Sensoren": [
     { "kind": "block", "type": "sensor_touch" },
@@ -629,6 +662,15 @@ window.generateLiveCode = function(block, indentLevel = 0) {
         case 'scan_object':
             code += `${indent}<span class="sync-comment"># Umgebung scannen</span>\n`;
             code += `${indent}<span class="sync-function">eco_bot.scan</span>()\n`;
+            break;
+        case 'action_build':
+            code += `${indent}<span class="sync-function">eco_bot.build_block</span>()\n`;
+            break;
+        case 'action_dig':
+            code += `${indent}<span class="sync-function">eco_bot.dig_hole</span>()\n`;
+            break;
+        case 'action_remove':
+            code += `${indent}<span class="sync-function">eco_bot.remove_block</span>()\n`;
             break;
         case 'repeat_n':
             code += `${indent}<span class="sync-keyword">for</span> i <span class="sync-keyword">in</span> <span class="sync-function">range</span>(<span class="sync-number">${block.getFieldValue('TIMES')}</span>):\n`;
