@@ -625,7 +625,7 @@ function sensorUltrasonic() {
     const rx = roverGroup.position.x, rz = roverGroup.position.z;
     const yaw = roverGroup.rotation.y;
     const fDX = Math.sin(yaw), fDZ = Math.cos(yaw);
-    for (let d = 1; d <= 100; d += 1.0) {
+    for (let d = 1; d <= 100; d += 2.0) { // step=2 for performance (still accurate to ~20cm)
         const px = rx + fDX * d, pz = rz + fDZ * d;
         if (checkCollision(px, pz, yaw) || Math.abs(px) > 215 || Math.abs(pz) > 215) {
             return Math.min(255, Math.round(d * 10)); // 1 Unit = 10cm
@@ -701,9 +701,6 @@ function evaluateSensorBlock(block) {
     if (!block) return false;
     const sensorOutput = document.getElementById('sensor-output');
     const type = block.type;
-    
-    // Debug helper
-    console.log("Evaluating block:", type);
 
     switch (type) {
         case 'sensor_touch': { const v = sensorTouch(); sensorOutput.innerText = v ? '👆 Berührt!' : '👆 Kein Kontakt.'; return v; }
@@ -829,9 +826,13 @@ function rStep() {
         else { rStack.pop(); rPush(b.getNextBlock()); return rStep(); }
     }
     else if (b.type === 'wait_until_sensor') {
-        if (ctx.state === 0) { ctx.totalDist = 0; ctx.state = 1; }
-        // Evaluation now happens in animate loop for real-time response!
-        // Return block reference for the engine to check every frame.
+        if (ctx.state === 0) { ctx.waitTimer = 0; ctx.state = 1; }
+        ctx.waitTimer = (ctx.waitTimer || 0) + 0.016; // ~1 frame at 60fps
+        if (ctx.waitTimer > 30) { // 30s Timeout
+            document.getElementById('sensor-output').innerText = '⏱ Timeout: Bedingung nie erfüllt!';
+            rStack.pop(); rPush(b.getNextBlock()); return rStep();
+        }
+        // Evaluation happens in animate loop for real-time response!
         return { action: 'waitUntil', id: b.id, conditionBlock: b.getInputTargetBlock('CONDITION') };
     }
     else if (b.type === 'gripper_action') {
@@ -984,8 +985,14 @@ function updateTrails(delta) {
     for (let i = trails.length - 1; i >= 0; i--) {
         trails[i].age += delta;
         const t = trails[i].age / TRAIL_LIFETIME;
-        if (t >= 1) { scene.remove(trails[i].mesh); trails[i].mesh.material.dispose(); trails.splice(i, 1); }
-        else trails[i].mesh.material.opacity = 0.45 * (1 - t);
+        if (t >= 1) {
+            scene.remove(trails[i].mesh);
+            trails[i].mesh.geometry.dispose(); // prevent memory leak
+            trails[i].mesh.material.dispose();
+            trails.splice(i, 1);
+        } else {
+            trails[i].mesh.material.opacity = 0.45 * (1 - t);
+        }
     }
 }
 
@@ -1565,7 +1572,8 @@ function init() {
 
     document.getElementById('btn-next-quest').addEventListener('click', () => {
         document.getElementById('success-overlay').style.display = 'none';
-        spawnNextTarget();
+        completeAct();       // unlock reward & features
+        advanceToNextAct();  // move to next story act
     });
 
     document.getElementById('btn-reward-close').addEventListener('click', () => {
@@ -1654,8 +1662,11 @@ function updateLiveSensors() {
 function animate() {
     try {
         requestAnimationFrame(animate);
-        const delta = clock.getDelta();
+        // Clamp delta to 0.1s to prevent energy/physics spikes after tab switch
+        const delta = Math.min(clock.getDelta(), 0.1);
         let isMoving = false;
+        // Declare early so fog-reveal below can access it outside the roverGroup block
+        const anyInput = inputState.forward || inputState.backward || inputState.left || inputState.right;
 
         if (lidar) lidar.rotation.y += 2 * delta;
 
@@ -1696,7 +1707,8 @@ function animate() {
 
         // --- Solar Energy Logic ---
         let inSun = true;
-        let nearStation = isNearChargingStation(roverGroup.position.x, roverGroup.position.z);
+        // Cache result — also used in updateEnergyHUD this frame
+        const nearStation = isNearChargingStation(roverGroup.position.x, roverGroup.position.z);
         for (const obs of obstacles) {
             if (Math.hypot(roverGroup.position.x - obs.x, roverGroup.position.z - obs.z) < obs.radius + 4) {
                 inSun = false; break;
@@ -1717,8 +1729,7 @@ function animate() {
 
         const canMove = storyState.batteryLevel > 0;
 
-        // Manual & Continuous Program input
-        const anyInput = inputState.forward || inputState.backward || inputState.left || inputState.right;
+        // Manual & Continuous Program input (anyInput declared at top of animate for fog-reveal scope)
         const anyProgramInput = programMotorState.forward || programMotorState.backward || programMotorState.left || programMotorState.right;
         
         if ((anyInput || anyProgramInput) && canMove) {
@@ -1815,9 +1826,8 @@ function animate() {
         updateAtmosphere(delta, clock.elapsedTime);
         updateChargingStations(clock.elapsedTime);
         
-        // Dust while moving
+        // Dust while moving (use rx/rz already declared above from physics block)
         if (isMoving && Math.random() < 0.2) {
-            const rx = roverGroup.position.x, rz = roverGroup.position.z;
             spawnDust(rx, rz);
         }
 

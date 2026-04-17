@@ -6,7 +6,7 @@
     <title>RoboQuest 3D - Waldabenteuer</title>
     <meta name="description" content="Steuere den Eco-Bot durch den Wald, entdecke Geheimnisse und löse Story-Quests!">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=19">
+    <link rel="stylesheet" href="css/style.css?v=20">
     <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <!-- Google Blockly CDN -->
@@ -16,12 +16,12 @@
     <div id="app-container">
         <!-- Sidebar Menu: Block Categories -->
         <aside class="sidebar">
-            <button class="nav-btn cat-btn" id="cat-bewegung" data-category="🚗 Bewegung" title="Bewegung: Fahren & Drehen"><span>🚗</span></button>
-            <button class="nav-btn cat-btn" id="cat-schleifen" data-category="🔁 Schleifen" title="Schleifen: Wiederholungen"><span>🔁</span></button>
-            <button class="nav-btn cat-btn" id="cat-logik" data-category="⑂ Logik" title="Logik: Wenn-Dann & Vergleiche"><span>⑂</span></button>
-            <button class="nav-btn cat-btn" id="cat-warten" data-category="⏳ Warten" title="Warten: Zeit & Sensor-Ereignisse"><span>⏳</span></button>
-            <button class="nav-btn cat-btn" id="cat-aktionen" data-category="🤖 Aktionen" title="Aktionen: Greifen, Schieben, Scannen"><span>🤖</span></button>
-            <button class="nav-btn cat-btn" id="cat-sensoren" data-category="📡 Sensoren" title="Sensoren: Berührung, Ultraschall, Kamera..."><span>📡</span></button>
+            <button class="nav-btn cat-btn" id="cat-bewegung" data-category="🚗 Bewegung" title="Bewegung: Fahren & Drehen" aria-label="Bewegungsblöcke öffnen"><span>🚗</span></button>
+            <button class="nav-btn cat-btn" id="cat-schleifen" data-category="🔁 Schleifen" title="Schleifen: Wiederholungen" aria-label="Schleifen-Blöcke öffnen"><span>🔁</span></button>
+            <button class="nav-btn cat-btn" id="cat-logik" data-category="⑂ Logik" title="Logik: Wenn-Dann & Vergleiche" aria-label="Logik-Blöcke öffnen"><span>⑂</span></button>
+            <button class="nav-btn cat-btn" id="cat-warten" data-category="⏳ Warten" title="Warten: Zeit & Sensor-Ereignisse" aria-label="Warte-Blöcke öffnen"><span>⏳</span></button>
+            <button class="nav-btn cat-btn" id="cat-aktionen" data-category="🤖 Aktionen" title="Aktionen: Greifen, Schieben, Scannen" aria-label="Aktions-Blöcke öffnen"><span>🤖</span></button>
+            <button class="nav-btn cat-btn" id="cat-sensoren" data-category="📡 Sensoren" title="Sensoren: Berührung, Ultraschall, Kamera..." aria-label="Sensor-Blöcke öffnen"><span>📡</span></button>
         </aside>
 
         <!-- Main 3D Viewport -->
@@ -150,7 +150,7 @@
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="js/blockly_setup.js?v=19"></script>
-    <script src="js/app.js?v=19"></script>
+    <script src="js/blockly_setup.js?v=20"></script>
+    <script src="js/app.js?v=20"></script>
 </body>
 </html>
