@@ -359,6 +359,14 @@ Blockly.defineBlocksWithJsonArray([
     "output": "Boolean",
     "colour": 190,
     "tooltip": "Gibt WAHR zurück, wenn sich ein Hindernis direkt vor dem Roboter befindet."
+  },
+
+  {
+    "type": "sensor_battery",
+    "message0": "Batterie-Sensor (%) 🔋",
+    "output": "Number",
+    "colour": 190,
+    "tooltip": "Gibt den aktuellen Akkustand des Eco-Bots zurück (0-100%). Sinkt beim Fahren, steigt in der Sonne."
   }
 
 ]);
@@ -435,7 +443,8 @@ const CATEGORY_BLOCKS = {
     { "kind": "block", "type": "sensor_light" },
     { "kind": "block", "type": "sensor_rotation" },
     { "kind": "block", "type": "sensor_tilt" },
-    { "kind": "block", "type": "sensor_obstacle_ahead" }
+    { "kind": "block", "type": "sensor_obstacle_ahead" },
+    { "kind": "block", "type": "sensor_battery" }
   ]
 };
 
@@ -578,6 +587,7 @@ window.generateLiveCode = function(block, indentLevel = 0) {
         if (b.type === 'sensor_light') return '<span class="sync-function">eco_bot.light</span>()';
         if (b.type === 'sensor_rotation') return '<span class="sync-function">eco_bot.rotation</span>()';
         if (b.type === 'sensor_tilt') return '<span class="sync-function">eco_bot.tilt</span>()';
+        if (b.type === 'sensor_battery') return '<span class="sync-function">eco_bot.battery</span>()';
         if (b.type === 'number_value') return `<span class="sync-number">${b.getFieldValue('NUM')}</span>`;
         if (b.type === 'logic_compare') {
             const l = getCond(b.getInputTargetBlock('LEFT'));

@@ -348,6 +348,17 @@ function drawMiniMap() {
         ctx.beginPath(); ctx.arc(p.x, p.y, 2.5, 0, Math.PI*2); ctx.fill();
     });
 
+    // Charging stations
+    chargingStations.forEach(station => {
+        const p = toMap(station.x, station.z);
+        ctx.fillStyle = '#22d3ee';
+        ctx.beginPath(); ctx.arc(p.x, p.y, 3.5, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '6px sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('⚡', p.x, p.y);
+    });
+
     // Robot
     const rp = toMap(roverGroup.position.x, roverGroup.position.z);
     ctx.save();
@@ -702,6 +713,7 @@ function evaluateSensorBlock(block) {
         case 'sensor_light': { const v = sensorLight(); sensorOutput.innerText = '☀️ Licht: ' + v + '%'; return v; }
         case 'sensor_rotation': { const v = sensorRotation(); sensorOutput.innerText = '🔄 Drehung: ' + v + '°'; return v; }
         case 'sensor_tilt': { const v = sensorTilt(); sensorOutput.innerText = '⛰️ Neigung: ' + v + '°'; return v; }
+        case 'sensor_battery': { const v = Math.round(storyState.batteryLevel); sensorOutput.innerText = '🔋 Batterie: ' + v + '%'; return v; }
         case 'logic_compare': {
             const leftBlock = block.getInputTargetBlock('LEFT');
             const rightBlock = block.getInputTargetBlock('RIGHT');
@@ -869,11 +881,14 @@ function updateEnergyHUD() {
     
     el.innerText = Math.round(storyState.batteryLevel);
     
-    container.classList.remove('warn', 'crit');
+    container.classList.remove('warn', 'crit', 'charging');
+    const nearStation = roverGroup && isNearChargingStation(roverGroup.position.x, roverGroup.position.z);
     if (storyState.batteryLevel <= 20) {
         container.classList.add('crit');
     } else if (storyState.batteryLevel <= 50) {
         container.classList.add('warn');
+    } else if (nearStation) {
+        container.classList.add('charging');
     }
 }
 
@@ -1089,12 +1104,30 @@ function buildEnvironment() {
             tree.add(meshAt(new THREE.ConeGeometry(2, 3, 6), leaP, 0, 5, 0));
             const s = Math.random()*0.5+0.7; tree.scale.set(s,s,s); tree.position.set(rx, tY, rz);
             environmentGroup.add(tree); obstacles.push({ x: rx, z: rz, radius: 1.5*s });
+            // Shadow circle under tree
+            const shadowR = 3.5 * s;
+            const shadow = new THREE.Mesh(
+                new THREE.CircleGeometry(shadowR, 16),
+                new THREE.MeshBasicMaterial({ color: 0x0a1628, transparent: true, opacity: 0.35, side: THREE.DoubleSide })
+            );
+            shadow.rotation.x = -Math.PI / 2;
+            shadow.position.set(rx, tY + 0.06, rz);
+            environmentGroup.add(shadow);
         } else if (type < 0.55) {
             const tree = new THREE.Group();
             tree.add(meshAt(new THREE.CylinderGeometry(0.4, 0.5, 2, 5), trkMat, 0, 1, 0));
             tree.add(meshAt(new THREE.DodecahedronGeometry(2), leaD, 0, 3, 0));
             const s = Math.random()*0.5+0.7; tree.scale.set(s,s,s); tree.position.set(rx, tY, rz);
             environmentGroup.add(tree); obstacles.push({ x: rx, z: rz, radius: 1.5*s });
+            // Shadow circle under round tree
+            const shadowR2 = 3.0 * s;
+            const shadow2 = new THREE.Mesh(
+                new THREE.CircleGeometry(shadowR2, 16),
+                new THREE.MeshBasicMaterial({ color: 0x0a1628, transparent: true, opacity: 0.3, side: THREE.DoubleSide })
+            );
+            shadow2.rotation.x = -Math.PI / 2;
+            shadow2.position.set(rx, tY + 0.06, rz);
+            environmentGroup.add(shadow2);
         } else if (type < 0.75) {
             const rR = Math.random()*1.2+0.4;
             const rock = new THREE.Mesh(new THREE.IcosahedronGeometry(rR, 0), rckM);
@@ -1195,6 +1228,110 @@ function spawnDust(x, z) {
     p.life = 1.0 + Math.random()*0.5;
     scene.add(p);
     dustParticles.push(p);
+}
+
+// ════════════════════════════════════════════════════════════════
+// CHARGING STATIONS
+// ════════════════════════════════════════════════════════════════
+let chargingStations = [];
+const CHARGING_STATION_POSITIONS = [
+    { x: 0, z: 0 },       // Start area
+    { x: -50, z: 60 },    // Near forest
+    { x: 60, z: -50 },    // Near lake path
+    { x: -30, z: -80 }    // Near hut
+];
+const CHARGE_STATION_RADIUS = 6;
+const CHARGE_STATION_RATE = 20.0; // per second
+
+function spawnChargingStations() {
+    chargingStations.forEach(s => { if (s.group) scene.remove(s.group); });
+    chargingStations = [];
+
+    const padMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, emissive: 0x0ea5e9, emissiveIntensity: 0.4, metalness: 0.8, roughness: 0.2 });
+    const pillarMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.7, roughness: 0.3 });
+    const panelMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, emissive: 0x3b82f6, emissiveIntensity: 0.3, metalness: 0.6, roughness: 0.2 });
+
+    for (const pos of CHARGING_STATION_POSITIONS) {
+        const group = new THREE.Group();
+        const ty = getTerrainYGlobal(pos.x, pos.z);
+
+        // Ground pad (glowing ring)
+        const pad = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.5, 0.15, 24), padMat);
+        pad.position.y = 0.08;
+        group.add(pad);
+
+        // Inner glow ring
+        const innerRing = new THREE.Mesh(
+            new THREE.RingGeometry(1.5, 2.3, 24),
+            new THREE.MeshBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.5, side: THREE.DoubleSide })
+        );
+        innerRing.rotation.x = -Math.PI / 2;
+        innerRing.position.y = 0.2;
+        group.add(innerRing);
+
+        // Solar panel pillar
+        const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.2, 3, 8), pillarMat);
+        pillar.position.set(0, 1.5, 0);
+        group.add(pillar);
+
+        // Solar panel (tilted)
+        const panel = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.08, 1.8), panelMat);
+        panel.position.set(0, 3.1, 0);
+        panel.rotation.x = -0.4;
+        group.add(panel);
+
+        // Panel grid lines
+        for (let g = -0.6; g <= 0.6; g += 0.3) {
+            const gridLine = new THREE.Mesh(
+                new THREE.BoxGeometry(2.4, 0.1, 0.02),
+                new THREE.MeshBasicMaterial({ color: 0x60a5fa })
+            );
+            gridLine.position.set(0, 3.12, g);
+            gridLine.rotation.x = -0.4;
+            group.add(gridLine);
+        }
+
+        // Lightning bolt icon (small)
+        const bolt = new THREE.Mesh(
+            new THREE.ConeGeometry(0.3, 0.6, 4),
+            new THREE.MeshBasicMaterial({ color: 0xfbbf24 })
+        );
+        bolt.position.set(0, 0.6, 0);
+        bolt.userData = { phase: Math.random() * Math.PI * 2 };
+        group.add(bolt);
+
+        // Radius indicator (subtle circle on ground)
+        const radiusCircle = new THREE.Mesh(
+            new THREE.RingGeometry(CHARGE_STATION_RADIUS - 0.3, CHARGE_STATION_RADIUS, 32),
+            new THREE.MeshBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.15, side: THREE.DoubleSide })
+        );
+        radiusCircle.rotation.x = -Math.PI / 2;
+        radiusCircle.position.y = 0.05;
+        group.add(radiusCircle);
+
+        group.position.set(pos.x, ty, pos.z);
+        scene.add(group);
+        chargingStations.push({ group: group, x: pos.x, z: pos.z, bolt: bolt, innerRing: innerRing });
+    }
+}
+
+function isNearChargingStation(rx, rz) {
+    for (const station of chargingStations) {
+        if (Math.hypot(rx - station.x, rz - station.z) < CHARGE_STATION_RADIUS) return true;
+    }
+    return false;
+}
+
+function updateChargingStations(time) {
+    for (const station of chargingStations) {
+        if (station.bolt) {
+            station.bolt.position.y = 0.6 + Math.sin(time * 2 + station.bolt.userData.phase) * 0.15;
+            station.bolt.rotation.y += 0.02;
+        }
+        if (station.innerRing) {
+            station.innerRing.material.opacity = 0.3 + Math.sin(time * 3) * 0.2;
+        }
+    }
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1368,6 +1505,7 @@ function init() {
     setupInputHandlers();
     initFog();
     initMiniMap();
+    spawnChargingStations();
     // Hide map coverage if no fog
     if (!fogEnabled) document.getElementById('hud-map-coverage').style.display = 'none';
 
@@ -1556,8 +1694,9 @@ function animate() {
             if (targetMesh.userData.beam) targetMesh.userData.beam.material.opacity = 0.15 + pulse * 0.2;
         }
 
-        // --- NEW: Solar Energy Logic ---
+        // --- Solar Energy Logic ---
         let inSun = true;
+        let nearStation = isNearChargingStation(roverGroup.position.x, roverGroup.position.z);
         for (const obs of obstacles) {
             if (Math.hypot(roverGroup.position.x - obs.x, roverGroup.position.z - obs.z) < obs.radius + 4) {
                 inSun = false; break;
@@ -1565,7 +1704,10 @@ function animate() {
         }
         
         const eIcon = document.getElementById('energy-icon');
-        if (inSun) {
+        if (nearStation) {
+            storyState.batteryLevel += CHARGE_STATION_RATE * delta;
+            if (eIcon) eIcon.innerText = '⚡';
+        } else if (inSun) {
             storyState.batteryLevel += 6.0 * delta;
             if (eIcon) eIcon.innerText = '☀️';
         } else {
@@ -1671,6 +1813,7 @@ function animate() {
         updateTrails(delta);
         drawMiniMap();
         updateAtmosphere(delta, clock.elapsedTime);
+        updateChargingStations(clock.elapsedTime);
         
         // Dust while moving
         if (isMoving && Math.random() < 0.2) {

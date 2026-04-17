@@ -217,10 +217,16 @@ body {
 }
 .hud-energy.warn { color: #fbbf24; }
 .hud-energy.crit { color: #ef4444; animation: blinkCrit 1s infinite alternate; }
+.hud-energy.charging { color: #22d3ee; animation: pulseCharge 0.8s ease-in-out infinite alternate; }
 
 @keyframes blinkCrit {
   from { opacity: 1; }
   to { opacity: 0.5; }
+}
+
+@keyframes pulseCharge {
+  from { color: #22d3ee; text-shadow: 0 0 4px rgba(34, 211, 238, 0.3); }
+  to { color: #67e8f9; text-shadow: 0 0 12px rgba(34, 211, 238, 0.6); }
 }
 
 

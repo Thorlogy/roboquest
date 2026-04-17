@@ -1,8 +1,38 @@
-# RoboQuest 3D — Forest Expedition (v17 Visuals Update)
+# RoboQuest 3D — Forest Expedition (v19 Energy Update)
 
 Ein interaktives 3D-Lernspiel für Kinder. Der Eco-Bot erkundet einen kranken Wald, sammelt Proben und löst Missionen. Die Programmierung erfolgt visuell über Google Blockly mit Fokus auf Code-Effizienz und Sensor-Logik.
 
-## 🚀 Neue Features (v17 Update)
+## 🚀 Neue Features (v19 Update)
+
+### 🔋 Batterie-Sensor Block
+- **Neuer Blockly-Block**: `Batterie-Sensor (%) 🔋` — gibt den aktuellen Akkustand (0-100) als Zahl zurück.
+- **Programmierbar**: Kann mit Logik-Blöcken kombiniert werden, z.B. „WENN Batterie < 20% DANN zur Ladestation fahren".
+- **Live-Code**: Wird im Python-Preview als `eco_bot.battery()` dargestellt.
+- **Sensor-HUD**: Akkustand wird nun auch im Live-Sensor-Display unten rechts angezeigt.
+
+### ⚡ Ladestationen
+- **4 Solar-Ladestationen** über die Karte verteilt (Start, Wald, Seepfad, Hütte).
+- **3D-Modell**: Solarpanel auf Mast mit leuchtender Cyan-Bodenplatte und pulsierendem Blitz-Icon.
+- **Schnellladen**: +20.0/s im Radius der Station (vs. +6.0/s in der Sonne).
+- **Minimap-Icons**: Ladestationen als Cyan-Punkte mit ⚡ auf der Minimap sichtbar.
+- **HUD-Feedback**: Cyan-pulsierendes „⚡" im Energie-HUD, wenn in Reichweite.
+
+### 🌑 Visuelle Schatten
+- **Schatten-Kreise**: Unter allen Bäumen werden halbtransparente dunkle Kreise auf den Boden projiziert.
+- **Gameplay-Hinweis**: Kinder erkennen visuell, wo der Bot nur langsam lädt (☁️ 0.5/s).
+
+### 📊 Energie-Balance (v19)
+
+| Situation | Ladung | Verbrauch | Netto |
+|---|---|---|---|
+| Stehen an Ladestation ⚡ | +20.0/s | 0 | **+20.0/s** 🚀 |
+| Fahren an Ladestation ⚡ | +20.0/s | -8.0/s | **+12.0/s** ✅ |
+| Stehen in Sonne ☀️ | +6.0/s | 0 | **+6.0/s** ✅ |
+| Fahren in Sonne ☀️ | +6.0/s | -8.0/s | **-2.0/s** ⬇️ |
+| Stehen im Schatten ☁️ | +0.5/s | 0 | **+0.5/s** 🐌 |
+| Fahren im Schatten ☁️ | +0.5/s | -8.0/s | **-7.5/s** ⚠️ |
+
+## Ältere Features (v17/v18)
 
 ### 🏎️ Animierte Ketten & Bodenspuren
 - **Dynamische Ketten (Texture Scrolling)**: Der Antrieb des Eco-Bots ist ab sofort visuell vollständig animiert. Eine geriffelte Endlos-Textur scrollt performant und proportional zur Fahrtgeschwindigkeit über die Laufwerke.
@@ -57,4 +87,5 @@ Ein interaktives 3D-Lernspiel für Kinder. Der Eco-Bot erkundet einen kranken Wa
 - Der Blockly-Workspace wird automatisch im `localStorage` gesichert.
 
 ---
-*Entwickelt für pädagogische Anwendungen in der Robotik. v17 Checkpoint - April 2026.*
+*Entwickelt für pädagogische Anwendungen in der Robotik. v19 Checkpoint - April 2026.*
+
