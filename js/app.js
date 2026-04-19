@@ -257,6 +257,18 @@ const SECRET_ZONES = [
         story: "Ein uralter riesiger Baum! In seiner Krone lebt eine weise Eule. Sie flüstert dir zu: 'Pflanze die Samen, und der Wald wird gesunden...'",
         points: 150,
         requireScan: true
+    },
+    {
+        id: "base", name: "Recycling-Hub", icon: "🏠",
+        x: 0, z: 0, radius: 10,
+        story: "Deine Heimatbasis. Hier werden Materialien recycelt und der Eco-Bot gewartet.",
+        points: 0
+    },
+    {
+        id: "maze_exit", name: "Labyrinth-Ausgang", icon: "🏁",
+        x: 80, z: 80, radius: 8,
+        story: "Du hast es geschafft! Der Weg aus dem Felsen-Labyrinth ist frei.",
+        points: 500
     }
 ];
 
@@ -740,6 +752,7 @@ function completeAct() {
     if (act.reward) {
         storyState.unlockedFeatures.push(act.reward.id);
         updateRoverUpgrades();
+        updateSidebarVisibility(); // Refresh sidebar after reward
         showReward(act.reward);
     }
 }
@@ -2025,7 +2038,26 @@ function init() {
     });
 
     updateHUD();
+    updateSidebarVisibility();
     animate();
+}
+
+/**
+ * Hides or shows sidebar category buttons based on unlocked features.
+ */
+function updateSidebarVisibility() {
+    const loopsBtn = document.getElementById('cat-schleifen');
+    const logicBtn = document.getElementById('cat-logik');
+    
+    if (loopsBtn) {
+        if (storyState.unlockedFeatures.includes('loops')) loopsBtn.classList.remove('hidden');
+        else loopsBtn.classList.add('hidden');
+    }
+    
+    if (logicBtn) {
+        if (storyState.unlockedFeatures.includes('logic')) logicBtn.classList.remove('hidden');
+        else logicBtn.classList.add('hidden');
+    }
 }
 
 // ════════════════════════════════════════════════════════════════
