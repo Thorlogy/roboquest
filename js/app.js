@@ -349,6 +349,10 @@ function spawnPlantSpots() {
     }
 }
 
+/**
+ * Versucht ein Sammel-Objekt in der Nähe des Roboters aufzunehmen.
+ * Wenn erfolgreich, wird das Item 'getragen' (carriedItem) und visuell am Roboter befestigt.
+ */
 function tryGrabItem() {
     if (!roverGroup) return;
     if (storyState.carriedItem) {
@@ -392,6 +396,10 @@ function tryGrabItem() {
     }
 }
 
+/**
+ * Versucht das aktuell getragene Objekt an einer Recycling-Station abzuladen.
+ * Überprüft die Distanz zum Recycling-Hub und aktualisiert bei Erfolg den Score und Quest-Status.
+ */
 function tryDropItem() {
     if (!storyState.carriedItem) return;
     const rx = roverGroup.position.x, rz = roverGroup.position.z;
@@ -1301,6 +1309,10 @@ function buildClouds() {
 
 let environmentGroup = null;
 
+/**
+ * Erstellt die 3D-Umgebung inklusive Boden, Pfaden, Bäumen, Felsen und dem Labyrinth.
+ * Ruft getTerrainYGlobal auf, um Objekte physikalisch korrekt am Boden zu platzieren.
+ */
 function buildEnvironment() {
     if (environmentGroup) scene.remove(environmentGroup);
     environmentGroup = new THREE.Group();
