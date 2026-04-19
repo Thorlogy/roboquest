@@ -464,10 +464,7 @@ const CATEGORY_BLOCKS = {
   "🤖 Aktionen": [
     { "kind": "block", "type": "gripper_action" },
     { "kind": "block", "type": "push_action" },
-    { "kind": "block", "type": "scan_object" },
-    { "kind": "block", "type": "action_build" },
-    { "kind": "block", "type": "action_dig" },
-    { "kind": "block", "type": "action_remove" }
+    { "kind": "block", "type": "scan_object" }
   ],
   "📡 Sensoren": [
     { "kind": "block", "type": "sensor_touch" },
@@ -1009,9 +1006,6 @@ document.addEventListener('DOMContentLoaded', () => {
             "sleep": { title: "⏳ eco_bot.sleep(seconds)", desc: "Pausiert das Programmfenster und den Roboter für die angegebene Zeit in Sekunden.", returns: "", example: 'eco_bot.sleep(2.0)' },
             "gripper": { title: "✊ eco_bot.gripper(action)", desc: "Öffnet ('OPEN') oder schließt ('CLOSE') den Roboter-Greifarm. Zum Aufnehmen von Gegenständen.", returns: "", example: 'eco_bot.gripper("CLOSE")' },
             "scan": { title: "🔍 eco_bot.scan()", desc: "Aktiviert den LiDAR Radar-Sensor und scannt die direkte Umgebung.", returns: "", example: 'eco_bot.scan()' },
-            "build_block": { title: "🧱 eco_bot.build_block()", desc: "Baut einen festen Hindernis-Block direkt vor dem Roboter in die Welt.", returns: "", example: 'eco_bot.build_block()' },
-            "dig_hole": { title: "⛏️ eco_bot.dig_hole()", desc: "Gräbt ein Stück Erde direkt vor dem Roboter weg. Kann nicht auf Fels benutzt werden.", returns: "", example: 'eco_bot.dig_hole()' },
-            "remove_block": { title: "🧹 eco_bot.remove_block()", desc: "Entfernt einen zuvor gebauten Block, der sich vor dem Roboter befindet.", returns: "", example: 'eco_bot.remove_block()' },
             "push": { title: "💪 eco_bot.push(duration)", desc: "Schiebt ein Objekt mit Motorkraft für die angegebene Zeit nach vorn.", returns: "", example: 'eco_bot.push(2)' },
             "obstacle_ahead": { title: "📡 eco_bot.obstacle_ahead()", desc: "Prüft, ob sich direkt vor dem Roboter ein Hindernis befindet.", returns: "bool: True (Wahr) wenn ein Hindernis vorhanden ist", example: 'if eco_bot.obstacle_ahead():' },
             "touch_sensor": { title: "🛑 eco_bot.touch_sensor()", desc: "Prüft, ob der vordere Stoßdämpfer (Berührungssensor) gerade ausgelöst ist.", returns: "bool: True (Wahr) bei Berührung", example: 'while not eco_bot.touch_sensor():' },
@@ -1043,9 +1037,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     { name: 'sleep', caption: 'eco_bot.sleep(seconds)', value: 'eco_bot.sleep(1.0)', meta: 'EcoBot API' },
                     { name: 'gripper', caption: 'eco_bot.gripper(action)', value: 'eco_bot.gripper("OPEN")', meta: 'EcoBot API' },
                     { name: 'scan', caption: 'eco_bot.scan()', value: 'eco_bot.scan()', meta: 'EcoBot API' },
-                    { name: 'build_block', caption: 'eco_bot.build_block()', value: 'eco_bot.build_block()', meta: 'EcoBot API' },
-                    { name: 'dig_hole', caption: 'eco_bot.dig_hole()', value: 'eco_bot.dig_hole()', meta: 'EcoBot API' },
-                    { name: 'remove_block', caption: 'eco_bot.remove_block()', value: 'eco_bot.remove_block()', meta: 'EcoBot API' },
                     { name: 'push', caption: 'eco_bot.push(duration)', value: 'eco_bot.push(1)', meta: 'EcoBot API' },
                     { name: 'obstacle_ahead', caption: 'eco_bot.obstacle_ahead()', value: 'eco_bot.obstacle_ahead()', meta: 'Sensor (bool)' },
                     { name: 'touch_sensor', caption: 'eco_bot.touch_sensor()', value: 'eco_bot.touch_sensor()', meta: 'Sensor (bool)' },

@@ -795,6 +795,23 @@ body {
 /* ═══════════════════════════════════════════ */
 /* CODE ANALYSIS                              */
 /* ═══════════════════════════════════════════ */
+.hud-energy, .hud-cargo {
+  font-weight: 600;
+  font-size: 0.95rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.hud-cargo {
+  border-color: rgba(251, 191, 36, 0.4); /* Amber border for cargo */
+}
+
+.hidden {
+  display: none !important;
+}
+
 .code-analysis-results {
   margin: 15px 0;
   padding: 15px;

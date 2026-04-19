@@ -193,41 +193,39 @@ var storyState = {
 
 const STORY_ACTS = {
     1: {
-        title: "📖 Akt 1: Der kranke Wald",
+        title: "📖 Akt 1: Logistik-Einheit",
         hasFog: false,
         objectives: [
-            { id: "collect_trash", text: "Sammle 3 Müll-Objekte", target: 3, type: "trash", icon: "🗑" },
-            { id: "find_hut", text: "Finde die alte Hütte", type: "zone", zoneId: "hut", icon: "🏚" }
+            { id: "find_trash", text: "Finde 3 Schrotteile", target: 3, type: "trash", icon: "🗑" },
+            { id: "drop_trash", text: "Bringe Schrott zum Recycling-Center", target: 3, type: "drop_off", icon: "♻️" }
         ],
         reward: { id: 'loops', title: "Schleifen-Modul!", desc: "Ab jetzt kannst du 'Wiederholen'-Blöcke nutzen.", icon: "🔁" },
         spawnItems: [
-            { type: "trash", count: 5 },
-            { type: "key", count: 1 }
+            { type: "trash", count: 8 }
         ]
     },
     2: {
-        title: "📖 Akt 2: Die tiefe Schlucht",
+        title: "📖 Akt 2: Das Felsen-Labyrinth",
         hasFog: true,
         objectives: [
-            { id: "build_bridge", text: "Erschaffe 3 Bau-Blöcke (Treppe/Brücke)", target: 3, type: "build", icon: "🧱" },
-            { id: "find_lake", text: "Finde den versteckten See", type: "zone", zoneId: "lake", icon: "🌊" }
+            { id: "escape_maze", text: "Entkomme aus dem Labyrinth", type: "zone", zoneId: "maze_exit", icon: "🏁" },
+            { id: "scan_walls", text: "Nutze LiDAR-Scan 3 mal", target: 3, type: "scan", icon: "🔍" }
         ],
         reward: { id: 'logic', title: "Logik-Modul!", desc: "WENN/DANN Blöcke sind jetzt freigeschaltet.", icon: "⑂" },
         spawnItems: [
-            { type: "datachip", count: 4 },
-            { type: "key", count: 1 }
+            { type: "datachip", count: 5 }
         ]
     },
     3: {
-        title: "📖 Akt 3: Der Waldgeist",
+        title: "📖 Akt 3: Autonomer Sammler",
         hasFog: false,
         objectives: [
-            { id: "plant_seeds", text: "Pflanze 3 Samen an markierten Spots", target: 3, type: "seed_plant", icon: "🌱" },
-            { id: "find_owl", text: "Finde den Eulenbaum", type: "zone", zoneId: "owl", icon: "🦉" }
+            { id: "full_cleanup", text: "Sammle & Recycel 5 Datenchips", target: 5, type: "drop_off_chip", icon: "📀" },
+            { id: "find_base", text: "Kehr zur Forschungsstation zurück", type: "zone", zoneId: "base", icon: "🏠" }
         ],
-        reward: { id: 'gold', title: "Waldmeister!", desc: "Du hast den Wald gerettet! Gold-Skin freigeschaltet.", icon: "🏆" },
+        reward: { id: 'gold', title: "Roboter-Master!", desc: "Du hast bewiesen, dass ein Bot den Wald retten kann!", icon: "🏆" },
         spawnItems: [
-            { type: "seed", count: 5 }
+            { type: "datachip", count: 10 }
         ]
     }
 };
@@ -353,29 +351,81 @@ function spawnPlantSpots() {
 
 function tryGrabItem() {
     if (!roverGroup) return;
+    if (storyState.carriedItem) {
+        document.getElementById('sensor-output').innerText = "⚠️ Zuerst das aktuelle Teil abladen!";
+        return;
+    }
     const rx = roverGroup.position.x, rz = roverGroup.position.z;
 
     for (let i = collectibles.length - 1; i >= 0; i--) {
         const c = collectibles[i];
-        if (Math.hypot(rx - c.x, rz - c.z) < 3.0) {
+        if (Math.hypot(rx - c.x, rz - c.z) < 4.0) {
+            // "Carry" the item
+            storyState.carriedItem = { type: c.type, def: c.def };
             scene.remove(c.mesh);
             collectibles.splice(i, 1);
-            collectedCount++;
-            storyState.itemsCollected[c.type] = (storyState.itemsCollected[c.type] || 0) + 1;
-            storyState.totalItemsCollected++;
+            
+            // Visual on robot
+            const itemPreview = c.mesh.clone();
+            itemPreview.scale.set(0.4, 0.4, 0.4);
+            itemPreview.position.set(0, 1.8, 0.5);
+            roverGroup.add(itemPreview);
+            roverGroup.userData.carriedMesh = itemPreview;
 
-            // Calculate multiplier
-            let mult = 1;
-            if (programDriven) mult = 2;
-            const pts = c.def.points * mult;
-            score += pts;
-            document.getElementById('score-display').innerText = score;
-            showMultiplier(mult);
-            showPickupFlash(c.def.emoji + " +" + pts);
-            document.getElementById('sensor-output').innerText = c.def.emoji + " " + c.def.name + " gesammelt! (×" + mult + ")";
+            // Track pick up for "Find" objectives
+            storyState.itemsPickedUp[c.type] = (storyState.itemsPickedUp[c.type] || 0) + 1;
+
+            document.getElementById('sensor-output').innerText = "📦 " + c.def.name + " aufgenommen. Bringe es zum Recycling-Hub!";
+            showActionFlash("📦 Item geladen");
+            
+            // Update HUD
+            const cargoHUD = document.getElementById('hud-cargo');
+            const cargoStatus = document.getElementById('cargo-status');
+            if (cargoHUD && cargoStatus) {
+                cargoHUD.classList.remove('hidden');
+                cargoStatus.innerText = c.def.name;
+            }
+
             checkQuestProgress();
+            return;
         }
     }
+}
+
+function tryDropItem() {
+    if (!storyState.carriedItem) return;
+    const rx = roverGroup.position.x, rz = roverGroup.position.z;
+    
+    // Check if in Base zone (Recycling Hub)
+    const baseZone = SECRET_ZONES.find(z => z.id === 'base');
+    if (baseZone && Math.hypot(rx - baseZone.x, rz - baseZone.z) < baseZone.radius) {
+        const item = storyState.carriedItem;
+        storyState.itemsCollected[item.type] = (storyState.itemsCollected[item.type] || 0) + 1;
+        storyState.totalItemsCollected++;
+        
+        // Score
+        let mult = programDriven ? 3 : 1; 
+        const pts = item.def.points * mult;
+        score += pts;
+        document.getElementById('score-display').innerText = score;
+        showMultiplier(mult);
+        showPickupFlash(item.def.emoji + " Recycelt! +" + pts);
+        
+        // Remove from robot
+        if (roverGroup.userData.carriedMesh) roverGroup.remove(roverGroup.userData.carriedMesh);
+        storyState.carriedItem = null;
+        
+        // Update HUD
+        const cargoHUD = document.getElementById('hud-cargo');
+        if (cargoHUD) cargoHUD.classList.add('hidden');
+
+        document.getElementById('sensor-output').innerText = "✅ " + item.def.name + " erfolgreich recycelt!";
+        checkQuestProgress();
+    } else {
+        document.getElementById('sensor-output').innerText = "❌ Hier ist keine Recycling-Station!";
+        showActionFlash("❌ Abladen misslungen");
+    }
+}
 
     // Check plant spots (if carrying seeds)
     if (storyState.currentAct === 3 && storyState.itemsCollected.seed > 0) {
@@ -633,11 +683,16 @@ function checkQuestProgress() {
     let allDone = true;
     act.objectives.forEach((obj, idx) => {
         let done = false;
-        if (obj.type === 'trash') done = storyState.itemsCollected.trash >= obj.target;
-        else if (obj.type === 'datachip') done = storyState.itemsCollected.datachip >= obj.target;
+        if (obj.type === 'trash') done = (storyState.itemsPickedUp.trash || 0) >= obj.target;
+        else if (obj.type === 'drop_off') done = (storyState.itemsCollected.trash || 0) >= obj.target;
+        else if (obj.type === 'drop_off_chip') done = (storyState.itemsCollected.datachip || 0) >= obj.target;
+        else if (obj.type === 'datachip') done = (storyState.itemsPickedUp.datachip || 0) >= obj.target;
         else if (obj.type === 'seed_plant') done = storyState.seedsPlanted >= obj.target;
         else if (obj.type === 'zone') done = storyState.zonesDiscovered.includes(obj.zoneId);
         else if (obj.type === 'build') done = (storyState.blocksBuilt || 0) >= obj.target;
+        else if (obj.type === 'scan') done = (storyState.scanCount || 0) >= obj.target;
+        
+        if (done && !obj.completed) {
 
         const el = document.getElementById('obj-' + idx);
         if (el) {
@@ -1432,6 +1487,23 @@ function buildEnvironment() {
         }
     }
 
+    // --- NEW: ROBOTICS LABYRINTH (Rock Walls) ---
+    // Specifically placing rocks around x=20..80, z=20..80 to create a maze
+    const mazeRocks = [
+        {x: 15, z: 20, r: 4}, {x: 15, z: 30, r: 4}, {x: 15, z: 40, r: 4}, {x: 15, z: 50, r: 4},
+        {x: 25, z: 50, r: 4}, {x: 35, z: 50, r: 4}, {x: 45, z: 50, r: 4},
+        {x: 45, z: 40, r: 4}, {x: 45, z: 30, r: 4}, {x: 45, z: 20, r: 4},
+        {x: 55, z: 20, r: 4}, {x: 65, z: 20, r: 4}, {x: 75, z: 20, r: 4},
+        {x: 75, z: 30, r: 4}, {x: 75, z: 40, r: 4}, {x: 75, z: 50, r: 4}, {x: 75, z: 60, r: 4}, {x: 75, z: 70, r: 4}
+    ];
+    mazeRocks.forEach(m => {
+        const rck = new THREE.Mesh(new THREE.IcosahedronGeometry(m.r, 0), rckM);
+        const ty = getTerrainYGlobal(m.x, m.z);
+        rck.position.set(m.x, ty + m.r * 0.5, m.z);
+        environmentGroup.add(rck);
+        obstacles.push({ x: m.x, z: m.z, radius: m.r * 0.9 });
+    });
+
     // --- NEW: POI PROPS (Fence around Hut) ---
     const hut = { x: -80, z: -90 };
     for (let i=0; i<8; i++) {
@@ -2142,6 +2214,8 @@ function animate() {
                         currentCommandObj._effectFired = true;
                         spawnActionRings(roverGroup.position);
                         showActionFlash('🔍 Scanne Umgebung...');
+                        storyState.scanCount = (storyState.scanCount || 0) + 1;
+                        checkQuestProgress();
                     }
                 }
                 else if (currentCommand === 'wait') { commandProgress += (delta * speedM) / cmdDuration; }
@@ -2225,7 +2299,10 @@ function animate() {
                 }
 
                 if (commandProgress >= 1.0) {
-                    if (currentCommand === 'gripper' && gripperState === 'CLOSE') tryGrabItem();
+                    if (currentCommand === 'gripper') {
+                        if (gripperState === 'CLOSE') tryGrabItem();
+                        else tryDropItem();
+                    }
                     if (currentCommand === 'push' && roverGroup) roverGroup.children[0].position.z = 0; // Reset lean
                     if (currentCommand && currentCommand.includes('turn')) roverGroup.rotation.y = Math.round(roverGroup.rotation.y / (Math.PI/2)) * (Math.PI/2);
                     currentCommandObj = null; currentCommand = null;
