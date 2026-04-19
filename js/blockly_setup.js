@@ -613,94 +613,94 @@ window.generateLiveCode = function(block, indentLevel = 0) {
     
     const getCond = (b) => {
         if (!b) return 'False';
-        if (b.type === 'sensor_obstacle_ahead') return '<span class="sync-function">eco_bot.obstacle_ahead</span>()';
-        if (b.type === 'sensor_touch') return '<span class="sync-function">eco_bot.touch_sensor</span>()';
-        if (b.type === 'sensor_ultrasonic') return '<span class="sync-function">eco_bot.ultrasonic</span>()';
-        if (b.type === 'sensor_camera') return '<span class="sync-function">eco_bot.camera</span>()';
-        if (b.type === 'sensor_light') return '<span class="sync-function">eco_bot.light</span>()';
-        if (b.type === 'sensor_rotation') return '<span class="sync-function">eco_bot.rotation</span>()';
-        if (b.type === 'sensor_tilt') return '<span class="sync-function">eco_bot.tilt</span>()';
-        if (b.type === 'sensor_battery') return '<span class="sync-function">eco_bot.battery</span>()';
-        if (b.type === 'number_value') return `<span class="sync-number">${b.getFieldValue('NUM')}</span>`;
+        if (b.type === 'sensor_obstacle_ahead') return 'eco_bot.obstacle_ahead()';
+        if (b.type === 'sensor_touch') return 'eco_bot.touch_sensor()';
+        if (b.type === 'sensor_ultrasonic') return 'eco_bot.ultrasonic()';
+        if (b.type === 'sensor_camera') return 'eco_bot.camera()';
+        if (b.type === 'sensor_light') return 'eco_bot.light()';
+        if (b.type === 'sensor_rotation') return 'eco_bot.rotation()';
+        if (b.type === 'sensor_tilt') return 'eco_bot.tilt()';
+        if (b.type === 'sensor_battery') return 'eco_bot.battery()';
+        if (b.type === 'number_value') return `${b.getFieldValue('NUM')}`;
         if (b.type === 'logic_compare') {
             const l = getCond(b.getInputTargetBlock('LEFT'));
             const r = getCond(b.getInputTargetBlock('RIGHT'));
-            const op = {'LT':'&lt;','GT':'&gt;','EQ':'==','LTE':'&lt;=','GTE':'&gt;='}[b.getFieldValue('OP')] || '==';
+            const op = {'LT':'<','GT':'>','EQ':'==','LTE':'<=','GTE':'>='}[b.getFieldValue('OP')] || '==';
             return `${l} ${op} ${r}`;
         }
         if (b.type === 'logic_not') {
-            return `<span class="sync-keyword">not</span> (${getCond(b.getInputTargetBlock('BOOL'))})`;
+            return `not (${getCond(b.getInputTargetBlock('BOOL'))})`;
         }
         return 'False';
     };
 
     switch(block.type) {
         case 'move_robot':
-            code += `${indent}<span class="sync-comment"># Roboter bewegen</span>\n`;
-            code += `${indent}<span class="sync-function">eco_bot.move</span>(<span class="sync-string">"${block.getFieldValue('DIRECTION')}"</span>, <span class="sync-number">${block.getFieldValue('DISTANCE')}</span>)\n`;
+            code += `${indent}# Roboter bewegen\n`;
+            code += `${indent}eco_bot.move("${block.getFieldValue('DIRECTION')}", ${block.getFieldValue('DISTANCE')})\n`;
             break;
         case 'turn_robot':
-            code += `${indent}<span class="sync-comment"># Roboter drehen</span>\n`;
-            code += `${indent}<span class="sync-function">eco_bot.turn</span>(<span class="sync-string">"${block.getFieldValue('DIRECTION')}"</span>, <span class="sync-number">${block.getFieldValue('DISTANCE')}</span>)\n`;
+            code += `${indent}# Roboter drehen\n`;
+            code += `${indent}eco_bot.turn("${block.getFieldValue('DIRECTION')}", ${block.getFieldValue('DISTANCE')})\n`;
             break;
         case 'start_motor':
-            code += `${indent}<span class="sync-function">eco_bot.start_motor</span>(<span class="sync-string">"${block.getFieldValue('DIRECTION')}"</span>)\n`;
+            code += `${indent}eco_bot.start_motor("${block.getFieldValue('DIRECTION')}")\n`;
             break;
         case 'stop_motor':
-            code += `${indent}<span class="sync-function">eco_bot.stop_motor</span>()\n`;
+            code += `${indent}eco_bot.stop_motor()\n`;
             break;
         case 'wait_seconds':
-            code += `${indent}<span class="sync-comment"># Warten</span>\n`;
-            code += `${indent}<span class="sync-function">eco_bot.sleep</span>(<span class="sync-number">${block.getFieldValue('SECONDS')}</span>)\n`;
+            code += `${indent}# Warten\n`;
+            code += `${indent}eco_bot.sleep(${block.getFieldValue('SECONDS')})\n`;
             break;
         case 'gripper_action':
-            code += `${indent}<span class="sync-function">eco_bot.gripper</span>(<span class="sync-string">"${block.getFieldValue('ACTION')}"</span>)\n`;
+            code += `${indent}eco_bot.gripper("${block.getFieldValue('ACTION')}")\n`;
             break;
         case 'push_action':
-            code += `${indent}<span class="sync-function">eco_bot.push</span>(<span class="sync-number">${block.getFieldValue('DURATION')}</span>)\n`;
+            code += `${indent}eco_bot.push(${block.getFieldValue('DURATION')})\n`;
             break;
         case 'scan_object':
-            code += `${indent}<span class="sync-comment"># Umgebung scannen</span>\n`;
-            code += `${indent}<span class="sync-function">eco_bot.scan</span>()\n`;
+            code += `${indent}# Umgebung scannen\n`;
+            code += `${indent}eco_bot.scan()\n`;
             break;
         case 'action_build':
-            code += `${indent}<span class="sync-function">eco_bot.build_block</span>()\n`;
+            code += `${indent}eco_bot.build_block()\n`;
             break;
         case 'action_dig':
-            code += `${indent}<span class="sync-function">eco_bot.dig_hole</span>()\n`;
+            code += `${indent}eco_bot.dig_hole()\n`;
             break;
         case 'action_remove':
-            code += `${indent}<span class="sync-function">eco_bot.remove_block</span>()\n`;
+            code += `${indent}eco_bot.remove_block()\n`;
             break;
         case 'repeat_n':
-            code += `${indent}<span class="sync-keyword">for</span> i <span class="sync-keyword">in</span> <span class="sync-function">range</span>(<span class="sync-number">${block.getFieldValue('TIMES')}</span>):\n`;
+            code += `${indent}for i in range(${block.getFieldValue('TIMES')}):\n`;
             const doBlock = block.getInputTargetBlock('DO');
             if (doBlock) code += window.generateLiveCode(doBlock, indentLevel + 1);
-            else code += `${indent}  <span class="sync-keyword">pass</span>\n`;
+            else code += `${indent}  pass\n`;
             break;
         case 'while_sensor':
-            code += `${indent}<span class="sync-keyword">while</span> ${getCond(block.getInputTargetBlock('CONDITION'))}:\n`;
+            code += `${indent}while ${getCond(block.getInputTargetBlock('CONDITION'))}:\n`;
             const whileDo = block.getInputTargetBlock('DO');
             if (whileDo) code += window.generateLiveCode(whileDo, indentLevel + 1);
-            else code += `${indent}  <span class="sync-keyword">pass</span>\n`;
+            else code += `${indent}  pass\n`;
             break;
         case 'logic_if_else':
-            code += `${indent}<span class="sync-keyword">if</span> ${getCond(block.getInputTargetBlock('IF_COND'))}:\n`;
+            code += `${indent}if ${getCond(block.getInputTargetBlock('IF_COND'))}:\n`;
             const ifDo = block.getInputTargetBlock('DO_IF');
             if (ifDo) code += window.generateLiveCode(ifDo, indentLevel + 1);
-            else code += `${indent}  <span class="sync-keyword">pass</span>\n`;
+            else code += `${indent}  pass\n`;
             const elseDo = block.getInputTargetBlock('DO_ELSE');
             if (elseDo) {
-                code += `${indent}<span class="sync-keyword">else</span>:\n`;
+                code += `${indent}else:\n`;
                 code += window.generateLiveCode(elseDo, indentLevel + 1);
             }
             break;
         case 'wait_until_sensor':
-            code += `${indent}<span class="sync-keyword">while</span> <span class="sync-keyword">not</span> ${getCond(block.getInputTargetBlock('CONDITION'))}:\n`;
-            code += `${indent}  <span class="sync-function">eco_bot.sleep</span>(<span class="sync-number">0.1</span>)\n`;
+            code += `${indent}while not ${getCond(block.getInputTargetBlock('CONDITION'))}:\n`;
+            code += `${indent}  eco_bot.sleep(0.1)\n`;
             break;
         default:
-            code += `${indent}<span class="sync-comment"># Unbekannter Block: ${block.type}</span>\n`;
+            code += `${indent}# Unbekannter Block: ${block.type}\n`;
     }
 
     if (block.getNextBlock()) {
@@ -709,17 +709,25 @@ window.generateLiveCode = function(block, indentLevel = 0) {
     return code;
 };
 
+window.pyEditor = null; // Exported to be accessible by app.js executor
 window.updateLiveCodePanel = function() {
-    const panel = document.getElementById('live-code-content');
-    if (!panel) return;
+    if (!window.pyEditor) return;
+    
+    // Only update Ace from Blockly if the Blocks tab is currently active
+    // This allows the "One-Way Sync" workflow.
+    const blocksTabActive = document.querySelector('[data-tab="blocks"]');
+    if (blocksTabActive && !blocksTabActive.classList.contains('active')) return;
+
     const root = window.getBlocklyAST();
     if (!root) {
-        panel.innerHTML = '<span class="sync-comment"># Baue Blöcke in der IDE,\n# um den Code zu sehen!</span>\n\neco_bot = EcoBot()\neco_bot.boot()';
+        window.pyEditor.setValue('# Baue Blöcke in der IDE,\n# um den Python Code hier zu bearbeiten!\n\neco_bot.move("FORWARD", 1)', -1);
     } else {
-        let text = '<span class="sync-comment"># --- ECO-BOT PROGRAMM ---</span>\n\n';
+        let text = '# --- ECO-BOT PROGRAMM ---\n\n';
         text += window.generateLiveCode(root, 0);
-        text += '\n<span class="sync-comment"># Programmende</span>';
-        panel.innerHTML = text;
+        // Ensure clean trailing newline before end comment
+        if (!text.endsWith('\n')) text += '\n';
+        text += '\n# Programmende';
+        window.pyEditor.setValue(text, -1);
     }
 };
 
@@ -729,3 +737,428 @@ window.injectBlockly = function(unlockedFeatures = []) {
     originalInject(unlockedFeatures);
     setTimeout(window.updateLiveCodePanel, 200);
 };
+
+// ════════════════════════════════════════════════════════════════
+// PYTHON TO BLOCKS PARSER
+// ════════════════════════════════════════════════════════════════
+
+window.pythonToBlocks = function(code, workspace) {
+    if (!workspace) return;
+    
+    workspace.clear();
+
+    const lines = code.split('\n');
+    let parentStack = [{ block: null, indent: -1 }];
+    let currentBlock = null;
+    let firstBlock = null;
+
+    const parseCondition = (condStr, parentBlock) => {
+        condStr = condStr.trim();
+        let targetType = 'sensor_obstacle_ahead';
+        let notMatch = condStr.match(/^not\s*\((.+)\)$/);
+        
+        if (notMatch) {
+            let notBlock = workspace.newBlock('logic_not');
+            notBlock.initSvg();
+            parseCondition(notMatch[1], notBlock);
+            if (parentBlock.type === 'logic_if_else') parentBlock.getInput('IF_COND').connection.connect(notBlock.outputConnection);
+            else if (parentBlock.type === 'while_sensor') parentBlock.getInput('CONDITION').connection.connect(notBlock.outputConnection);
+            else if (parentBlock.type === 'wait_until_sensor') parentBlock.getInput('CONDITION').connection.connect(notBlock.outputConnection);
+            return;
+        }
+
+        let cmpMatch = condStr.match(/(.+?)\s*(<|>|==|<=|>=)\s*(.+)/);
+        if (cmpMatch) {
+            let cmpBlock = workspace.newBlock('logic_compare');
+            cmpBlock.initSvg();
+            let opMap = {'<':'LT', '>':'GT', '==':'EQ', '<=':'LTE', '>=':'GTE'};
+            cmpBlock.setFieldValue(opMap[cmpMatch[2]], 'OP');
+            
+            parseCondition(cmpMatch[1], cmpBlock); 
+            
+            let numBlock = workspace.newBlock('number_value');
+            numBlock.initSvg();
+            numBlock.setFieldValue(Number(cmpMatch[3]), 'NUM');
+            cmpBlock.getInput('RIGHT').connection.connect(numBlock.outputConnection);
+            
+            if (parentBlock.type === 'logic_if_else') parentBlock.getInput('IF_COND').connection.connect(cmpBlock.outputConnection);
+            else if (parentBlock.type === 'while_sensor') parentBlock.getInput('CONDITION').connection.connect(cmpBlock.outputConnection);
+            else if (parentBlock.type === 'wait_until_sensor') parentBlock.getInput('CONDITION').connection.connect(cmpBlock.outputConnection);
+            else if (parentBlock.type === 'logic_not') parentBlock.getInput('BOOL').connection.connect(cmpBlock.outputConnection);
+            return;
+        }
+
+        if (condStr === 'eco_bot.obstacle_ahead()') targetType = 'sensor_obstacle_ahead';
+        else if (condStr === 'eco_bot.touch_sensor()') targetType = 'sensor_touch';
+        else if (condStr === 'eco_bot.ultrasonic()') targetType = 'sensor_ultrasonic';
+        else if (condStr === 'eco_bot.camera()') targetType = 'sensor_camera';
+        else if (condStr === 'eco_bot.light()') targetType = 'sensor_light';
+        else if (condStr === 'eco_bot.rotation()') targetType = 'sensor_rotation';
+        else if (condStr === 'eco_bot.tilt()') targetType = 'sensor_tilt';
+        else if (condStr === 'eco_bot.battery()') targetType = 'sensor_battery';
+        else if (!isNaN(Number(condStr))) {
+            let numBlock = workspace.newBlock('number_value');
+            numBlock.initSvg();
+            numBlock.setFieldValue(Number(condStr), 'NUM');
+            if (parentBlock.type === 'logic_compare') parentBlock.getInput('LEFT').connection.connect(numBlock.outputConnection);
+            return;
+        }
+
+        let condBlock = workspace.newBlock(targetType);
+        condBlock.initSvg();
+
+        if (parentBlock.type === 'logic_compare') {
+            parentBlock.getInput('LEFT').connection.connect(condBlock.outputConnection);
+        } else if (parentBlock.type === 'logic_if_else') {
+            parentBlock.getInput('IF_COND').connection.connect(condBlock.outputConnection);
+        } else if (parentBlock.type === 'while_sensor') {
+            parentBlock.getInput('CONDITION').connection.connect(condBlock.outputConnection);
+        } else if (parentBlock.type === 'wait_until_sensor') {
+            parentBlock.getInput('CONDITION').connection.connect(condBlock.outputConnection);
+        } else if (parentBlock.type === 'logic_not') {
+            parentBlock.getInput('BOOL').connection.connect(condBlock.outputConnection);
+        }
+    };
+
+    let previousConnection = null;
+    let missingCount = 0;
+
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+        if (line.trim() === '' || line.trim().startsWith('#')) continue;
+
+        let indentMatch = line.match(/^\s*/);
+        let indent = indentMatch ? indentMatch[0].length : 0;
+        line = line.trim();
+
+        while (parentStack.length > 1 && indent <= parentStack[parentStack.length - 1].indent) {
+            parentStack.pop();
+        }
+
+        let parent = parentStack[parentStack.length - 1].block;
+        let newBlock = null;
+
+        if (line.startsWith('eco_bot.move(')) {
+            let m = line.match(/eco_bot\.move\("([^"]+)",\s*([\d.]+)\)/);
+            if (m) {
+                newBlock = workspace.newBlock('move_robot');
+                newBlock.initSvg();
+                newBlock.setFieldValue(m[1], 'DIRECTION');
+                newBlock.setFieldValue(Number(m[2]), 'DISTANCE');
+            }
+        } else if (line.startsWith('eco_bot.turn(')) {
+            let m = line.match(/eco_bot\.turn\("([^"]+)",\s*([\d.]+)\)/);
+            if (m) {
+                newBlock = workspace.newBlock('turn_robot');
+                newBlock.initSvg();
+                newBlock.setFieldValue(m[1], 'DIRECTION');
+                newBlock.setFieldValue(Number(m[2]), 'DISTANCE');
+            }
+        } else if (line.startsWith('eco_bot.start_motor(')) {
+            let m = line.match(/eco_bot\.start_motor\("([^"]+)"\)/);
+            if (m) {
+                newBlock = workspace.newBlock('start_motor');
+                newBlock.initSvg();
+                newBlock.setFieldValue(m[1], 'DIRECTION');
+            }
+        } else if (line === 'eco_bot.stop_motor()') {
+            newBlock = workspace.newBlock('stop_motor');
+            newBlock.initSvg();
+        } else if (line.startsWith('eco_bot.sleep(')) {
+            let m = line.match(/eco_bot\.sleep\(([\d.]+)\)/);
+            if (m) {
+                newBlock = workspace.newBlock('wait_seconds');
+                newBlock.initSvg();
+                newBlock.setFieldValue(Number(m[1]), 'SECONDS');
+            }
+        } else if (line.startsWith('eco_bot.gripper(')) {
+            let m = line.match(/eco_bot\.gripper\("([^"]+)"\)/);
+            if (m) {
+                newBlock = workspace.newBlock('gripper_action');
+                newBlock.initSvg();
+                newBlock.setFieldValue(m[1], 'ACTION');
+            }
+        } else if (line.startsWith('eco_bot.push(')) {
+            let m = line.match(/eco_bot\.push\(([\d.]+)\)/);
+            if (m) {
+                newBlock = workspace.newBlock('push_action');
+                newBlock.initSvg();
+                newBlock.setFieldValue(Number(m[1]), 'DURATION');
+            }
+        } else if (line === 'eco_bot.scan()') {
+            newBlock = workspace.newBlock('scan_object');
+            newBlock.initSvg();
+        } else if (line === 'eco_bot.build_block()') {
+            newBlock = workspace.newBlock('action_build');
+            newBlock.initSvg();
+        } else if (line === 'eco_bot.dig_hole()') {
+            newBlock = workspace.newBlock('action_dig');
+            newBlock.initSvg();
+        } else if (line === 'eco_bot.remove_block()') {
+            newBlock = workspace.newBlock('action_remove');
+            newBlock.initSvg();
+        } else if (line.startsWith('for i in range(')) {
+            let m = line.match(/for i in range\((\d+)\):/);
+            if (m) {
+                newBlock = workspace.newBlock('repeat_n');
+                newBlock.initSvg();
+                newBlock.setFieldValue(Number(m[1]), 'TIMES');
+                parentStack.push({ block: newBlock, indent: indent, inputName: 'DO', lastConnection: null });
+            }
+        } else if (line.startsWith('while not ')) {
+            let m = line.match(/while not (.+):/);
+            if (m && i + 1 < lines.length && lines[i+1].trim() === 'eco_bot.sleep(0.1)') {
+                newBlock = workspace.newBlock('wait_until_sensor');
+                newBlock.initSvg();
+                parseCondition(m[1], newBlock);
+                i++; // Skip sleep line
+            }
+        } else if (line.startsWith('while ')) {
+            let m = line.match(/while (.+):/);
+            if (m) {
+                newBlock = workspace.newBlock('while_sensor');
+                newBlock.initSvg();
+                parseCondition(m[1], newBlock);
+                parentStack.push({ block: newBlock, indent: indent, inputName: 'DO', lastConnection: null });
+            }
+        } else if (line.startsWith('if ')) {
+            let m = line.match(/if (.+):/);
+            if (m) {
+                newBlock = workspace.newBlock('logic_if_else');
+                newBlock.initSvg();
+                parseCondition(m[1], newBlock);
+                parentStack.push({ block: newBlock, indent: indent, inputName: 'DO_IF', lastConnection: null });
+            }
+        } else if (line.startsWith('else:')) {
+            if (parent && parent.type === 'logic_if_else') {
+                parentStack[parentStack.length - 1].inputName = 'DO_ELSE';
+                parentStack[parentStack.length - 1].lastConnection = null;
+            }
+            continue;
+        } else if (line === 'pass') {
+            continue;
+        } else {
+            console.warn("Python Parser: Could not parse line:", line);
+            missingCount++;
+            continue;
+        }
+
+        if (newBlock) {
+            if (!firstBlock) firstBlock = newBlock;
+
+            if (parent) {
+                let parentFrame = parentStack[parentStack.length - 1];
+                if (!parentFrame.lastConnection) {
+                    parent.getInput(parentFrame.inputName).connection.connect(newBlock.previousConnection);
+                } else {
+                    parentFrame.lastConnection.connect(newBlock.previousConnection);
+                }
+                parentFrame.lastConnection = newBlock.nextConnection;
+            } else if (previousConnection) {
+                previousConnection.connect(newBlock.previousConnection);
+            }
+            
+            if (!parent && newBlock) {
+                previousConnection = newBlock.nextConnection;
+            }
+        }
+    }
+    
+    if (firstBlock) {
+        firstBlock.moveBy(40, 40);
+    }
+    
+    workspace.render();
+    return missingCount;
+};
+
+// ════════════════════════════════════════════════════════════════
+// IDE TAB MANAGEMENT
+// ════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+    let pyCodeEdited = false;
+    const tabBtns = document.querySelectorAll('.ide-tab-btn');
+    const blocklyView = document.getElementById('blocklyDiv');
+    const codeView = document.getElementById('live-code-panel');
+
+    // Init Ace Editor
+    if (typeof ace !== 'undefined') {
+        ace.require("ace/ext/language_tools");
+        window.pyEditor = ace.edit("python-editor");
+        window.pyEditor.setTheme("ace/theme/tomorrow_night_eighties");
+        window.pyEditor.session.setMode("ace/mode/python");
+        window.pyEditor.setOptions({
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true,
+            showPrintMargin: false,
+            fontSize: "14px"
+        });
+
+        window.pyEditor.on("change", function() {
+            // Track if user manually edits code
+            if (window.pyEditor.curOp && window.pyEditor.curOp.command.name) {
+                pyCodeEdited = true;
+            }
+        });
+
+        // Eco-Bot Documentation Dictionary
+        const ecoBotDocs = {
+            "move": { title: "🚗 eco_bot.move(direction, distance)", desc: "Bewegt den Roboter um die angegebene Distanz (z.B. 'FORWARD', 3).", returns: "", example: 'eco_bot.move("FORWARD", 3)' },
+            "turn": { title: "🔄 eco_bot.turn(direction, count)", desc: "Dreht den Roboter um 90 Grad ('LEFT' oder 'RIGHT'). count gibt die Anzahl der Drehungen an.", returns: "", example: 'eco_bot.turn("LEFT", 1)' },
+            "sleep": { title: "⏳ eco_bot.sleep(seconds)", desc: "Pausiert das Programmfenster und den Roboter für die angegebene Zeit in Sekunden.", returns: "", example: 'eco_bot.sleep(2.0)' },
+            "gripper": { title: "✊ eco_bot.gripper(action)", desc: "Öffnet ('OPEN') oder schließt ('CLOSE') den Roboter-Greifarm. Zum Aufnehmen von Gegenständen.", returns: "", example: 'eco_bot.gripper("CLOSE")' },
+            "scan": { title: "🔍 eco_bot.scan()", desc: "Aktiviert den LiDAR Radar-Sensor und scannt die direkte Umgebung.", returns: "", example: 'eco_bot.scan()' },
+            "build_block": { title: "🧱 eco_bot.build_block()", desc: "Baut einen festen Hindernis-Block direkt vor dem Roboter in die Welt.", returns: "", example: 'eco_bot.build_block()' },
+            "dig_hole": { title: "⛏️ eco_bot.dig_hole()", desc: "Gräbt ein Stück Erde direkt vor dem Roboter weg. Kann nicht auf Fels benutzt werden.", returns: "", example: 'eco_bot.dig_hole()' },
+            "remove_block": { title: "🧹 eco_bot.remove_block()", desc: "Entfernt einen zuvor gebauten Block, der sich vor dem Roboter befindet.", returns: "", example: 'eco_bot.remove_block()' },
+            "push": { title: "💪 eco_bot.push(duration)", desc: "Schiebt ein Objekt mit Motorkraft für die angegebene Zeit nach vorn.", returns: "", example: 'eco_bot.push(2)' },
+            "obstacle_ahead": { title: "📡 eco_bot.obstacle_ahead()", desc: "Prüft, ob sich direkt vor dem Roboter ein Hindernis befindet.", returns: "bool: True (Wahr) wenn ein Hindernis vorhanden ist", example: 'if eco_bot.obstacle_ahead():' },
+            "touch_sensor": { title: "🛑 eco_bot.touch_sensor()", desc: "Prüft, ob der vordere Stoßdämpfer (Berührungssensor) gerade ausgelöst ist.", returns: "bool: True (Wahr) bei Berührung", example: 'while not eco_bot.touch_sensor():' },
+            "ultrasonic": { title: "📏 eco_bot.ultrasonic()", desc: "Misst die genaue Distanz zum nächsten Hindernis mit Ultraschall.", returns: "int: Distanz in cm", example: 'if eco_bot.ultrasonic() < 50:' },
+            "camera": { title: "📷 eco_bot.camera()", desc: "Sucht mithilfe der Kamera nach auffälligen Objekten (z.B. Müll).", returns: "bool: True (Wahr) wenn ein Zielobjekt erkannt wurde", example: 'if eco_bot.camera():' },
+            "light": { title: "☀️ eco_bot.light()", desc: "Misst die Helligkeit der aktuellen Umgebung. Wichtig in dunklen Höhlen.", returns: "int: Helligkeit in % (0 - 100)", example: 'print(eco_bot.light())' },
+            "rotation": { title: "🧭 eco_bot.rotation()", desc: "Prüft den internen Kompass. Gibt an, in welche Richtung der Rumpf zeigt.", returns: "int: Winkel in Grad (0, 90, 180, 270)", example: 'if eco_bot.rotation() == 90:' },
+            "tilt": { title: "📐 eco_bot.tilt()", desc: "Misst das Gyroskop um zu sehen, ob der Roboter auf einer Schräge oder Kante steht.", returns: "int: Neigung in Grad", example: 'if eco_bot.tilt() > 10:' },
+            "battery": { title: "🔋 eco_bot.battery()", desc: "Gibt den aktuellen Akkustand des Roboters wieder. Wird bei manchen Quests verbraucht.", returns: "int: Akkustand in % (0 - 100)", example: 'if eco_bot.battery() < 20:' },
+            "start_motor": { title: "⚙️ eco_bot.start_motor(direction)", desc: "Startet den Motor im Dauerbetrieb. Stoppt nicht von selbst!", returns: "", example: 'eco_bot.start_motor("FORWARD")' },
+            "stop_motor": { title: "🛑 eco_bot.stop_motor()", desc: "Stoppt harte Dauerbetrieb-Motorbewegungen sofort.", returns: "", example: 'eco_bot.stop_motor()' }
+        };
+
+        const getDocHTML = (key) => {
+            const doc = ecoBotDocs[key];
+            if (!doc) return "";
+            let html = `<h4>${doc.title}</h4><p>${doc.desc}</p>`;
+            if (doc.example) html += `<div style="background: rgba(0,0,0,0.3); padding: 5px; border-radius: 4px; font-family: monospace; font-size: 0.8rem; margin: 8px 0; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #cbd5e1;">Beispiel: ${doc.example}</div>`;
+            if (doc.returns) html += `<div class="doc-returns">↪ ${doc.returns}</div>`;
+            return html;
+        };
+
+        // Autocomplete setup
+        const ecoBotCompleter = {
+            getCompletions: function(editor, session, pos, prefix, callback) {
+                const arr = [
+                    { name: 'move', caption: 'eco_bot.move(direction, seconds)', value: 'eco_bot.move("FORWARD", 1)', meta: 'EcoBot API' },
+                    { name: 'turn', caption: 'eco_bot.turn(direction, count)', value: 'eco_bot.turn("LEFT", 1)', meta: 'EcoBot API' },
+                    { name: 'sleep', caption: 'eco_bot.sleep(seconds)', value: 'eco_bot.sleep(1.0)', meta: 'EcoBot API' },
+                    { name: 'gripper', caption: 'eco_bot.gripper(action)', value: 'eco_bot.gripper("OPEN")', meta: 'EcoBot API' },
+                    { name: 'scan', caption: 'eco_bot.scan()', value: 'eco_bot.scan()', meta: 'EcoBot API' },
+                    { name: 'build_block', caption: 'eco_bot.build_block()', value: 'eco_bot.build_block()', meta: 'EcoBot API' },
+                    { name: 'dig_hole', caption: 'eco_bot.dig_hole()', value: 'eco_bot.dig_hole()', meta: 'EcoBot API' },
+                    { name: 'remove_block', caption: 'eco_bot.remove_block()', value: 'eco_bot.remove_block()', meta: 'EcoBot API' },
+                    { name: 'push', caption: 'eco_bot.push(duration)', value: 'eco_bot.push(1)', meta: 'EcoBot API' },
+                    { name: 'obstacle_ahead', caption: 'eco_bot.obstacle_ahead()', value: 'eco_bot.obstacle_ahead()', meta: 'Sensor (bool)' },
+                    { name: 'touch_sensor', caption: 'eco_bot.touch_sensor()', value: 'eco_bot.touch_sensor()', meta: 'Sensor (bool)' },
+                    { name: 'ultrasonic', caption: 'eco_bot.ultrasonic()', value: 'eco_bot.ultrasonic()', meta: 'Sensor (number)' },
+                    { name: 'camera', caption: 'eco_bot.camera()', value: 'eco_bot.camera()', meta: 'Sensor (bool)' },
+                    { name: 'light', caption: 'eco_bot.light()', value: 'eco_bot.light()', meta: 'Sensor (number)' },
+                    { name: 'rotation', caption: 'eco_bot.rotation()', value: 'eco_bot.rotation()', meta: 'Sensor (number)' },
+                    { name: 'tilt', caption: 'eco_bot.tilt()', value: 'eco_bot.tilt()', meta: 'Sensor (number)' },
+                    { name: 'battery', caption: 'eco_bot.battery()', value: 'eco_bot.battery()', meta: 'Sensor (number)' }
+                ];
+                
+                const completions = arr.map(item => ({
+                    caption: item.caption,
+                    value: item.value,
+                    meta: item.meta,
+                    docHTML: getDocHTML(item.name)
+                }));
+                
+                callback(null, completions);
+            }
+        };
+        window.pyEditor.completers = [ecoBotCompleter];
+
+        // Hover Tooltip Implementation
+        let hoverTimer = null;
+        let tooltipNode = document.createElement('div');
+        tooltipNode.className = 'ace-hover-tooltip';
+        tooltipNode.style.display = 'none';
+        document.body.appendChild(tooltipNode);
+
+        window.pyEditor.on("mousemove", function (e) {
+            clearTimeout(hoverTimer);
+            const pos = e.getDocumentPosition();
+            const token = window.pyEditor.session.getTokenAt(pos.row, pos.column);
+
+            if (token && token.type === "identifier" && ecoBotDocs[token.value]) {
+                const doc = ecoBotDocs[token.value];
+                const x = e.domEvent.clientX; // Ensure we get screen coordinates
+                const y = e.domEvent.clientY;
+                
+                hoverTimer = setTimeout(() => {
+                    let html = `<h4>${doc.title}</h4><p>${doc.desc}</p>`;
+                    if (doc.example) html += `<div style="background: rgba(0,0,0,0.3); padding: 5px; border-radius: 4px; font-family: monospace; font-size: 0.8rem; margin: 8px 0; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #cbd5e1;">Beispiel: ${doc.example}</div>`;
+                    if (doc.returns) html += `<div class="doc-returns">↪ ${doc.returns}</div>`;
+                    tooltipNode.innerHTML = html;
+                    
+                    // Adjust horizontal position to avoid going off-screen
+                    const tooltipWidth = 320;
+                    let left = x + 15;
+                    if (left + tooltipWidth > window.innerWidth) {
+                        left = x - tooltipWidth - 15;
+                    }
+                    
+                    tooltipNode.style.left = left + 'px';
+                    tooltipNode.style.top = (y + 15) + 'px';
+                    tooltipNode.style.display = 'block';
+                }, 350); // 350ms hover delay
+            } else {
+                tooltipNode.style.display = 'none';
+            }
+        });
+
+        window.pyEditor.container.addEventListener("mouseleave", () => {
+             clearTimeout(hoverTimer);
+             tooltipNode.style.display = 'none';
+        });
+    }
+
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const clickedBtn = e.target.closest('.ide-tab-btn');
+            if (!clickedBtn) return;
+            const target = clickedBtn.getAttribute('data-tab');
+            if (!target) return;
+            
+            tabBtns.forEach(b => b.classList.remove('active'));
+            clickedBtn.classList.add('active');
+
+            if (target === 'blocks') {
+                if (pyCodeEdited && blocklyWorkspace && window.pyEditor) {
+                    const code = window.pyEditor.getValue();
+                    const missingCount = window.pythonToBlocks(code, blocklyWorkspace);
+                    
+                    const statusEl = document.getElementById('sync-status');
+                    if (statusEl) {
+                        if (missingCount > 0) {
+                            statusEl.innerHTML = `🔄 Sync: ⚠️ ${missingCount} Zeilen konnten nicht übersetzt werden`;
+                            statusEl.className = 'sync-indicator active warning';
+                        } else {
+                            statusEl.innerHTML = `🔄 Sync OK`;
+                            statusEl.className = 'sync-indicator active';
+                        }
+                        setTimeout(() => statusEl.classList.remove('active'), 3000);
+                    }
+                    pyCodeEdited = false;
+                }
+                
+                blocklyView.classList.add('active');
+                codeView.classList.remove('active');
+                if (blocklyWorkspace) {
+                    setTimeout(() => Blockly.svgResize(blocklyWorkspace), 50);
+                    setTimeout(() => Blockly.svgResize(blocklyWorkspace), 200);
+                }
+            } else if (target === 'python') {
+                blocklyView.classList.remove('active');
+                codeView.classList.add('active');
+                if (window.updateLiveCodePanel) {
+                    window.updateLiveCodePanel();
+                    pyCodeEdited = false;
+                }
+                if (window.pyEditor) setTimeout(() => window.pyEditor.resize(), 50);
+            }
+        });
+    });
+});

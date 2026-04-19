@@ -47,6 +47,114 @@ let trailTimer = 0;
 const trailMat = new THREE.MeshBasicMaterial({ color: 0x3a2510, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
 const trailGeo = new THREE.PlaneGeometry(0.5, 0.4);
 
+// ── Action Visual Effects ───────────────────────────────────────
+let actionParticles = [];
+let actionRings = [];
+
+/**
+ * Spawn particles for robot actions (dig, build, gripper, remove)
+ * @param {'dig'|'build'|'remove'|'gripper_close'|'gripper_open'} type
+ * @param {THREE.Vector3} position - world position to spawn at
+ */
+function spawnActionParticles(type, position) {
+    const configs = {
+        dig: { color: 0x8b5a2b, count: 18, speed: 4, size: 0.25, life: 1.2, gravity: 6, spread: 0.8 },
+        build: { color: 0xfbbf24, count: 14, speed: 2.5, size: 0.2, life: 1.0, gravity: 1, spread: 1.2 },
+        remove: { color: 0xef4444, count: 12, speed: 3, size: 0.2, life: 0.9, gravity: 4, spread: 1.0 },
+        gripper_close: { color: 0x4ade80, count: 8, speed: 1.5, size: 0.15, life: 0.7, gravity: 0.5, spread: 0.5 },
+        gripper_open: { color: 0x22d3ee, count: 6, speed: 1.0, size: 0.12, life: 0.6, gravity: 0.3, spread: 0.4 }
+    };
+    const cfg = configs[type] || configs.build;
+
+    for (let i = 0; i < cfg.count; i++) {
+        const geo = new THREE.BoxGeometry(cfg.size, cfg.size, cfg.size);
+        const mat = new THREE.MeshBasicMaterial({ color: cfg.color, transparent: true, opacity: 1.0 });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.copy(position);
+        mesh.position.y += 0.5;
+        const vx = (Math.random() - 0.5) * cfg.spread * cfg.speed;
+        const vy = Math.random() * cfg.speed + cfg.speed * 0.5;
+        const vz = (Math.random() - 0.5) * cfg.spread * cfg.speed;
+        mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+        scene.add(mesh);
+        actionParticles.push({ mesh, vx, vy, vz, age: 0, life: cfg.life, gravity: cfg.gravity });
+    }
+}
+
+/**
+ * Spawn expanding scan rings from robot position
+ * @param {THREE.Vector3} position
+ */
+function spawnActionRings(position) {
+    for (let i = 0; i < 3; i++) {
+        const ringGeo = new THREE.RingGeometry(0.3, 0.5, 32);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.8, side: THREE.DoubleSide });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.position.copy(position);
+        ring.position.y += 2.0;
+        ring.rotation.x = -Math.PI / 2;
+        scene.add(ring);
+        actionRings.push({ mesh: ring, age: -i * 0.2, life: 1.5, maxRadius: 12 });
+    }
+}
+
+/**
+ * Update particles and rings each frame
+ */
+function updateActionEffects(delta) {
+    // Update particles
+    for (let i = actionParticles.length - 1; i >= 0; i--) {
+        const p = actionParticles[i];
+        p.age += delta;
+        const t = p.age / p.life;
+        if (t >= 1) {
+            scene.remove(p.mesh);
+            p.mesh.geometry.dispose();
+            p.mesh.material.dispose();
+            actionParticles.splice(i, 1);
+        } else {
+            p.vy -= p.gravity * delta;
+            p.mesh.position.x += p.vx * delta;
+            p.mesh.position.y += p.vy * delta;
+            p.mesh.position.z += p.vz * delta;
+            p.mesh.rotation.x += delta * 3;
+            p.mesh.rotation.z += delta * 2;
+            p.mesh.material.opacity = 1.0 - t;
+            const scale = 1.0 - t * 0.5;
+            p.mesh.scale.setScalar(scale);
+        }
+    }
+
+    // Update scan rings
+    for (let i = actionRings.length - 1; i >= 0; i--) {
+        const r = actionRings[i];
+        r.age += delta;
+        if (r.age < 0) continue; // Staggered start
+        const t = r.age / r.life;
+        if (t >= 1) {
+            scene.remove(r.mesh);
+            r.mesh.geometry.dispose();
+            r.mesh.material.dispose();
+            actionRings.splice(i, 1);
+        } else {
+            const scale = 1 + t * r.maxRadius;
+            r.mesh.scale.setScalar(scale);
+            r.mesh.material.opacity = 0.8 * (1 - t);
+        }
+    }
+}
+
+/**
+ * Show a visual action flash in the viewport
+ */
+function showActionFlash(text) {
+    const el = document.createElement('div');
+    el.className = 'item-pickup-flash action-flash';
+    el.innerText = text;
+    document.querySelector('.viewport').appendChild(el);
+    setTimeout(() => el.remove(), 1400);
+}
+
 function meshAt(geo, mat, x, y, z) {
     const m = new THREE.Mesh(geo, mat);
     m.position.set(x, y, z);
@@ -1022,7 +1130,28 @@ function isOnBranchPath(px, pz) {
 
 function getTerrainVisualYGlobal(x, z) {
     const hills = Math.sin(x*0.15) * Math.cos(z*0.15) * 0.4;
-    return Math.sin(x*0.05) * Math.cos(z*0.05) * 1.5 + Math.sin(x*0.01) * 2 + hills;
+    let y = Math.sin(x*0.05) * Math.cos(z*0.05) * 1.5 + Math.sin(x*0.01) * 2 + hills;
+
+    // 1. Fluss (River) - Quert die Map weiträumig bei z = -35
+    const distToRiver = Math.abs(z - (-35));
+    if (distToRiver < 8.0) {
+        // U-förmiger Graben, bis zu 3.5 Einheiten tief
+        let edge = 1 - (distToRiver / 8.0);
+        y -= Math.sin(edge * Math.PI/2) * 3.5;
+    }
+
+    // 2. Steiles Hochplateau (Plateau) - Bei x=60, z=-60 (Nähe Hütte)
+    const plateauDist = Math.hypot(x - 60, z - (-60));
+    if (plateauDist < 12.0) {
+        const pHeight = 4.0; // Zu hoch, um direkt raufzufahren
+        if (plateauDist < 8.0) {
+            y += pHeight; // Flache Spitze
+        } else {
+            y += ((12.0 - plateauDist) / 4.0) * pHeight; // Steiler Anstieg
+        }
+    }
+
+    return y;
 }
 
 function getTerrainYGlobal(x, z) {
@@ -1074,7 +1203,7 @@ function updateTrails(delta) {
         const t = trails[i].age / TRAIL_LIFETIME;
         if (t >= 1) {
             scene.remove(trails[i].mesh);
-            trails[i].mesh.geometry.dispose(); // prevent memory leak
+            // trailGeo is shared, DO NOT dispose it! trails[i].mesh.geometry.dispose(); 
             trails[i].mesh.material.dispose();
             trails.splice(i, 1);
         } else {
@@ -1122,6 +1251,15 @@ function buildEnvironment() {
     environmentGroup = new THREE.Group();
     obstacles = [];
 
+    // Seeded random for deterministic object placement so trees don't reshuffle
+    let envSeed = 42;
+    function seededRandom() {
+        let t = (envSeed += 0x6d2b79f5);
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    }
+
     const groundGeo = new THREE.PlaneGeometry(900, 900, 150, 150);
     const pos = groundGeo.attributes.position;
     for(let i=0; i < pos.count; i++) {
@@ -1152,6 +1290,20 @@ function buildEnvironment() {
     const path = new THREE.Mesh(pathGeo, new THREE.MeshStandardMaterial({ color: 0x8b5a2b, flatShading: true }));
     path.rotation.x = -Math.PI / 2; path.receiveShadow = true;
     environmentGroup.add(path);
+
+    // River Water Plane
+    const waterGeo = new THREE.PlaneGeometry(800, 15);
+    const waterMat = new THREE.MeshPhysicalMaterial({ 
+        color: 0x0ea5e9, 
+        transparent: true, 
+        opacity: 0.7,
+        roughness: 0.1,
+        metalness: 0.1 
+    });
+    const water = new THREE.Mesh(waterGeo, waterMat);
+    water.rotation.x = -Math.PI / 2;
+    water.position.set(0, -1.0, -35); // Base height of the river
+    environmentGroup.add(water);
 
     // Branch paths
     const baseBranchGeo = new THREE.PlaneGeometry(8, 100, 16, 40);
@@ -1202,20 +1354,20 @@ function buildEnvironment() {
     const rckM = new THREE.MeshStandardMaterial({ color: 0x9e9e9e, flatShading: true });
 
     for(let i=0; i<1600; i++) {
-        let rx = (Math.random()-0.5)*880, rz = (Math.random()-0.5)*880;
+        let rx = (seededRandom()-0.5)*880, rz = (seededRandom()-0.5)*880;
         if (Math.abs(rx) < 12) rx = rx >= 0 ? rx + 12 : rx - 12;
         if (Math.abs(rx) < 15 && Math.abs(rz) < 15) rz += 20;
         let tY = getTerrainYGlobal(rx, rz);
-        if (tY < -2 && Math.random() < 0.8) continue;
+        if (tY < -2 && seededRandom() < 0.8) continue;
 
-        const type = Math.random();
+        const type = seededRandom();
         if (type < 0.35) {
             const tree = new THREE.Group();
             const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.6, 2, 5), trkMat);
             trunk.position.y = 1; trunk.castShadow = true; tree.add(trunk);
             tree.add(meshAt(new THREE.ConeGeometry(2.5, 4, 6), leaP, 0, 3, 0));
             tree.add(meshAt(new THREE.ConeGeometry(2, 3, 6), leaP, 0, 5, 0));
-            const s = Math.random()*0.5+0.7; tree.scale.set(s,s,s); tree.position.set(rx, tY, rz);
+            const s = seededRandom()*0.5+0.7; tree.scale.set(s,s,s); tree.position.set(rx, tY, rz);
             environmentGroup.add(tree); obstacles.push({ x: rx, z: rz, radius: 1.5*s });
             // Shadow circle under tree
             const shadowR = 3.5 * s;
@@ -1232,7 +1384,7 @@ function buildEnvironment() {
             const tree = new THREE.Group();
             tree.add(meshAt(new THREE.CylinderGeometry(0.4, 0.5, 2, 5), trkMat, 0, 1, 0));
             tree.add(meshAt(new THREE.DodecahedronGeometry(2), leaD, 0, 3, 0));
-            const s = Math.random()*0.5+0.7; tree.scale.set(s,s,s); tree.position.set(rx, tY, rz);
+            const s = seededRandom()*0.5+0.7; tree.scale.set(s,s,s); tree.position.set(rx, tY, rz);
             environmentGroup.add(tree); obstacles.push({ x: rx, z: rz, radius: 1.5*s });
             // Shadow circle under round tree
             const shadowR2 = 3.0 * s;
@@ -1246,31 +1398,31 @@ function buildEnvironment() {
             shadow2.position.set(rx, tY + 0.06, rz);
             environmentGroup.add(shadow2);
         } else if (type < 0.75) {
-            const rR = Math.random()*1.2+0.4;
+            const rR = seededRandom()*1.2+0.4;
             const rock = new THREE.Mesh(new THREE.IcosahedronGeometry(rR, 0), rckM);
             rock.position.set(rx, tY+0.4, rz); rock.castShadow = true;
             environmentGroup.add(rock); obstacles.push({ x: rx, z: rz, radius: rR*0.8 });
         } else {
             const bush = new THREE.Mesh(new THREE.SphereGeometry(1, 8, 8), leaB);
-            bush.scale.set(1.5+Math.random(), 0.6+Math.random()*0.4, 1.2+Math.random());
+            bush.scale.set(1.5+seededRandom(), 0.6+seededRandom()*0.4, 1.2+seededRandom());
             bush.position.set(rx, tY + 0.3, rz);
             environmentGroup.add(bush);
         }
 
         // --- NEW: EXTRA VEGETATION (Flowers & Mushrooms) ---
-        if (Math.random() < 0.3) {
-            const fx = rx + (Math.random()-0.5)*4, fz = rz + (Math.random()-0.5)*4;
+        if (seededRandom() < 0.3) {
+            const fx = rx + (seededRandom()-0.5)*4, fz = rz + (seededRandom()-0.5)*4;
             const fy = getTerrainYGlobal(fx, fz);
             const flowerColors = [0xef4444, 0x3b82f6, 0xfacc15, 0xa78bfa];
             const flower = new THREE.Mesh(
                 new THREE.BoxGeometry(0.2, 0.4, 0.2),
-                new THREE.MeshLambertMaterial({ color: flowerColors[Math.floor(Math.random()*flowerColors.length)] })
+                new THREE.MeshLambertMaterial({ color: flowerColors[Math.floor(seededRandom()*flowerColors.length)] })
             );
             flower.position.set(fx, fy + 0.2, fz);
             environmentGroup.add(flower);
         }
-        if (Math.random() < 0.08) {
-            const mx = rx + (Math.random()-0.5)*3, mz = rz + (Math.random()-0.5)*3;
+        if (seededRandom() < 0.08) {
+            const mx = rx + (seededRandom()-0.5)*3, mz = rz + (seededRandom()-0.5)*3;
             const my = getTerrainYGlobal(mx, mz);
             const mush = new THREE.Group();
             mush.add(meshAt(new THREE.CylinderGeometry(0.1, 0.1, 0.3), new THREE.MeshLambertMaterial({color: 0xeeeeee}), 0, 0.15, 0));
@@ -1302,13 +1454,51 @@ function buildEnvironment() {
                 new THREE.SphereGeometry(0.1, 8, 8),
                 new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.8 })
             );
-            const ox = (Math.random()-0.5)*zone.radius*1.5, oz = (Math.random()-0.5)*zone.radius*1.5;
-            f.position.set(zone.x + ox, getTerrainYGlobal(zone.x+ox, zone.z+oz) + 2 + Math.random()*3, zone.z + oz);
-            f.userData = { phase: Math.random() * Math.PI*2, speed: 0.5 + Math.random() };
+            const ox = (seededRandom()-0.5)*zone.radius*1.5, oz = (seededRandom()-0.5)*zone.radius*1.5;
+            f.position.set(zone.x + ox, getTerrainYGlobal(zone.x+ox, zone.z+oz) + 2 + seededRandom()*3, zone.z + oz);
+            f.userData = { phase: seededRandom() * Math.PI*2, speed: 0.5 + seededRandom() };
             environmentGroup.add(f);
             fireflies.push(f);
         }
     });
+
+    // --- RENDER BUILT BLOCKS ---
+    for (const mod of worldModifications) {
+        if (mod.type === 'build') {
+            const block = new THREE.Mesh(
+                new THREE.BoxGeometry(1.2, 1.2, 1.2), 
+                new THREE.MeshLambertMaterial({ color: 0xfbbf24 })
+            );
+            block.position.set(mod.x, mod.y + 0.1, mod.z);
+            block.castShadow = true; 
+            block.receiveShadow = true;
+            environmentGroup.add(block);
+            obstacles.push({ x: mod.x, z: mod.z, radius: 0.8 });
+        }
+    }
+
+    // --- NEW: WANDERING CREATURES (Red Bugs) ---
+    creatures = [];
+    for (let i = 0; i < 8; i++) {
+        const body = new THREE.Mesh(
+            new THREE.SphereGeometry(0.6, 8, 8),
+            new THREE.MeshLambertMaterial({ color: 0xef4444 })
+        );
+        body.scale.set(1, 0.5, 1.5);
+        
+        const cx = (seededRandom() - 0.5) * 80 - 50;
+        const cz = (seededRandom() - 0.5) * 80 - 50;
+        body.position.set(cx, getTerrainYGlobal(cx, cz) + 0.3, cz);
+        body.rotation.y = seededRandom() * Math.PI * 2;
+        body.castShadow = true;
+        
+        environmentGroup.add(body);
+        creatures.push({
+            mesh: body,
+            speed: 2.5 + seededRandom() * 1.5,
+            turnTimer: 0
+        });
+    }
 
     scene.add(environmentGroup);
 }
@@ -1624,16 +1814,77 @@ function init() {
     if (window.ResizeObserver) new ResizeObserver(onWindowResize).observe(container);
     else { window.addEventListener('resize', onWindowResize); setTimeout(onWindowResize, 100); }
 
+    window.executingMode = 'blocks';
+    window.pyResolveCallback = null;
+
     document.getElementById('btn-run').addEventListener('click', () => {
-        if(window.getBlocklyAST) {
+        // Evaluate if Py Editor mode is active: if the blocks tab is not active!
+        const blocksTabActive = document.querySelector('[data-tab="blocks"]');
+        const isPythonMode = blocksTabActive && !blocksTabActive.classList.contains('active');
+
+        if (isPythonMode && window.pyEditor) {
+            // Run Python via Skulpt
+            const code = window.pyEditor.getValue();
+            if (!code || code.trim() === '') { document.getElementById('sensor-output').innerText = 'Leeres Python Programm!'; return; }
+            
+            document.getElementById('sensor-output').innerText = '▶ Python Script gestartet';
+            window.executingMode = 'python';
+            window.pyResolveCallback = null;
+            currentCommandObj = null; currentCommand = null;
+            isRunning = true;
+            programDriven = true;
+            
+            // Define Skulpt Builtin Setup
+            if (!window.Sk.builtins.eco_bot) {
+                window.Sk.builtins.eco_bot = compileEcoBotSkulptAPI(); // Defined below
+            }
+            // Print output buffer for sensor display
+            window._pyPrintBuffer = [];
+            window.Sk.configure({
+                output: function(text) {
+                    console.log(text);
+                    // Show print() output in sensor display
+                    if (text && text.trim() !== '') {
+                        window._pyPrintBuffer.push(text.replace(/\n$/, ''));
+                        // Keep last 4 lines visible
+                        const recent = window._pyPrintBuffer.slice(-4);
+                        document.getElementById('sensor-output').innerText = '🐍 ' + recent.join('\n');
+                    }
+                },
+                read: function(x) {
+                    if (window.Sk.builtinFiles === undefined || window.Sk.builtinFiles["files"][x] === undefined)
+                        throw "File not found: '" + x + "'";
+                    return window.Sk.builtinFiles["files"][x];
+                }
+            });
+
+            const p = window.Sk.misceval.asyncToPromise(function() {
+                return window.Sk.importMainWithBody("<stdin>", false, code, true);
+            });
+            p.then(function(mod) {
+                if (window.executingMode === 'python') {
+                    document.getElementById('sensor-output').innerText = '✅ Python Programm beendet!';
+                    isRunning = false;
+                    programMotorState = { forward: false, backward: false, left: false, right: false };
+                }
+            }, function(err) {
+                if (window.executingMode === 'python') {
+                    document.getElementById('sensor-output').innerText = '❌ Fehler in Zeile ' + err.traceback[0].lineno + ': ' + err.toString();
+                    isRunning = false;
+                    programMotorState = { forward: false, backward: false, left: false, right: false };
+                }
+            });
+
+        } else if (window.getBlocklyAST) {
+            // Run Blockly Engine
             const rootBlock = window.getBlocklyAST();
             if(!rootBlock) { document.getElementById('sensor-output').innerText = 'Leeres Programm!'; return; }
-            // Count blocks for efficiency bonus
             let blockCount = 0;
             let b = rootBlock;
             while (b) { blockCount++; b = b.getNextBlock(); }
             storyState.blocksUsedLastRun = blockCount;
             programDriven = true;
+            window.executingMode = 'blocks';
             document.getElementById('sensor-output').innerText = '▶ Programm gestartet (' + blockCount + ' Blöcke)';
             rStack = []; currentCommandObj = null; currentCommand = null;
             rPush(rootBlock);
@@ -1645,6 +1896,9 @@ function init() {
         document.getElementById('sensor-output').innerText = 'Eco-Bot pausiert.';
         isRunning = false; programDriven = false;
         rStack = []; currentCommandObj = null; currentCommand = null;
+        window.pyResolveCallback = null;
+        if (window.Sk) window.Sk.hardInterrupt = true; // Stop Skulpt if supported
+        setTimeout(() => { if (window.Sk) window.Sk.hardInterrupt = false; }, 100);
         programMotorState = { forward: false, backward: false, left: false, right: false };
         if (window.highlightBlock) window.highlightBlock(null);
     });
@@ -1742,6 +1996,7 @@ let fogUpdateTimer = 0;
 let coverageUpdateTimer = 0;
 let sensorDisplayTimer = 0;
 let lastTrailPos = new THREE.Vector3();
+let creatures = [];
 
 function updateLiveSensors() {
     if (!roverGroup || isRunning) return; // Don't override program output
@@ -1855,7 +2110,7 @@ function animate() {
                 isRunning = false;
                 programMotorState = { forward: false, backward: false, left: false, right: false }; // Auto-stop
                 if (window.highlightBlock) window.highlightBlock(null);
-            } else if (!currentCommandObj && rStack.length > 0) {
+            } else if (window.executingMode === 'blocks' && !currentCommandObj && rStack.length > 0) {
                 currentCommandObj = rStep();
                 if (currentCommandObj) {
                     currentCommand = currentCommandObj.action;
@@ -1863,7 +2118,7 @@ function animate() {
                     if (window.highlightBlock && currentCommandObj.id) window.highlightBlock(currentCommandObj.id);
                 }
             }
-            if (!currentCommandObj && rStack.length === 0) {
+            if (window.executingMode === 'blocks' && !currentCommandObj && rStack.length === 0) {
                 isRunning = false;
                 programMotorState = { forward: false, backward: false, left: false, right: false }; // Auto-stop at end
                 if (window.highlightBlock) window.highlightBlock(null);
@@ -1879,7 +2134,16 @@ function animate() {
                 else if (currentCommand === 'moveBackward') { tryMove(-5.0 * delta * speedM); commandProgress += delta * speedM; isMoving = true; }
                 else if (currentCommand === 'turnLeft') { const ny = roverGroup.rotation.y + (Math.PI/2)*animSpeed; if(!checkCollision(roverGroup.position.x, roverGroup.position.z, ny, true)) roverGroup.rotation.y = ny; commandProgress += animSpeed; isMoving = true; }
                 else if (currentCommand === 'turnRight') { const ny = roverGroup.rotation.y - (Math.PI/2)*animSpeed; if(!checkCollision(roverGroup.position.x, roverGroup.position.z, ny, true)) roverGroup.rotation.y = ny; commandProgress += animSpeed; isMoving = true; }
-                else if (currentCommand === 'scan') { commandProgress += animSpeed; if (lidar) lidar.rotation.y += 12 * delta * speedM; }
+                else if (currentCommand === 'scan') {
+                    commandProgress += animSpeed;
+                    if (lidar) lidar.rotation.y += 12 * delta * speedM;
+                    // Spawn scan rings once at start
+                    if (!currentCommandObj._effectFired) {
+                        currentCommandObj._effectFired = true;
+                        spawnActionRings(roverGroup.position);
+                        showActionFlash('🔍 Scanne Umgebung...');
+                    }
+                }
                 else if (currentCommand === 'wait') { commandProgress += (delta * speedM) / cmdDuration; }
                 else if (currentCommand === 'waitUntil') { 
                     // REAL-TIME CHECK: Evaluated every frame instead of once per tick
@@ -1887,27 +2151,55 @@ function animate() {
                         commandProgress = 1.0; // Finish immediately!
                     }
                 }
-                else if (currentCommand === 'gripper') { commandProgress += animSpeed; }
-                else if (currentCommand === 'push') { tryMove(2.5 * delta * speedM); commandProgress += delta * speedM; isMoving = true; }
+                else if (currentCommand === 'gripper') {
+                    commandProgress += animSpeed;
+                    // Visual feedback for gripper
+                    if (commandProgress >= 0.5 && commandProgress - animSpeed < 0.5) {
+                        const gPos = roverGroup.position.clone();
+                        gPos.y += 1.5;
+                        if (gripperState === 'CLOSE') {
+                            spawnActionParticles('gripper_close', gPos);
+                            showActionFlash('✊ Greifer schließen');
+                        } else {
+                            spawnActionParticles('gripper_open', gPos);
+                            showActionFlash('✋ Greifer öffnen');
+                        }
+                    }
+                }
+                else if (currentCommand === 'push') {
+                    tryMove(2.5 * delta * speedM);
+                    commandProgress += delta * speedM;
+                    isMoving = true;
+                    // Lean robot forward slightly while pushing
+                    if (roverGroup) roverGroup.children[0].position.z = 0.15;
+                }
                 else if (currentCommand === 'startMotor' || currentCommand === 'stopMotor') { commandProgress = 1.0; } // Immediate blocks
                 else if (currentCommand === 'build') {
                     // Place block 2 units in front
                     const py = getTerrainYGlobal(roverGroup.position.x, roverGroup.position.z);
                     const fx = Math.sin(roverGroup.rotation.y) * 2.0;
                     const fz = Math.cos(roverGroup.rotation.y) * 2.0;
-                    worldModifications.push({ type: 'build', x: roverGroup.position.x + fx, y: py + 0.5, z: roverGroup.position.z + fz, id: Date.now() });
+                    const buildPos = new THREE.Vector3(roverGroup.position.x + fx, py + 0.5, roverGroup.position.z + fz);
+                    worldModifications.push({ type: 'build', x: buildPos.x, y: buildPos.y, z: buildPos.z, id: Date.now() });
                     saveWorldModifications();
                     storyState.blocksBuilt = (storyState.blocksBuilt || 0) + 1;
                     buildEnvironment(); // Rebuild visually
+                    // Visual effects
+                    spawnActionParticles('build', buildPos);
+                    showActionFlash('🧱 Block gebaut!');
                     document.getElementById('sensor-output').innerText = '🧱 Block erfolgreich gebaut!';
                     commandProgress = 1.0;
                 }
                 else if (currentCommand === 'dig') {
                     const fx = Math.sin(roverGroup.rotation.y) * 2.0;
                     const fz = Math.cos(roverGroup.rotation.y) * 2.0;
-                    worldModifications.push({ type: 'dig', x: roverGroup.position.x + fx, z: roverGroup.position.z + fz, id: Date.now() });
+                    const digPos = new THREE.Vector3(roverGroup.position.x + fx, roverGroup.position.y, roverGroup.position.z + fz);
+                    worldModifications.push({ type: 'dig', x: digPos.x, z: digPos.z, id: Date.now() });
                     saveWorldModifications();
                     buildEnvironment();
+                    // Visual effects - dirt particles flying up
+                    spawnActionParticles('dig', digPos);
+                    showActionFlash('⛏️ Loch gegraben!');
                     document.getElementById('sensor-output').innerText = '⛏️ Loch erfolgreich gegraben!';
                     commandProgress = 1.0;
                 }
@@ -1920,17 +2212,28 @@ function animate() {
                     // Find built block nearby
                     const modIdx = worldModifications.findIndex(m => m.type === 'build' && Math.hypot(m.x - targetX, m.z - targetZ) < 1.5);
                     if(modIdx > -1) {
+                        const removePos = new THREE.Vector3(targetX, py, targetZ);
+                        spawnActionParticles('remove', removePos);
+                        showActionFlash('🧹 Block entfernt!');
                         worldModifications.splice(modIdx, 1);
                         saveWorldModifications();
                         buildEnvironment();
+                    } else {
+                        showActionFlash('⚠️ Kein Block hier!');
                     }
                     commandProgress = 1.0;
                 }
 
                 if (commandProgress >= 1.0) {
                     if (currentCommand === 'gripper' && gripperState === 'CLOSE') tryGrabItem();
+                    if (currentCommand === 'push' && roverGroup) roverGroup.children[0].position.z = 0; // Reset lean
                     if (currentCommand && currentCommand.includes('turn')) roverGroup.rotation.y = Math.round(roverGroup.rotation.y / (Math.PI/2)) * (Math.PI/2);
                     currentCommandObj = null; currentCommand = null;
+                    if (window.executingMode === 'python' && window.pyResolveCallback) {
+                        const cb = window.pyResolveCallback;
+                        window.pyResolveCallback = null;
+                        cb();
+                    }
                 }
             }
         }
@@ -1962,6 +2265,7 @@ function animate() {
         if (coverageUpdateTimer > 2.0) { updateMapCoverage(); coverageUpdateTimer = 0; }
 
         updateTrails(delta);
+        updateActionEffects(delta);
         drawMiniMap();
         updateAtmosphere(delta, clock.elapsedTime);
         updateChargingStations(clock.elapsedTime);
@@ -2101,3 +2405,118 @@ function setupDPad() {
 
 init();
 setupDPad();
+
+// ════════════════════════════════════════════════════════════════
+// SKULPT PYTHON ENGINE BRIDGE
+// ════════════════════════════════════════════════════════════════
+window.compileEcoBotSkulptAPI = function() {
+    const mod = {};
+    mod.tp$getattr = function(name) { return mod[name.v]; };
+    
+    // Helper to queue an action n times and await resolution from animate loop
+    const runSequence = async (commandName, count) => {
+        for(let i=0; i<count; i++) {
+            await new Promise(resolve => {
+                window.pyResolveCallback = resolve;
+                currentCommandObj = { action: commandName, id: 'py' };
+                currentCommand = commandName;
+                commandProgress = 0;
+            });
+        }
+    };
+
+    mod.move = new window.Sk.builtin.func(function(dir, dist) {
+        window.Sk.builtin.pyCheckArgs("move", arguments, 2, 2);
+        const count = dist.v;
+        const actionName = (dir.v === 'BACKWARD') ? 'moveBackward' : 'move';
+        const susp = new window.Sk.misceval.Suspension();
+        susp.resume = function() { return window.Sk.builtin.none.none$; };
+        susp.data = { type: "Sk.promise", promise: runSequence(actionName, count) };
+        return susp;
+    });
+
+    mod.turn = new window.Sk.builtin.func(function(dir, dist) {
+        window.Sk.builtin.pyCheckArgs("turn", arguments, 2, 2);
+        const count = dist.v;
+        const actionName = (dir.v === 'LEFT') ? 'turnLeft' : 'turnRight';
+        const susp = new window.Sk.misceval.Suspension();
+        susp.resume = function() { return window.Sk.builtin.none.none$; };
+        susp.data = { type: "Sk.promise", promise: runSequence(actionName, count) };
+        return susp;
+    });
+
+    mod.sleep = new window.Sk.builtin.func(function(seconds) {
+        window.Sk.builtin.pyCheckArgs("sleep", arguments, 1, 1);
+        const susp = new window.Sk.misceval.Suspension();
+        susp.resume = function() { return window.Sk.builtin.none.none$; };
+        susp.data = { type: "Sk.promise", promise: new Promise(resolve => {
+            window.pyResolveCallback = resolve;
+            currentCommandObj = { action: 'wait', duration: seconds.v, id: 'py' };
+            currentCommand = 'wait';
+            commandProgress = 0;
+        })};
+        return susp;
+    });
+
+    const singleAction = (actionName) => {
+        return new window.Sk.builtin.func(function() {
+            const susp = new window.Sk.misceval.Suspension();
+            susp.resume = function() { return window.Sk.builtin.none.none$; };
+            susp.data = { type: "Sk.promise", promise: runSequence(actionName, 1) };
+            return susp;
+        });
+    }
+
+    mod.build_block = singleAction('build');
+    mod.dig_hole = singleAction('dig');
+    mod.remove_block = singleAction('remove');
+    mod.scan = singleAction('scan');
+    
+    mod.push = new window.Sk.builtin.func(function(dist) {
+        const susp = new window.Sk.misceval.Suspension();
+        susp.resume = function() { return window.Sk.builtin.none.none$; };
+        susp.data = { type: "Sk.promise", promise: runSequence('push', (dist ? dist.v : 1)) };
+        return susp;
+    });
+    
+    mod.gripper = new window.Sk.builtin.func(function(state) {
+        const susp = new window.Sk.misceval.Suspension();
+        susp.resume = function() { return window.Sk.builtin.none.none$; };
+        susp.data = { type: "Sk.promise", promise: new Promise(resolve => {
+            window.pyResolveCallback = resolve;
+            gripperState = state.v;
+            currentCommandObj = { action: 'gripper', id: 'py' };
+            currentCommand = 'gripper';
+            commandProgress = 0;
+        })};
+        return susp;
+    });
+    
+    mod.start_motor = new window.Sk.builtin.func(function(dir) {
+        const d = dir.v;
+        programMotorState = { forward: false, backward: false, left: false, right: false };
+        if (d === 'FORWARD') programMotorState.forward = true;
+        if (d === 'BACKWARD') programMotorState.backward = true;
+        if (d === 'LEFT') programMotorState.left = true;
+        if (d === 'RIGHT') programMotorState.right = true;
+        return window.Sk.builtin.none.none$;
+    });
+
+    mod.stop_motor = new window.Sk.builtin.func(function() {
+        programMotorState = { forward: false, backward: false, left: false, right: false };
+        return window.Sk.builtin.none.none$;
+    });
+
+    // Sensors
+    mod.obstacle_ahead = new window.Sk.builtin.func(function() { return new window.Sk.builtin.bool(sensorUltrasonic() < 15); });
+    mod.touch_sensor = new window.Sk.builtin.func(function() { return new window.Sk.builtin.bool(sensorUltrasonic() < 3); });
+    mod.ultrasonic = new window.Sk.builtin.func(function() { return new window.Sk.builtin.int_(Math.round(sensorUltrasonic())); });
+    mod.camera = new window.Sk.builtin.func(function() { return new window.Sk.builtin.bool(sensorCameraObjectName() !== 'Nichts'); });
+    mod.camera_object = new window.Sk.builtin.func(function() { return new window.Sk.builtin.str(sensorCameraObjectName()); });
+    mod.light = new window.Sk.builtin.func(function() { return new window.Sk.builtin.int_(Math.round(sensorLight())); });
+    mod.rotation = new window.Sk.builtin.func(function() { return new window.Sk.builtin.int_(Math.round(sensorRotation())); });
+    mod.tilt = new window.Sk.builtin.func(function() { return new window.Sk.builtin.int_(Math.round(sensorTilt())); });
+    mod.battery = new window.Sk.builtin.func(function() { return new window.Sk.builtin.int_(Math.round(storyState.batteryLevel)); });
+
+    return mod;
+};

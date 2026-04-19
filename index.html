@@ -6,11 +6,17 @@
     <title>RoboQuest 3D - Waldabenteuer</title>
     <meta name="description" content="Steuere den Eco-Bot durch den Wald, entdecke Geheimnisse und löse Story-Quests!">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=20">
+    <link rel="stylesheet" href="css/style.css?v=22">
     <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <!-- Google Blockly CDN -->
     <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+    <!-- Ace Editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.4/ace.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.4/ext-language_tools.min.js"></script>
+    <!-- Skulpt (Python Execution) -->
+    <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
 </head>
 <body>
     <div id="app-container">
@@ -131,12 +137,17 @@
     <div id="code-ide" class="glass-panel hidden">
         <div id="ide-header">
             <h3>Eco-Bot Programmierer</h3>
+            <div id="sync-status" class="sync-indicator"></div>
+            <div class="ide-tabs">
+                <button class="ide-tab-btn active" data-tab="blocks">🧩 Blöcke</button>
+                <button class="ide-tab-btn" data-tab="python">🐍 Python Code</button>
+            </div>
         </div>
         <div class="ide-body">
-            <div id="blocklyDiv"></div>
-            <div id="live-code-panel" class="glass-panel">
-                <div class="live-panel-header">Live Code (Python)</div>
-                <pre><code id="live-code-content"></code></pre>
+            <div id="blocklyDiv" class="active"></div>
+            <div id="live-code-panel">
+                <div class="live-panel-header">Python Code Editor</div>
+                <div id="python-editor" style="flex: 1; width: 100%; border-radius: 0 0 8px 8px; font-size: 14px;"></div>
             </div>
         </div>
     </div>
@@ -150,7 +161,7 @@
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="js/blockly_setup.js?v=20"></script>
-    <script src="js/app.js?v=20"></script>
+    <script src="js/blockly_setup.js?v=21"></script>
+    <script src="js/app.js?v=21"></script>
 </body>
 </html>
