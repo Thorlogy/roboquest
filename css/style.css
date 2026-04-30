@@ -767,6 +767,47 @@ body {
   .hud-score { font-size: 1rem; padding: 8px 12px; }
   .hud-quest { font-size: 0.85rem; padding: 6px 10px; }
   .story-panel { display: none; }
+  
+  /* IDE Fullscreen on Mobile */
+  #code-ide {
+    left: 0; top: 0;
+    width: 100vw; height: 100vh;
+    min-width: unset; min-height: unset;
+    border-radius: 0;
+    z-index: 100;
+  }
+  
+  /* Handbook Mobile Layout */
+  .handbook-modal {
+    width: 100%; height: 100%;
+    max-width: none; max-height: none;
+    border-radius: 0;
+  }
+  .handbook-body {
+    flex-direction: column;
+  }
+  .handbook-sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .hb-tab-btn {
+    white-space: nowrap;
+    padding: 10px 15px;
+    border-left: none !important;
+    border-bottom: 3px solid transparent;
+  }
+  .hb-tab-btn.active {
+    border-left: none !important;
+    border-bottom: 3px solid #4ade80;
+  }
+  
+  /* Hide Minimap to save space */
+  #minimap-container {
+    display: none !important;
+  }
 }
 
 /* ═══════════════════════════════════════════ */
