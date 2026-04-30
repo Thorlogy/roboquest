@@ -58,6 +58,7 @@
                     📦 <span id="cargo-status">Leer</span>
                 </div>
                 <div class="hud-btns">
+                    <button class="hud-action-btn" id="handbook-btn">📖 Handbuch</button>
                     <button class="hud-action-btn" id="cam-toggle-btn">🎥 Ansicht: Follow</button>
                     <button class="hud-action-btn" id="reset-btn">🔄 Reset</button>
                 </div>
@@ -132,6 +133,87 @@
                 <div class="reward-title" id="reward-title">Upgrade freigeschaltet!</div>
                 <div class="reward-desc" id="reward-desc">Dein Roboter ist jetzt schneller.</div>
                 <button class="success-btn" id="btn-reward-close">Cool!</button>
+            </div>
+
+            <!-- Handbook / Codex Modal -->
+            <div class="handbook-modal glass-panel" id="handbook-modal" style="display:none;">
+                <div class="handbook-header">
+                    <h2>📖 RoboQuest Handbuch</h2>
+                    <button class="action-btn" id="btn-close-handbook" style="margin-left: auto;">✖</button>
+                </div>
+                <div class="handbook-body">
+                    <div class="handbook-sidebar">
+                        <button class="hb-tab-btn active" data-target="hb-story">🌍 Geschichte & Lore</button>
+                        <button class="hb-tab-btn" data-target="hb-controls">🕹️ Steuerung</button>
+                        <button class="hb-tab-btn" data-target="hb-blocks">🧩 Blockly Guide</button>
+                        <button class="hb-tab-btn" data-target="hb-python">🐍 Python API</button>
+                    </div>
+                    <div class="handbook-content">
+                        <!-- Story Tab -->
+                        <div class="hb-tab-content active" id="hb-story">
+                            <h3>Die Welt von RoboQuest</h3>
+                            <p>Die Menschheit hat die Erde vor Jahrhunderten verlassen, als die Umwelt kollabierte. Alles, was blieb, waren kleine Roboter wie du: Die <strong>Eco-Bots</strong>.</p>
+                            <p>Deine Mission ist es, die Natur wiederherzustellen und die alten Solarpunk-Systeme zu reaktivieren.</p>
+                            <h4>Die Missionen</h4>
+                            <ul>
+                                <li><strong>Akt 1: Logistik-Einheit</strong> - Lerne dich zu bewegen und räume den Wald von altem Schrott auf.</li>
+                                <li><strong>Akt 2: Das Labyrinth</strong> - Nutze deinen LiDAR-Scanner (Entfernungsmesser), um einen Weg durch das Felslabyrinth zu finden.</li>
+                                <li><strong>Akt 3: Wiederaufforstung</strong> - Finde wertvolle Samen und pflanze neue Bäume, um das Ökosystem wiederzubeleben.</li>
+                                <li><strong>Akt 4: Solarpunk-City</strong> - Mache rostige Windräder durch ein Software-Update (LiDAR Scan) wieder funktionsfähig, um grüne Energie zu produzieren.</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Controls Tab -->
+                        <div class="hb-tab-content" id="hb-controls" style="display:none;">
+                            <h3>Manuelle Steuerung</h3>
+                            <p>Du kannst deinen Eco-Bot auch ohne Code fernsteuern:</p>
+                            <ul>
+                                <li><strong>W, A, S, D</strong> oder <strong>Pfeiltasten</strong>: Fahren und drehen.</li>
+                                <li><strong>Leertaste</strong>: Den Greifarm öffnen oder schließen.</li>
+                                <li><strong>On-Screen D-Pad</strong> (unten rechts): Alternativ zur Tastatur.</li>
+                                <li><strong>Mausklick + Ziehen</strong> in der 3D-Welt: Kamera manuell rotieren.</li>
+                                <li><strong>Mausrad</strong>: Hinein- und Herauszoomen.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Blocks Tab -->
+                        <div class="hb-tab-content" id="hb-blocks" style="display:none;">
+                            <h3>Programmierung mit Blöcken</h3>
+                            <p>Öffne die Programmier-Oberfläche mit einem Klick auf die <strong>Blöcke-Kategorien am linken Rand</strong>.</p>
+                            <ul>
+                                <li>Ziehe Blöcke in den Arbeitsbereich und verbinde sie.</li>
+                                <li>Klicke unten in der Mitte auf <strong>▶ (Play)</strong>, um das Programm auf den Roboter zu übertragen.</li>
+                            </ul>
+                            <h4>Wichtige Sensoren</h4>
+                            <p>Du kannst <strong>WENN/DANN</strong>-Blöcke nutzen, um auf Sensoren zu reagieren:</p>
+                            <ul>
+                                <li><code>LiDAR Distanz &lt; 20</code>: Prüft, ob ein Hindernis vor dir ist.</li>
+                                <li><code>Objekt erkannt = 'trash'</code>: Erkennt per Kamera, was vor dir liegt.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Python Tab -->
+                        <div class="hb-tab-content" id="hb-python" style="display:none;">
+                            <h3>Python API Referenz</h3>
+                            <p>Für Profis: Du kannst deinen Bot auch direkt in Python programmieren. Nutze den <code>mod</code>-Befehlssatz.</p>
+                            <pre style="background: #1e293b; color: #e2e8f0; padding: 10px; border-radius: 8px; font-family: monospace;"><code># Bewegung
+mod.move('FORWARD', 5)       # 5 Einheiten vorwärts
+mod.move('BACKWARD', 2)      # 2 Einheiten rückwärts
+mod.turn('LEFT', 1)          # 90 Grad links
+mod.turn('RIGHT', 1)         # 90 Grad rechts
+
+# Aktionen
+mod.gripper('OPEN')          # Greifarm auf / fallen lassen
+mod.gripper('CLOSE')         # Greifarm zu / greifen
+mod.scan()                   # LiDAR Radar aktivieren
+mod.sleep(2)                 # 2 Sekunden warten
+
+# Motoren (für Schleifen)
+mod.start_motor('FORWARD')
+mod.stop_motor()</code></pre>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
