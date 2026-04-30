@@ -12,6 +12,7 @@ backups/
 js/archive/
 node_modules/
 .env
+*.py
 
 # Editor files
 .vscode/
