@@ -1,51 +1,38 @@
-# RoboQuest 3D — Robotics Simulator (v22 Robotics Refocus)
+# RoboQuest 3D — Solarpunk & Robotik Simulator (v23 Release)
 
-Ein authentischer 3D-Robotik-Simulator für Bildungszwecke. Der Fokus liegt auf der Programmierung von Sensoren, Logistik-Algorithmen und autonomer Pfadfindung. Die visuelle Blockly-Programmierung ist vollständig bidirektional mit dem Python-Editor synchronisiert.
+Ein interaktiver, webbasierter 3D-Robotik-Simulator mit starkem Fokus auf **Pädagogik, Storytelling und Open-Source-Architektur**. Spieler steuern einen kleinen "Eco-Bot" durch eine Solarpunk-Welt, programmieren ihn per Blockly oder Python und reparieren die Natur.
 
-## 🤖 Real-Life Robotik Fokus (v22 Update)
+## 🌍 Solarpunk-Welt & Story (Akt 4)
+- **Umwelt-Reparatur**: Finde und repariere defekte Windräder via LiDAR-Scan (`mod.scan()`), um erneuerbare Energien in der "Solarpunk-City" zu aktivieren.
+- **Lebendige Natur**: Wilde Tiere (Füchse) durchstreifen den Wald und reagieren dynamisch (Fluchtverhalten) auf die Annäherung des Roboters.
+- **Recycling-Hub**: Die Basisstation erstrahlt nun als futuristischer, leuchtender Solarpunk-Ring.
 
-### 📦 Logistik- & Greifarm-Mechanik
-- **Physisches Greifen**: Der Roboter sammelt Objekte nicht mehr durch bloßes Drüberfahren. Er muss mit `eco_bot.gripper("CLOSE")` gezielt zugreifen.
-- **Cargo-Management**: Aufgenommener Schrott oder Datenchips werden physisch am Chassis befestigt. Der aktuelle Ladestatus wird im HUD (📦 Cargo) angezeigt.
-- **Recycling-Hub**: Items müssen zur Basis (Recycling-Hub) transportiert und dort mit `OPEN` entladen werden, um Missionspunkte zu erhalten.
+## 📖 Interaktives Handbuch (Codex)
+- **Onboarding**: Beim allerersten Start des Spiels öffnet sich automatisch das Handbuch, um neue Spieler in die Story und Steuerung einzuführen.
+- **Wissens-Datenbank**: Das UI-Overlay (Glassmorphism) enthält 4 Tabs: Geschichte, Steuerung, Blockly-Tutorials und eine detaillierte Python-API-Referenz.
 
-### 🧱 Fels-Labyrinth & Pfadfindung
-- **Start-Herausforderung**: Der Roboter startet in einem dichten Labyrinth aus unzerstörbaren Felsbrocken.
-- **Sensor-Pflicht**: Um zu entkommen, müssen Spieler den Ultraschall-Sensor (`ultrasonic()`) und LiDAR-Scan (`scan()`) nutzen, um Hindernisse autonom zu umfahren.
-- **Minecraft-Features entfernt**: Terraform-Befehle (build/dig) wurden entfernt, um den Fokus zu 100% auf industrielle Robotik zu legen.
+## 📱 Mobile Optimierung (Responsive Design)
+- **Vollbild-IDE**: Das Programmier-Fenster nimmt auf Smartphones automatisch 100% des Platzes ein, für perfekte Touch-Bedienbarkeit.
+- **Kompaktes UI**: Das Handbuch ordnet seine Tabs auf kleinen Bildschirmen vertikal/horizontal platzsparend an, und störende HUD-Elemente (Minimap) werden ausgeblendet.
+- **Touch-Steuerung**: Voller Support über das digitale On-Screen-Steuerkreuz (D-Pad).
 
-### 🔄 Bidirektionaler Python-Sync
-- **🧩 ↔ 🐍 Live-Synchronisation**: Änderungen an den Blockly-Blöcken erscheinen sofort als Python-Code. Ebenso wird Python-Code (bei korrekter API-Nutzung) zurück in Blöcke übersetzt.
-- **IntelliSense & Hover**: Der Code-Editor bietet nun Autovervollständigung mit Dokumentation und Hover-Tooltips inklusive Code-Beispielen für alle `eco_bot.*` Befehle.
+## 🧩 Bidirektionaler Python-Sync
+- **Live-Synchronisation**: Änderungen an den Blockly-Blöcken erscheinen sofort als Python-Code. Python-Code wird (bei korrekter API-Nutzung) zurück in Blöcke übersetzt.
+- **Ace Editor**: Professioneller Code-Editor mit IntelliSense und Syntax-Highlighting.
 
-## 🔋 Energie- & Ressourcen-Management
-
-| Situation | Ladung | Verbrauch | Netto |
-|---|---|---|---|
-| Recycling-Hub 🏠 | +20.0/s | 0 | **+20.0/s** 🚀 |
-| Fahren in Sonne ☀️ | +6.0/s | -8.0/s | **-2.0/s** ⬇️ |
-| Fahren im Schatten ☁️ | +0.5/s | -8.0/s | **-7.5/s** ⚠️ |
-
-## 📖 Story-Missions (Robotik-Spezifisch)
-
-- **Akt 1: Logistik-Einheit**: Finde 3 Schrottteile im Wald und liefere sie sicher im Recycling-Center ab.
-- **Akt 2: Das Felsen-Labyrinth**: Nutze Ultraschall-Sensoren, um einen Weg aus dem engen Fels-Irrgarten zu finden.
-- **Akt 3: Autonomer Sammler**: Programmiere eine Routine, die Datenchips im unwegsamen Gelände aufspürt und recycelt.
-
-## 🗺️ Interface & Navigation
-- **HUD (Glassmorphism)**: Echtzeit-Anzeige für Score, Quest-Fortschritt, Karten-Erkundung (Fog of War) und Cargo-Status.
-- **IDE-Tabs**: Nahtloser Wechsel zwischen visueller (🧩) und textbasierter (🐍) Programmierung.
+## 💡 Technische Architektur (Modularisiert)
+- **Core**: Three.js (WebGL), Skulpt (Python Interpreter im Browser).
+- **ES6-ready via Global Namespace**: Die ehemalige monolithische 2.900-Zeilen-Datei wurde für Open-Source-Beiträge in logische Komponenten aufgeteilt:
+  - `config.js` (Story & Konstanten)
+  - `ui.js` (DOM & Handbuch)
+  - `pythonBridge.js` (Skulpt Interpreter)
+  - `engine.js` (Game Loop & Three.js 3D-Welt)
+- **Serverless**: Läuft zu 100% im Browser (via GitHub Pages). Es ist kein Backend oder Docker-Container zur Code-Ausführung nötig.
 
 ## 🔧 Installation & Betrieb
-
-1. Terminal im Verzeichnis `/roboquest` öffnen.
-2. Lokalen Server starten: `python3 -m http.server 8080`.
-3. Im Browser öffnen: `http://localhost:8080`
-
-## 💡 Technische Architektur
-- **Core**: Three.js (WebGL), Skulpt (Python Interpreter), Ace Editor.
-- **Sync**: Custom Regex-Parser für Python-to-Blockly Übersetzung.
-- **Aesthetics**: Glassmorphism UI, atmosphärische Glühwürmchen, reaktive Partikel-Effekte für alle Roboter-Aktionen.
+1. Repository klonen.
+2. Lokalen Webserver starten (z.B. `python3 -m http.server 8080`).
+3. Im Browser öffnen: `http://localhost:8080` (Oder direkt über GitHub Pages nutzen).
 
 ---
-*Entwickelt für pädagogische Anwendungen in der Informatik. v22 Robotics Refocus — April 2026.*
+*Entwickelt für pädagogische Anwendungen in der Informatik. Solarpunk Release — April 2026.*
