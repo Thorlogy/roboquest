@@ -333,6 +333,16 @@ Blockly.defineBlocksWithJsonArray([
     "helpUrl": ""
   },
 
+  {
+    "type": "action_clean_water",
+    "message0": "Wasser reinigen 💧",
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": 280,
+    "tooltip": "Startet den Reinigungsprozess, wenn der Eco-Bot am Fluss steht.",
+    "helpUrl": ""
+  },
+
   // ── 📡 SENSOREN ───────────────────────────────────────────────
 
   {
@@ -464,7 +474,8 @@ const CATEGORY_BLOCKS = {
   "🤖 Aktionen": [
     { "kind": "block", "type": "gripper_action" },
     { "kind": "block", "type": "push_action" },
-    { "kind": "block", "type": "scan_object" }
+    { "kind": "block", "type": "scan_object" },
+    { "kind": "block", "type": "action_clean_water" }
   ],
   "📡 Sensoren": [
     { "kind": "block", "type": "sensor_touch" },
@@ -668,6 +679,10 @@ window.generateLiveCode = function(block, indentLevel = 0) {
             break;
         case 'action_remove':
             code += `${indent}eco_bot.remove_block()\n`;
+            break;
+        case 'action_clean_water':
+            code += `${indent}# Wasser reinigen\n`;
+            code += `${indent}eco_bot.clean_water()\n`;
             break;
         case 'repeat_n':
             code += `${indent}for i in range(${block.getFieldValue('TIMES')}):\n`;

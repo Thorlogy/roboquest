@@ -147,19 +147,19 @@ function buildEnvironment() {
     path.rotation.x = -Math.PI / 2; path.receiveShadow = true;
     environmentGroup.add(path);
 
-    // River Water Plane
-    const waterGeo = new THREE.PlaneGeometry(800, 15);
-    const waterMat = new THREE.MeshPhysicalMaterial({ 
-        color: 0x0ea5e9, 
+    // River Water Plane (Dirty by default)
+    const waterGeo = new THREE.PlaneGeometry(1200, 20, 100, 1);
+    waterMat = new THREE.MeshPhysicalMaterial({ 
+        color: 0x5d4037, // Muddy brown
         transparent: true, 
-        opacity: 0.7,
-        roughness: 0.1,
+        opacity: 0.85,
+        roughness: 0.2,
         metalness: 0.1 
     });
-    const water = new THREE.Mesh(waterGeo, waterMat);
-    water.rotation.x = -Math.PI / 2;
-    water.position.set(0, -1.0, -35); // Base height of the river
-    environmentGroup.add(water);
+    riverMesh = new THREE.Mesh(waterGeo, waterMat);
+    riverMesh.rotation.x = -Math.PI / 2;
+    riverMesh.position.set(0, -0.8, -35);
+    environmentGroup.add(riverMesh);
 
     // Branch paths
     const baseBranchGeo = new THREE.PlaneGeometry(8, 100, 16, 40);
@@ -403,6 +403,41 @@ function updateAtmosphere(delta, time) {
         f.position.y += Math.sin(time * f.userData.speed + f.userData.phase) * 0.01;
         f.material.opacity = 0.4 + Math.sin(time * 2 + f.userData.phase) * 0.4;
     });
+
+    // River flow effect
+    if (riverMesh) {
+        riverMesh.geometry.attributes.position.array.forEach((_, i) => {
+            if (i % 3 === 2) { // Z height in PlaneGeo (which is vertical because of rotation)
+                const x = riverMesh.geometry.attributes.position.array[i-2];
+                riverMesh.geometry.attributes.position.array[i] += Math.sin(time * 2 + x * 0.1) * 0.005;
+            }
+        });
+        riverMesh.geometry.attributes.position.needsUpdate = true;
+    }
+}
+
+let isWaterClean = false;
+function cleanWater() {
+    if (isWaterClean || !riverMesh) return;
+    isWaterClean = true;
+    
+    // Smooth transition to Solarpunk Blue
+    const targetColor = new THREE.Color(0x0ea5e9);
+    const startColor = riverMesh.material.color.getHex();
+    
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += 0.02;
+        riverMesh.material.color.lerp(targetColor, 0.1);
+        riverMesh.material.opacity = 0.85 - progress * 0.2;
+        
+        if (progress >= 1) {
+            clearInterval(interval);
+            riverMesh.material.color.set(targetColor);
+            riverMesh.material.opacity = 0.65;
+            showSuccess('💧 Das Wasser ist wieder rein! Ein Sieg für die Natur.', '🎉');
+        }
+    }, 50);
 }
 
 // ════════════════════════════════════════════════════════════════

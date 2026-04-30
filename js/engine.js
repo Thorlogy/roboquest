@@ -1161,6 +1161,18 @@ function animate() {
                         }
                     }
                 }
+                else if (currentCommand === 'cleanWater') {
+                    commandProgress += animSpeed * 0.5; // Cleaning takes longer
+                    if (!currentCommandObj._effectFired) {
+                        currentCommandObj._effectFired = true;
+                        // Check if near river (z is -35)
+                        if (Math.abs(roverGroup.position.z - (-35)) < 15) {
+                            cleanWater();
+                        } else {
+                            showActionFlash('⚠️ Nicht nah genug am Wasser!');
+                        }
+                    }
+                }
                 else if (currentCommand === 'push') {
                     tryMove(2.5 * delta * speedM);
                     commandProgress += delta * speedM;
