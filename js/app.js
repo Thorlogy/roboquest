@@ -173,6 +173,8 @@ let commandProgress = 0;
 let gripperState = 'OPEN';
 let programDriven = false; // Track if items collected via program
 let programMotorState = { forward: false, backward: false, left: false, right: false }; // Continuous programmatic motion
+let foxes = [];
+let turbines = [];
 
 function rPush(block) {
     if (block) rStack.push({ block: block, state: 0, totalDist: 0, waitTime: 0 });
@@ -191,6 +193,7 @@ var storyState = {
     itemsPickedUp: { trash: 0, seed: 0, datachip: 0, key: 0 },
     totalItemsCollected: 0,
     seedsPlanted: 0,
+    turbinesRepaired: 0,
     blocksUsedLastRun: 0,
     blocksDetailed: { move: 0, turn: 0, loop: 0, logic: 0, action: 0 },
     batteryLevel: 100
@@ -232,6 +235,15 @@ const STORY_ACTS = {
         spawnItems: [
             { type: "seed", count: 8 }
         ]
+    },
+    4: {
+        title: "📖 Akt 4: Solarpunk-City",
+        hasFog: false,
+        objectives: [
+            { id: "repair_turbines", text: "Repariere 3 Windräder per Scan", target: 3, type: "repair_turbine", icon: "⚙️" },
+            { id: "find_lake", text: "Finde den versteckten See", type: "zone", zoneId: "lake", icon: "🌊" }
+        ],
+        reward: { id: 'gold', title: "Umwelt-Retter!", desc: "Der Wald ist gerettet und grün!", icon: "🌟" }
     }
 };
 
@@ -1339,6 +1351,86 @@ function buildClouds() {
 
 let environmentGroup = null;
 
+// ════════════════════════════════════════════════════════════════
+// SOLARPUNK & ANIMALS
+// ════════════════════════════════════════════════════════════════
+function buildFox(x, z) {
+    const foxGroup = new THREE.Group();
+    const mOrange = new THREE.MeshLambertMaterial({ color: 0xea580c });
+    const mWhite = new THREE.MeshLambertMaterial({ color: 0xffffff });
+    const mBlack = new THREE.MeshLambertMaterial({ color: 0x171717 });
+
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.4, 0.4), mOrange);
+    body.position.y = 0.5;
+    foxGroup.add(body);
+
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), mOrange);
+    head.position.set(0.5, 0.7, 0);
+    foxGroup.add(head);
+    
+    const snout = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.2, 0.2), mWhite);
+    snout.position.set(0.7, 0.6, 0);
+    foxGroup.add(snout);
+
+    const nose = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), mBlack);
+    nose.position.set(0.85, 0.65, 0);
+    foxGroup.add(nose);
+
+    const tail = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.2, 0.2), mOrange);
+    tail.position.set(-0.6, 0.6, 0);
+    tail.rotation.z = Math.PI / 4;
+    foxGroup.add(tail);
+
+    for (let i = 0; i < 4; i++) {
+        const leg = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.4, 0.15), mBlack);
+        leg.position.set(i < 2 ? 0.3 : -0.3, 0.2, i % 2 === 0 ? 0.2 : -0.2);
+        foxGroup.add(leg);
+    }
+
+    foxGroup.position.set(x, getTerrainYGlobal(x, z), z);
+    foxGroup.userData = { targetRot: Math.random() * Math.PI * 2, speed: 1.0, timer: Math.random() * 2 };
+    scene.add(foxGroup);
+    return foxGroup;
+}
+
+function buildWindTurbine(x, z) {
+    const turbine = new THREE.Group();
+    const mWhite = new THREE.MeshLambertMaterial({ color: 0xf8fafc });
+    const mGlow = new THREE.MeshLambertMaterial({ color: 0x34d399, emissive: 0x10b981, emissiveIntensity: 0 });
+
+    const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 1.0, 15, 16), mWhite);
+    tower.position.y = 7.5;
+    turbine.add(tower);
+
+    const nacelle = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 3), mWhite);
+    nacelle.position.set(0, 15, 0);
+    turbine.add(nacelle);
+
+    const glowStripe = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.2, 3.1), mGlow);
+    glowStripe.position.set(0, 15, 0);
+    turbine.add(glowStripe);
+
+    const rotor = new THREE.Group();
+    rotor.position.set(0, 15, 1.6);
+    const hub = new THREE.Mesh(new THREE.SphereGeometry(0.8, 16, 16), mWhite);
+    rotor.add(hub);
+
+    for (let i = 0; i < 3; i++) {
+        const blade = new THREE.Mesh(new THREE.BoxGeometry(0.4, 8, 0.1), mWhite);
+        blade.position.y = 4;
+        const bladePivot = new THREE.Group();
+        bladePivot.rotation.z = (i * Math.PI * 2) / 3;
+        bladePivot.add(blade);
+        rotor.add(bladePivot);
+    }
+
+    turbine.add(rotor);
+    turbine.position.set(x, getTerrainYGlobal(x, z), z);
+    turbine.userData = { isRepaired: false, rotor: rotor, glowMat: mGlow };
+    scene.add(turbine);
+    return turbine;
+}
+
 /**
  * Erstellt die 3D-Umgebung inklusive Boden, Pfaden, Bäumen, Felsen und dem Labyrinth.
  * Ruft getTerrainYGlobal auf, um Objekte physikalisch korrekt am Boden zu platzieren.
@@ -1613,6 +1705,26 @@ function buildEnvironment() {
             turnTimer: 0
         });
     }
+
+    // Solarpunk Base Upgrade
+    const baseZone = SECRET_ZONES.find(z => z.id === 'base');
+    if (baseZone) {
+        const solarpunkMat = new THREE.MeshLambertMaterial({ color: 0x1e293b, emissive: 0x0ea5e9, emissiveIntensity: 0.5 });
+        const solarpunkRing = new THREE.Mesh(new THREE.TorusGeometry(5, 0.3, 16, 64), solarpunkMat);
+        solarpunkRing.rotation.x = Math.PI / 2;
+        solarpunkRing.position.set(baseZone.x, getTerrainYGlobal(baseZone.x, baseZone.z) + 0.1, baseZone.z);
+        environmentGroup.add(solarpunkRing);
+    }
+
+    // Spawn Foxes
+    foxes.forEach(f => scene.remove(f)); foxes = [];
+    for (let i=0; i<6; i++) foxes.push(buildFox(seededRandom() * 200 - 100, seededRandom() * 200 - 100));
+    
+    // Spawn Wind Turbines
+    turbines.forEach(t => scene.remove(t)); turbines = [];
+    turbines.push(buildWindTurbine(60, 40));
+    turbines.push(buildWindTurbine(-80, 70));
+    turbines.push(buildWindTurbine(100, -80));
 
     scene.add(environmentGroup);
 }
@@ -2172,6 +2284,47 @@ function animate() {
 
         if (lidar) lidar.rotation.y += 2 * delta;
 
+        // Solarpunk Turbines
+        for (const t of turbines) {
+            if (t.userData.isRepaired) {
+                t.userData.rotor.rotation.z += 2.0 * delta;
+            }
+        }
+
+        // Foxes AI
+        for (const f of foxes) {
+            const dist = Math.hypot(roverGroup.position.x - f.position.x, roverGroup.position.z - f.position.z);
+            if (dist < 15) {
+                // Flee
+                const angleAway = Math.atan2(f.position.x - roverGroup.position.x, f.position.z - roverGroup.position.z);
+                f.userData.targetRot = angleAway;
+                f.userData.speed = 4.0;
+            } else {
+                f.userData.timer -= delta;
+                if (f.userData.timer <= 0) {
+                    f.userData.targetRot = Math.random() * Math.PI * 2;
+                    f.userData.speed = 0.5;
+                    f.userData.timer = 1 + Math.random() * 3;
+                }
+            }
+            
+            let diff = f.userData.targetRot - f.rotation.y;
+            while(diff < -Math.PI) diff += Math.PI * 2;
+            while(diff > Math.PI) diff -= Math.PI * 2;
+            f.rotation.y += diff * 5 * delta;
+
+            const nx = f.position.x + Math.sin(f.rotation.y) * f.userData.speed * delta;
+            const nz = f.position.z + Math.cos(f.rotation.y) * f.userData.speed * delta;
+            if (!checkCollision(nx, nz, 0, false)) {
+                f.position.x = nx;
+                f.position.z = nz;
+                f.position.y = getTerrainYGlobal(nx, nz);
+                f.children[0].position.y = 0.5 + Math.sin(Date.now() * 0.01 * f.userData.speed) * 0.1;
+            } else {
+                f.userData.targetRot += Math.PI;
+            }
+        }
+
         // Collectible bobbing animation
         for (const c of collectibles) {
             if (c.mesh) c.mesh.position.y = getTerrainYGlobal(c.x, c.z) + 1.0 + Math.sin(Date.now() * 0.003 + c.x) * 0.3;
@@ -2293,7 +2446,22 @@ function animate() {
                     if (!currentCommandObj._effectFired) {
                         currentCommandObj._effectFired = true;
                         spawnActionRings(roverGroup.position);
-                        showActionFlash('🔍 Scanne Umgebung...');
+                        
+                        let repairedAny = false;
+                        for (const t of turbines) {
+                            if (!t.userData.isRepaired && Math.hypot(roverGroup.position.x - t.position.x, roverGroup.position.z - t.position.z) < 15) {
+                                t.userData.isRepaired = true;
+                                t.userData.glowMat.emissiveIntensity = 1.0;
+                                storyState.turbinesRepaired++;
+                                repairedAny = true;
+                                showPickupFlash("⚙️ Windrad repariert!");
+                                if (window.audioEngine) window.audioEngine.playHappyBeep();
+                                score += 200;
+                                document.getElementById('score-display').innerText = score;
+                            }
+                        }
+
+                        if (!repairedAny) showActionFlash('🔍 Scanne Umgebung...');
                         storyState.scanCount = (storyState.scanCount || 0) + 1;
                         checkQuestProgress();
                     }
