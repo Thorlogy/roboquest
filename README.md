@@ -2,6 +2,11 @@
 
 Ein interaktiver, webbasierter 3D-Robotik-Simulator mit starkem Fokus auf **Pädagogik, Storytelling und Open-Source-Architektur**. Spieler steuern einen kleinen "Eco-Bot" durch eine Solarpunk-Welt, programmieren ihn per Blockly oder Python und reparieren die Natur.
 
+## Lizenz
+Dieses Werk ist lizenziert unter einer [Creative Commons Namensnennung - Weitergabe unter gleichen Bedingungen 4.0 International Lizenz](http://creativecommons.org/licenses/by-sa/4.0/).
+
+[![CC BY-SA 4.0](https://licensebuttons.net/l/by-sa/4.0/88x31.png)](http://creativecommons.org/licenses/by-sa/4.0/)
+
 ## 🌍 Solarpunk-Welt & Story (Akt 4)
 - **Umwelt-Reparatur**: Finde und repariere defekte Windräder via LiDAR-Scan (`mod.scan()`), um erneuerbare Energien in der "Solarpunk-City" zu aktivieren.
 - **Lebendige Natur**: Wilde Tiere (Füchse) durchstreifen den Wald und reagieren dynamisch (Fluchtverhalten) auf die Annäherung des Roboters.
