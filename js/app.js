@@ -148,6 +148,10 @@ function updateActionEffects(delta) {
  * Show a visual action flash in the viewport
  */
 function showActionFlash(text) {
+    if (window.audioEngine) {
+        if (text.includes('❌')) window.audioEngine.playSadBoop();
+        else window.audioEngine.playServoSound();
+    }
     const el = document.createElement('div');
     el.className = 'item-pickup-flash action-flash';
     el.innerText = text;
@@ -438,6 +442,7 @@ function tryDropItem() {
                 scene.add(tree);
                 
                 showPickupFlash("🌱 Gepflanzt!");
+                if (window.audioEngine) window.audioEngine.playHappyBeep();
                 let mult = programDriven ? 2 : 1;
                 score += 50 * mult;
                 document.getElementById('score-display').innerText = score;
@@ -691,6 +696,8 @@ function discoverZone(zone) {
     // Big reveal fog
     revealFog(zone.x, zone.z, 35);
 
+    if (window.audioEngine) window.audioEngine.playDiscoverySound();
+
     // Show discovery popup
     document.getElementById('zone-icon').innerText = zone.icon;
     document.getElementById('zone-title').innerText = zone.name + " entdeckt!";
@@ -720,6 +727,7 @@ function checkQuestProgress() {
         
         if (done && !obj.completed) {
             obj.completed = true;
+            if (window.audioEngine) window.audioEngine.playHappyBeep();
             showPickupFlash("✅ " + obj.text);
         }
 
@@ -2263,6 +2271,12 @@ function animate() {
                 document.getElementById('sensor-output').innerText = '✅ Programm beendet!';
             }
             if (currentCommandObj) {
+                if (commandProgress === 0 && window.audioEngine) {
+                    if (currentCommand.includes('move')) window.audioEngine.playMoveSound();
+                    else if (currentCommand.includes('turn')) window.audioEngine.playServoSound();
+                    else if (currentCommand === 'gripper') window.audioEngine.playServoSound();
+                    else if (currentCommand === 'scan') window.audioEngine.playScanSound();
+                }
                 // Adjust ALL automated speeds by programSpeed for debugging
                 let speedM = typeof programSpeed !== 'undefined' ? programSpeed : 1.0;
                 let animSpeed = 1.0 * delta * speedM;
