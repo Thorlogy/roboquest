@@ -1365,8 +1365,10 @@ function animate() {
 
         // Camera
         if (cameraChaseMode) {
-            const behindX = rx - Math.sin(yaw) * CAM_DISTANCE;
-            const behindZ = rz - Math.cos(yaw) * CAM_DISTANCE;
+            // Mobile Optimization: increase distance on narrow screens
+            const dynamicDist = camera.aspect < 1 ? CAM_DISTANCE / camera.aspect : CAM_DISTANCE;
+            const behindX = rx - Math.sin(yaw) * dynamicDist;
+            const behindZ = rz - Math.cos(yaw) * dynamicDist;
             camera.position.x += (behindX - camera.position.x) * CAM_LERP;
             camera.position.y += (terrainY + CAM_HEIGHT - camera.position.y) * CAM_LERP;
             camera.position.z += (behindZ - camera.position.z) * CAM_LERP;

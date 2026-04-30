@@ -1087,3 +1087,30 @@ body {
   color: #a78bfa;
   font-family: monospace;
 }
+
+/* 📱 Mobile UI Scaling & Optimizations */
+@media (max-width: 480px) {
+  .hud-panel {
+    top: 8px !important; 
+    left: 8px !important;
+    transform: scale(0.8);
+    transform-origin: top left;
+  }
+  .dpad {
+    bottom: 10px !important; 
+    right: 10px !important;
+    transform: scale(0.85);
+    transform-origin: bottom right;
+  }
+  .story-panel {
+    left: 10px !important; 
+    bottom: 160px !important;
+    width: 200px !important;
+    font-size: 0.8rem !important;
+  }
+  .handbook-modal {
+    width: 100vw !important; 
+    height: 100vh !important;
+    border-radius: 0 !important;
+  }
+}
