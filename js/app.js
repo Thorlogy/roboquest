@@ -447,37 +447,6 @@ function tryDropItem() {
     }
 }
 
-    // Check plant spots (if carrying seeds)
-    if (storyState.currentAct === 3 && storyState.itemsCollected.seed > 0) {
-        for (const spot of plantSpots) {
-            if (!spot.planted && Math.hypot(rx - spot.x, rz - spot.z) < 2.5) {
-                spot.planted = true;
-                storyState.itemsCollected.seed--;
-                storyState.seedsPlanted++;
-                spot.mesh.material.color.setHex(0x33aa33);
-                spot.mesh.material.opacity = 1.0;
-                // Spawn a little tree
-                const tree = new THREE.Group();
-                const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 1.5, 6), new THREE.MeshStandardMaterial({ color: 0x6d4c41 }));
-                trunk.position.y = 0.75;
-                tree.add(trunk);
-                const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.2, 2, 6), new THREE.MeshStandardMaterial({ color: 0x2e7d32 }));
-                leaves.position.y = 2.2;
-                tree.add(leaves);
-                tree.position.set(spot.x, getTerrainYGlobal(spot.x, spot.z), spot.z);
-                scene.add(tree);
-                showPickupFlash("🌱 Gepflanzt!");
-                let mult = programDriven ? 2 : 1;
-                score += 50 * mult;
-                document.getElementById('score-display').innerText = score;
-                document.getElementById('sensor-output').innerText = "🌱 Samen gepflanzt! (" + storyState.seedsPlanted + "/3)";
-                checkQuestProgress();
-                break;
-            }
-        }
-    }
-}
-
 function showPickupFlash(text) {
     const el = document.createElement('div');
     el.className = 'item-pickup-flash';
@@ -713,6 +682,9 @@ function checkQuestProgress() {
         else if (obj.type === 'scan') done = (storyState.scanCount || 0) >= obj.target;
         
         if (done && !obj.completed) {
+            obj.completed = true;
+            showPickupFlash("✅ " + obj.text);
+        }
 
         const el = document.getElementById('obj-' + idx);
         if (el) {
