@@ -184,6 +184,7 @@ var storyState = {
     unlockedFeatures: ['drive'],
     zonesDiscovered: [],
     itemsCollected: { trash: 0, seed: 0, datachip: 0, key: 0 },
+    itemsPickedUp: { trash: 0, seed: 0, datachip: 0, key: 0 },
     totalItemsCollected: 0,
     seedsPlanted: 0,
     blocksUsedLastRun: 0,
@@ -217,15 +218,15 @@ const STORY_ACTS = {
         ]
     },
     3: {
-        title: "📖 Akt 3: Autonomer Sammler",
+        title: "📖 Akt 3: Wiederaufforstung",
         hasFog: false,
         objectives: [
-            { id: "full_cleanup", text: "Sammle & Recycel 5 Datenchips", target: 5, type: "drop_off_chip", icon: "📀" },
-            { id: "find_base", text: "Kehr zur Forschungsstation zurück", type: "zone", zoneId: "base", icon: "🏠" }
+            { id: "find_seeds", text: "Finde 3 Samen", target: 3, type: "seed", icon: "🌱" },
+            { id: "plant_trees", text: "Pflanze 3 Bäume", target: 3, type: "seed_plant", icon: "🌲" }
         ],
         reward: { id: 'gold', title: "Roboter-Master!", desc: "Du hast bewiesen, dass ein Bot den Wald retten kann!", icon: "🏆" },
         spawnItems: [
-            { type: "datachip", count: 10 }
+            { type: "seed", count: 8 }
         ]
     }
 };
@@ -409,13 +410,51 @@ function tryGrabItem() {
 }
 
 /**
- * Versucht das aktuell getragene Objekt an einer Recycling-Station abzuladen.
+ * Versucht das aktuell getragene Objekt an einer Recycling-Station abzuladen oder zu pflanzen.
  * Überprüft die Distanz zum Recycling-Hub und aktualisiert bei Erfolg den Score und Quest-Status.
  */
 function tryDropItem() {
     if (!storyState.carriedItem) return;
     const rx = roverGroup.position.x, rz = roverGroup.position.z;
     
+    // Check plant spots (if carrying seeds)
+    if (storyState.carriedItem.type === 'seed') {
+        for (const spot of plantSpots) {
+            if (!spot.planted && Math.hypot(rx - spot.x, rz - spot.z) < 2.5) {
+                spot.planted = true;
+                storyState.seedsPlanted = (storyState.seedsPlanted || 0) + 1;
+                spot.mesh.material.color.setHex(0x33aa33);
+                spot.mesh.material.opacity = 1.0;
+                
+                // Spawn a little tree
+                const tree = new THREE.Group();
+                const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 1.5, 6), new THREE.MeshStandardMaterial({ color: 0x6d4c41 }));
+                trunk.position.y = 0.75;
+                tree.add(trunk);
+                const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.2, 2, 6), new THREE.MeshStandardMaterial({ color: 0x2e7d32 }));
+                leaves.position.y = 2.2;
+                tree.add(leaves);
+                tree.position.set(spot.x, getTerrainYGlobal(spot.x, spot.z), spot.z);
+                scene.add(tree);
+                
+                showPickupFlash("🌱 Gepflanzt!");
+                let mult = programDriven ? 2 : 1;
+                score += 50 * mult;
+                document.getElementById('score-display').innerText = score;
+                document.getElementById('sensor-output').innerText = "🌱 Samen gepflanzt! (" + storyState.seedsPlanted + "/3)";
+                
+                // Remove from robot
+                if (roverGroup.userData.carriedMesh) roverGroup.remove(roverGroup.userData.carriedMesh);
+                storyState.carriedItem = null;
+                const cargoHUD = document.getElementById('hud-cargo');
+                if (cargoHUD) cargoHUD.classList.add('hidden');
+                
+                checkQuestProgress();
+                return; // Done
+            }
+        }
+    }
+
     // Check if in Base zone (Recycling Hub)
     const baseZone = SECRET_ZONES.find(z => z.id === 'base');
     if (baseZone && Math.hypot(rx - baseZone.x, rz - baseZone.z) < baseZone.radius) {
@@ -442,7 +481,7 @@ function tryDropItem() {
         document.getElementById('sensor-output').innerText = "✅ " + item.def.name + " erfolgreich recycelt!";
         checkQuestProgress();
     } else {
-        document.getElementById('sensor-output').innerText = "❌ Hier ist keine Recycling-Station!";
+        document.getElementById('sensor-output').innerText = "❌ Hier kannst du das nicht abladen!";
         showActionFlash("❌ Abladen misslungen");
     }
 }
@@ -676,10 +715,8 @@ function checkQuestProgress() {
         else if (obj.type === 'drop_off') done = (storyState.itemsCollected.trash || 0) >= obj.target;
         else if (obj.type === 'drop_off_chip') done = (storyState.itemsCollected.datachip || 0) >= obj.target;
         else if (obj.type === 'datachip') done = (storyState.itemsPickedUp.datachip || 0) >= obj.target;
+        else if (obj.type === 'seed') done = (storyState.itemsPickedUp.seed || 0) >= obj.target;
         else if (obj.type === 'seed_plant') done = storyState.seedsPlanted >= obj.target;
-        else if (obj.type === 'zone') done = storyState.zonesDiscovered.includes(obj.zoneId);
-        else if (obj.type === 'build') done = (storyState.blocksBuilt || 0) >= obj.target;
-        else if (obj.type === 'scan') done = (storyState.scanCount || 0) >= obj.target;
         
         if (done && !obj.completed) {
             obj.completed = true;
@@ -1691,12 +1728,11 @@ function updateChargingStations(time) {
 function buildEcoBot() {
     roverGroup = new THREE.Group();
     scene.add(roverGroup);
-    const mWhite = new THREE.MeshLambertMaterial({ color: 0xf8fafc });
-    const mGreen = new THREE.MeshLambertMaterial({ color: 0x4ade80 });
+    const mRustyYellow = new THREE.MeshLambertMaterial({ color: 0xd97706 });
+    const mRustyOrange = new THREE.MeshLambertMaterial({ color: 0xeab308 });
     const mDark = new THREE.MeshLambertMaterial({ color: 0x1e293b });
     const mSilver = new THREE.MeshLambertMaterial({ color: 0x94a3b8 });
     const mCyan = new THREE.MeshBasicMaterial({ color: 0x22d3ee });
-    const mOrange = new THREE.MeshBasicMaterial({ color: 0xfbbf24 });
     const mSolar = new THREE.MeshLambertMaterial({ color: 0x1e3a8a });
 
     // Track Materials
@@ -1716,49 +1752,63 @@ function buildEcoBot() {
     roverGroup.userData.trackMatR = mTrackR;
     roverGroup.userData.wheels = [];
 
-    const base = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.8, 3.2), mWhite); base.position.y = 1.0; roverGroup.add(base);
+    const base = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.8, 3.2), mRustyYellow); base.position.y = 1.0; roverGroup.add(base);
     const waist = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.4, 2.8), mDark); waist.position.y = 1.6; roverGroup.add(waist);
-    const chest = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.0, 2.8), mWhite); chest.position.set(0, 2.3, 0.2); roverGroup.add(chest);
+    const chest = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.4, 2.8), mRustyOrange); chest.position.set(0, 2.5, 0.2); roverGroup.add(chest);
 
     const ventGeo = new THREE.BoxGeometry(0.8, 0.1, 0.1);
-    for(let i=0; i<3; i++) { const v = new THREE.Mesh(ventGeo, mDark); v.position.set(0, 2.05+i*0.2, 1.6); roverGroup.add(v); }
+    for(let i=0; i<3; i++) { const v = new THREE.Mesh(ventGeo, mDark); v.position.set(0, 2.2+i*0.2, 1.6); roverGroup.add(v); }
 
     roverGroup.add(meshAt(new THREE.BoxGeometry(0.2, 0.2, 0.8), mSilver, -0.8, 0.9, 1.9));
     roverGroup.add(meshAt(new THREE.BoxGeometry(0.2, 0.2, 0.8), mSilver, 0.8, 0.9, 1.9));
-    roverGroup.add(meshAt(new THREE.BoxGeometry(2.8, 0.4, 0.3), mGreen, 0, 0.9, 2.3));
-    roverGroup.add(meshAt(new THREE.BoxGeometry(2.0, 0.1, 1.8), mSolar, 0, 2.85, -0.2));
+    roverGroup.add(meshAt(new THREE.BoxGeometry(2.0, 0.1, 1.8), mSolar, 0, 3.21, -0.2));
 
-    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.6, 16), mSilver); neck.position.set(0, 3.0, 0.8); roverGroup.add(neck);
-    const headGroup = new THREE.Group(); headGroup.position.set(0, 3.6, 0.8);
-    headGroup.add(new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.2, 1.4), mWhite));
-    const visor = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.8, 0.1), mDark); visor.position.z = 0.71; headGroup.add(visor);
-    const eyeGeo = new THREE.PlaneGeometry(0.4, 0.4);
-    const eyeL = new THREE.Mesh(eyeGeo, mCyan); eyeL.position.set(-0.4, 0, 0.77); headGroup.add(eyeL);
-    const eyeR = new THREE.Mesh(eyeGeo, mCyan); eyeR.position.set(0.4, 0, 0.77); headGroup.add(eyeR);
-    const antS = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.6), mSilver); antS.position.set(0.6, 0.9, -0.3); antS.rotation.z = -0.2; headGroup.add(antS);
-    const antB = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 16), mOrange); antB.position.set(0.66, 1.25, -0.3); headGroup.add(antB);
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 0.8, 16), mSilver); neck.position.set(0, 3.4, 0.8); roverGroup.add(neck);
+    
+    // Wall-E style binocular head
+    const headGroup = new THREE.Group(); headGroup.position.set(0, 4.0, 0.8);
+    // Left eye binocular
+    const eyeBoxL = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.9, 1.2), mSilver);
+    eyeBoxL.position.set(-0.5, 0, 0); headGroup.add(eyeBoxL);
+    const lensL = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.1, 16), mDark);
+    lensL.rotation.x = Math.PI / 2; lensL.position.set(-0.5, 0, 0.61); headGroup.add(lensL);
+    const pupilL = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.11, 16), mCyan);
+    pupilL.rotation.x = Math.PI / 2; pupilL.position.set(-0.5, 0, 0.61); headGroup.add(pupilL);
+    
+    // Right eye binocular
+    const eyeBoxR = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.9, 1.2), mSilver);
+    eyeBoxR.position.set(0.5, 0, 0); headGroup.add(eyeBoxR);
+    const lensR = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.1, 16), mDark);
+    lensR.rotation.x = Math.PI / 2; lensR.position.set(0.5, 0, 0.61); headGroup.add(lensR);
+    const pupilR = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.11, 16), mCyan);
+    pupilR.rotation.x = Math.PI / 2; pupilR.position.set(0.5, 0, 0.61); headGroup.add(pupilR);
+    
+    // Connecting bar between eyes
+    const eyeBar = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.2, 0.4), mRustyYellow);
+    eyeBar.position.set(0, -0.2, 0); headGroup.add(eyeBar);
+
     roverGroup.add(headGroup);
 
     lidar = new THREE.Group();
     lidar.add(new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 0.2, 16), mDark));
     const lidarTop = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.4, 16), mSilver); lidarTop.position.y = 0.3; lidar.add(lidarTop);
     const lidarEye = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 0.3), mCyan); lidarEye.position.set(0, 0.3, 0.2); lidar.add(lidarEye);
-    lidar.position.set(-0.6, 3.0, -0.4); roverGroup.add(lidar);
+    lidar.position.set(-0.6, 3.2, -0.4); roverGroup.add(lidar);
 
     // Arms
     const buildArm = (isRight) => {
         const ag = new THREE.Group();
         const sh = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.4, 16), mSilver); sh.rotation.z = Math.PI/2; ag.add(sh);
-        const bi = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.8, 0.2), mWhite); bi.position.set(isRight?0.3:-0.3, -0.3, 0.2); bi.rotation.x = -Math.PI/6; ag.add(bi);
+        const bi = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.8, 0.2), mRustyYellow); bi.position.set(isRight?0.3:-0.3, -0.3, 0.2); bi.rotation.x = -Math.PI/6; ag.add(bi);
         ag.add(meshAt(new THREE.SphereGeometry(0.15, 16, 16), mSilver, isRight?0.3:-0.3, -0.65, 0.4));
-        const fa = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.7, 0.15), mWhite); fa.position.set(isRight?0.3:-0.3, -0.9, 0.6); fa.rotation.x = -Math.PI/3; ag.add(fa);
+        const fa = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.7, 0.15), mRustyYellow); fa.position.set(isRight?0.3:-0.3, -0.9, 0.6); fa.rotation.x = -Math.PI/3; ag.add(fa);
         const cb = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.1, 0.25), mDark); cb.position.set(isRight?0.3:-0.3, -1.1, 0.95); cb.rotation.x = -Math.PI/3; ag.add(cb);
-        const c1 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.3), mGreen); c1.position.set(isRight?0.4:-0.2, -1.2, 1.1); c1.rotation.x = Math.PI/2; ag.add(c1);
-        const c2 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.3), mGreen); c2.position.set(isRight?0.2:-0.4, -1.2, 1.1); c2.rotation.x = Math.PI/2; ag.add(c2);
+        const c1 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.3), mRustyOrange); c1.position.set(isRight?0.4:-0.2, -1.2, 1.1); c1.rotation.x = Math.PI/2; ag.add(c1);
+        const c2 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.3), mRustyOrange); c2.position.set(isRight?0.2:-0.4, -1.2, 1.1); c2.rotation.x = Math.PI/2; ag.add(c2);
         return ag;
     };
-    const armL = buildArm(false); armL.position.set(-1.3, 2.5, 0.8); roverGroup.add(armL);
-    const armR = buildArm(true); armR.position.set(1.3, 2.5, 0.8); roverGroup.add(armR);
+    const armL = buildArm(false); armL.position.set(-1.3, 2.7, 0.8); roverGroup.add(armL);
+    const armR = buildArm(true); armR.position.set(1.3, 2.7, 0.8); roverGroup.add(armR);
     roverGroup.userData.armL = armL;
     roverGroup.userData.armR = armR;
 
