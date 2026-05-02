@@ -450,8 +450,8 @@ function updateAtmosphere(delta, time) {
     if (scene.fog) scene.fog.color.copy(skyColor);
     
     // Lerp Lighting
-    if (ambientLight) ambientLight.intensity = 0.4 + (1 - timeOfDay) * 0.6;
-    if (sunLight) sunLight.intensity = (1 - timeOfDay) * 1.0;
+    if (window.ambientLight) window.ambientLight.intensity = 0.4 + (1 - timeOfDay) * 0.6;
+    if (window.sunLight) window.sunLight.intensity = (1 - timeOfDay) * 1.0;
 
     fireflies.forEach(f => {
         f.position.y += Math.sin(time * f.userData.speed + f.userData.phase) * 0.01;

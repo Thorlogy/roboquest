@@ -696,11 +696,12 @@ function init() {
     controls.enableDamping = true; controls.dampingFactor = 0.1;
     controls.enabled = false;
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-    const dirLight = new THREE.DirectionalLight(0xfffbdd, 1.2);
-    dirLight.position.set(30, 60, -30); dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 2048; dirLight.shadow.mapSize.height = 2048;
-    scene.add(dirLight);
+    window.ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(window.ambientLight);
+    window.sunLight = new THREE.DirectionalLight(0xfffbdd, 1.2);
+    window.sunLight.position.set(30, 60, -30); window.sunLight.castShadow = true;
+    window.sunLight.shadow.mapSize.width = 2048; window.sunLight.shadow.mapSize.height = 2048;
+    scene.add(window.sunLight);
 
     buildEnvironment();
     buildClouds();
