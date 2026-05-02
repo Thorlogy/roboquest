@@ -23,23 +23,23 @@ let vitalityScore = 0;
 let timeOfDay = 0; // 0 to 1 (Day to Night)
 let skyColor = new THREE.Color(0x87ceeb); // Day blue
 
-function updateVitalityHUD() {
+window.updateVitalityHUD = function() {
     const el = document.getElementById('vitality-level');
     if (el) el.innerText = vitalityScore;
-}
+};
 
-function addVitality(amount) {
+window.addVitality = function(amount) {
     vitalityScore = Math.min(100, vitalityScore + amount);
-    updateVitalityHUD();
-    spawnVitalitySparkles();
-}
+    window.updateVitalityHUD();
+    window.spawnVitalitySparkles();
+};
 
-function spawnVitalitySparkles() {
+window.spawnVitalitySparkles = function() {
     if (!roverGroup) return;
     for (let i = 0; i < 15; i++) {
         const p = new THREE.Mesh(
             new THREE.SphereGeometry(0.1, 8, 8),
-            new THREE.MeshBasicMaterial({ color: 0x4ade80 })
+            new THREE.MeshBasicMaterial({ color: 0x4ade80, transparent: true })
         );
         p.position.copy(roverGroup.position);
         p.position.y += 1;
@@ -492,7 +492,7 @@ function cleanWater() {
             riverMesh.material.opacity = 0.65;
             showSuccess('💧 Das Wasser ist wieder rein! Ein Sieg für die Natur.', '🎉');
             showActionFlash("💧 Wasser gereinigt!");
-            addVitality(30); // 30% for the river
+            if (window.addVitality) window.addVitality(30); // 30% for the river
         }
     }, 50);
 }

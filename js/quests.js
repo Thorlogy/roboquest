@@ -167,7 +167,7 @@ function tryDropItem() {
                 
                 showPickupFlash("🌱 Gepflanzt!");
                 if (window.audioEngine) window.audioEngine.playHappyBeep();
-                if (typeof addVitality === 'function') addVitality(15); 
+                if (typeof window.addVitality === 'function') window.addVitality(15); 
                 let mult = programDriven ? 2 : 1;
                 score += 50 * mult;
                 document.getElementById('score-display').innerText = score;
@@ -209,7 +209,7 @@ function tryDropItem() {
         if (cargoHUD) cargoHUD.classList.add('hidden');
 
         document.getElementById('sensor-output').innerText = "✅ " + item.def.name + " erfolgreich recycelt!";
-        if (item.type === 'trash' && typeof addVitality === 'function') addVitality(5);
+        if (item.type === 'trash' && typeof window.addVitality === 'function') window.addVitality(5);
         checkQuestProgress();
     } else {
         document.getElementById('sensor-output').innerText = "❌ Hier kannst du das nicht abladen!";
