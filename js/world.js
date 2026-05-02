@@ -20,6 +20,8 @@ let environmentGroup = null;
 let riverMesh;
 let isWaterClean = false;
 let vitalityScore = 0;
+let timeOfDay = 0; // 0 to 1 (Day to Night)
+let skyColor = new THREE.Color(0x87ceeb); // Day blue
 
 function updateVitalityHUD() {
     const el = document.getElementById('vitality-level');
@@ -29,6 +31,31 @@ function updateVitalityHUD() {
 function addVitality(amount) {
     vitalityScore = Math.min(100, vitalityScore + amount);
     updateVitalityHUD();
+    spawnVitalitySparkles();
+}
+
+function spawnVitalitySparkles() {
+    if (!roverGroup) return;
+    for (let i = 0; i < 15; i++) {
+        const p = new THREE.Mesh(
+            new THREE.SphereGeometry(0.1, 8, 8),
+            new THREE.MeshBasicMaterial({ color: 0x4ade80 })
+        );
+        p.position.copy(roverGroup.position);
+        p.position.y += 1;
+        p.userData.vel = new THREE.Vector3((Math.random()-0.5)*0.2, 0.1 + Math.random()*0.2, (Math.random()-0.5)*0.2);
+        p.userData.life = 1.0;
+        scene.add(p);
+        
+        const animateSparkle = () => {
+            p.position.add(p.userData.vel);
+            p.userData.life -= 0.02;
+            p.material.opacity = p.userData.life;
+            if (p.userData.life > 0) requestAnimationFrame(animateSparkle);
+            else { scene.remove(p); p.geometry.dispose(); p.material.dispose(); }
+        };
+        animateSparkle();
+    }
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -412,6 +439,20 @@ function buildEnvironment() {
 let fireflies = [];
 
 function updateAtmosphere(delta, time) {
+    // Day/Night Cycle (very slow)
+    timeOfDay = (Math.sin(time * 0.05) + 1) / 2; // Cycle every ~120s
+    
+    // Lerp Sky Color (Day: Blue, Night: Dark Purple/Blue)
+    const daySky = new THREE.Color(0x87ceeb);
+    const nightSky = new THREE.Color(0x0a0a2e);
+    skyColor.copy(daySky).lerp(nightSky, timeOfDay);
+    scene.background = skyColor;
+    if (scene.fog) scene.fog.color.copy(skyColor);
+    
+    // Lerp Lighting
+    if (ambientLight) ambientLight.intensity = 0.4 + (1 - timeOfDay) * 0.6;
+    if (sunLight) sunLight.intensity = (1 - timeOfDay) * 1.0;
+
     fireflies.forEach(f => {
         f.position.y += Math.sin(time * f.userData.speed + f.userData.phase) * 0.01;
         f.material.opacity = 0.4 + Math.sin(time * 2 + f.userData.phase) * 0.4;
