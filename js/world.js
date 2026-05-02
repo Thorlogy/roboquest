@@ -22,6 +22,7 @@ let isWaterClean = false;
 let vitalityScore = 0;
 let timeOfDay = 0; // 0 to 1 (Day to Night)
 let skyColor = new THREE.Color(0x87ceeb); // Day blue
+let verticalPlantSpots = [];
 
 window.updateVitalityHUD = function() {
     const el = document.getElementById('vitality-level');
@@ -343,6 +344,9 @@ function buildEnvironment() {
         rck.position.set(m.x, ty + m.r * 0.5, m.z);
         environmentGroup.add(rck);
         obstacles.push({ x: m.x, z: m.z, radius: m.r * 0.9 });
+        
+        // Add potential vertical planting spot
+        verticalPlantSpots.push({ x: m.x, y: ty + m.r*0.5, z: m.z, rotY: Math.random()*Math.PI, planted: false });
     });
 
     // --- NEW: POI PROPS (Fence around Hut) ---
@@ -357,6 +361,7 @@ function buildEnvironment() {
             const sign = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.6, 0.1), trkMat);
             sign.position.set(px, post.position.y + 0.4, pz + 0.2);
             sign.rotation.y = angle; environmentGroup.add(sign);
+            verticalPlantSpots.push({ x: px, y: post.position.y, z: pz, rotY: angle, planted: false });
         }
     }
 
@@ -599,4 +604,63 @@ function updateChargingStations(time) {
             station.innerRing.material.opacity = 0.3 + Math.sin(time * 3) * 0.2;
         }
     }
+}
+
+window.plantVertical = function() {
+    if (!roverGroup) return;
+    const rx = roverGroup.position.x, rz = roverGroup.position.z;
+    
+    for (const spot of verticalPlantSpots) {
+        if (!spot.planted && Math.hypot(rx - spot.x, rz - spot.z) < 6.0) {
+            spot.planted = true;
+            
+            // Spawn vines/plants on the wall
+            const vineGroup = new THREE.Group();
+            for (let i = 0; i < 5; i++) {
+                const vine = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.05, 0.1, 2 + Math.random()*2, 6),
+                    new THREE.MeshStandardMaterial({ color: 0x166534 })
+                );
+                vine.position.set((Math.random()-0.5)*1, 1 + Math.random()*2, (Math.random()-0.5)*0.2);
+                vine.rotation.z = (Math.random()-0.5) * 0.5;
+                vineGroup.add(vine);
+                
+                // Add some leaves
+                const leaf = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.1), new THREE.MeshStandardMaterial({ color: 0x4ade80 }));
+                leaf.position.copy(vine.position);
+                leaf.position.y += 1;
+                vineGroup.add(leaf);
+            }
+            vineGroup.position.set(spot.x, spot.y, spot.z);
+            vineGroup.rotation.y = spot.rotY;
+            scene.add(vineGroup);
+            
+            showActionFlash("🌿 Wand begrünt!");
+            if (window.audioEngine) window.audioEngine.playHappyBeep();
+            window.addVitality(10);
+            return true;
+        }
+    }
+    showActionFlash("⚠️ Keine Wand in der Nähe!");
+    return false;
+}
+
+window.solarTrack = function() {
+    if (!roverGroup) return;
+    const targetAngle = Math.PI; 
+    
+    const interval = setInterval(() => {
+        let diff = targetAngle - roverGroup.rotation.y;
+        while(diff < -Math.PI) diff += Math.PI*2;
+        while(diff > Math.PI) diff -= Math.PI*2;
+        
+        if (Math.abs(diff) < 0.1) {
+            clearInterval(interval);
+            showActionFlash("☀️ Solar-Tracker aktiv!");
+            if (window.audioEngine) window.audioEngine.playHappyBeep();
+            window.isSolarTracking = true; 
+        } else {
+            roverGroup.rotation.y += Math.sign(diff) * 0.1;
+        }
+    }, 50);
 }

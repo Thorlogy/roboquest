@@ -64,6 +64,8 @@ window.compileEcoBotSkulptAPI = function() {
     mod.remove_block = singleAction('remove');
     mod.scan = singleAction('scan');
     mod.clean_water = singleAction('cleanWater');
+    mod.plant_vertical = singleAction('plantVertical');
+    mod.solar_track = singleAction('solarTrack');
     
     mod.push = new window.Sk.builtin.func(function(dist) {
         const susp = new window.Sk.misceval.Suspension();

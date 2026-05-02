@@ -1049,8 +1049,9 @@ function animate() {
             storyState.batteryLevel += CHARGE_STATION_RATE * delta;
             if (eIcon) eIcon.innerText = '⚡';
         } else if (inSun) {
-            storyState.batteryLevel += 6.0 * delta;
-            if (eIcon) eIcon.innerText = '☀️';
+            let rate = window.isSolarTracking ? 12.0 : 6.0;
+            storyState.batteryLevel += rate * delta;
+            if (eIcon) eIcon.innerText = window.isSolarTracking ? '✨☀️' : '☀️';
         } else {
             storyState.batteryLevel += 0.5 * delta;
             if (eIcon) eIcon.innerText = '☁️';
@@ -1182,6 +1183,20 @@ function animate() {
                     if (roverGroup) roverGroup.children[0].position.z = 0.15;
                 }
                 else if (currentCommand === 'startMotor' || currentCommand === 'stopMotor') { commandProgress = 1.0; } // Immediate blocks
+                else if (currentCommand === 'plantVertical') {
+                    if (!currentCommandObj._effectFired) {
+                        currentCommandObj._effectFired = true;
+                        if (window.plantVertical) window.plantVertical();
+                    }
+                    commandProgress += animSpeed * 0.5;
+                }
+                else if (currentCommand === 'solarTrack') {
+                    if (!currentCommandObj._effectFired) {
+                        currentCommandObj._effectFired = true;
+                        if (window.solarTrack) window.solarTrack();
+                    }
+                    commandProgress += animSpeed * 0.2;
+                }
                 else if (currentCommand === 'build') {
                     // Place block 2 units in front
                     const py = getTerrainYGlobal(roverGroup.position.x, roverGroup.position.z);

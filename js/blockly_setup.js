@@ -333,14 +333,27 @@ Blockly.defineBlocksWithJsonArray([
     "helpUrl": ""
   },
 
+    "helpUrl": "#help-clean-water"
+  },
+
   {
-    "type": "action_clean_water",
-    "message0": "Wasser reinigen 💧",
+    "type": "action_plant_vertical",
+    "message0": "Vertikaler Garten 🌿",
     "previousStatement": null,
     "nextStatement": null,
-    "colour": 280,
-    "tooltip": "Startet den Reinigungsprozess, wenn der Eco-Bot am Fluss steht.",
-    "helpUrl": "#help-clean-water"
+    "colour": 120,
+    "tooltip": "Begrünt Wände von Ruinen mit Kletterpflanzen.",
+    "helpUrl": ""
+  },
+
+  {
+    "type": "action_solar_track",
+    "message0": "Solar-Tracker ☀️",
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": 50,
+    "tooltip": "Dreht den Roboter zur Sonne, um schneller zu laden.",
+    "helpUrl": ""
   },
 
   // ── 📡 SENSOREN ───────────────────────────────────────────────
@@ -473,9 +486,11 @@ const CATEGORY_BLOCKS = {
   ],
   "🤖 Aktionen": [
     { "kind": "block", "type": "gripper_action" },
+    { "kind": "block", "type": "action_clean_water" },
+    { "kind": "block", "type": "action_plant_vertical" },
+    { "kind": "block", "type": "action_solar_track" },
     { "kind": "block", "type": "push_action" },
-    { "kind": "block", "type": "scan_object" },
-    { "kind": "block", "type": "action_clean_water" }
+    { "kind": "block", "type": "scan_object" }
   ],
   "📡 Sensoren": [
     { "kind": "block", "type": "sensor_touch" },
@@ -681,8 +696,16 @@ window.generateLiveCode = function(block, indentLevel = 0) {
             code += `${indent}eco_bot.remove_block()\n`;
             break;
         case 'action_clean_water':
-            code += `${indent}# Wasser reinigen\n`;
+            code += `${indent}# Umwelt-Restaurierung: Wasser reinigen\n`;
             code += `${indent}eco_bot.clean_water()\n`;
+            break;
+        case 'action_plant_vertical':
+            code += `${indent}# Solarpunk: Vertikalen Garten anlegen\n`;
+            code += `${indent}eco_bot.plant_vertical()\n`;
+            break;
+        case 'action_solar_track':
+            code += `${indent}# Energie: Zur Sonne ausrichten\n`;
+            code += `${indent}eco_bot.solar_track()\n`;
             break;
         case 'repeat_n':
             code += `${indent}for i in range(${block.getFieldValue('TIMES')}):\n`;
