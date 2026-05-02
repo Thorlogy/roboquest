@@ -1,43 +1,36 @@
-# RoboQuest 3D — Solarpunk & Robotik Simulator (v23 Release)
+# 🌳 RoboQuest: Solarpunk Expansion (v29)
 
-Ein interaktiver, webbasierter 3D-Robotik-Simulator mit starkem Fokus auf **Pädagogik, Storytelling und Open-Source-Architektur**. Spieler steuern einen kleinen "Eco-Bot" durch eine Solarpunk-Welt, programmieren ihn per Blockly oder Python und reparieren die Natur.
+Willkommen in der nächsten Evolutionsstufe von RoboQuest! Diese Version transformiert die Simulation in eine immersive Solarpunk-Erfahrung, die Kindern spielerisch ökologische Zusammenhänge und modernste Technik näherbringt.
 
-## Lizenz
-Dieses Werk ist lizenziert unter einer [Creative Commons Namensnennung - Weitergabe unter gleichen Bedingungen 4.0 International Lizenz](http://creativecommons.org/licenses/by-sa/4.0/).
+## 🌟 Neue Solarpunk-Features
 
-[![CC BY-SA 4.0](https://licensebuttons.net/l/by-sa/4.0/88x31.png)](http://creativecommons.org/licenses/by-sa/4.0/)
+### 1. Umwelt-Restaurierung & Öko-Status
+*   **Vitalitäts-Score**: Ein neues HUD-Element trackt den Fortschritt der ökologischen Wiederherstellung in Prozent.
+*   **Dynamische Welt**: Jede Aktion (Müll sammeln, Pflanzen, Reinigen) hat direkte Auswirkungen auf die Welt und den Score.
+*   **Vitalitäts-Effekte**: Grüne Energie-Partikel (Sparkles) geben direktes Feedback bei Erfolgen.
 
-## 🌍 Solarpunk-Welt & Story (Akt 4)
-- **Umwelt-Reparatur**: Finde und repariere defekte Windräder via LiDAR-Scan (`mod.scan()`), um erneuerbare Energien in der "Solarpunk-City" zu aktivieren.
-- **Lebendige Natur**: Wilde Tiere (Füchse) durchstreifen den Wald und reagieren dynamisch (Fluchtverhalten) auf die Annäherung des Roboters.
-- **Recycling-Hub**: Die Basisstation erstrahlt nun als futuristischer, leuchtender Solarpunk-Ring.
+### 2. Fortgeschrittene Mechaniken
+*   **💧 Wasserreinigung**: Ein neuer Block, um verschmutzte Flüsse in saubere Biotope zu verwandeln (inkl. Soundeffekten).
+*   **🌿 Vertikale Gärten**: Begrüne Ruinenwände mit Ranken und Kletterpflanzen, um den städtischen Raum zurückzuerobern.
+*   **☀️ Solar-Tracker**: Lerne Energie-Management! Richte den Eco-Bot zur Sonne aus, um die Ladegeschwindigkeit zu verdoppeln.
 
-## 📖 Interaktives Handbuch (Codex)
-- **Onboarding**: Beim allerersten Start des Spiels öffnet sich automatisch das Handbuch, um neue Spieler in die Story und Steuerung einzuführen.
-- **Wissens-Datenbank**: Das UI-Overlay (Glassmorphism) enthält 4 Tabs: Geschichte, Steuerung, Blockly-Tutorials und eine detaillierte Python-API-Referenz.
+### 3. Atmosphäre & Sound
+*   **Generative Audio-Engine**: Ein dynamisches Soundscape mit Windrauschen, Vogelgezwitscher und technischen Servo-Sounds.
+*   **Tag-Nacht-Zyklus**: Die Welt erlebt einen sanften Wechsel der Lichtstimmung, von sonnigem Blau bis zu sternenklarem Violett.
 
-## 📱 Mobile Optimierung (Responsive Design)
-- **Vollbild-IDE**: Das Programmier-Fenster nimmt auf Smartphones automatisch 100% des Platzes ein, für perfekte Touch-Bedienbarkeit.
-- **Kompaktes UI**: Das Handbuch ordnet seine Tabs auf kleinen Bildschirmen vertikal/horizontal platzsparend an, und störende HUD-Elemente (Minimap) werden ausgeblendet.
-- **Touch-Steuerung**: Voller Support über das digitale On-Screen-Steuerkreuz (D-Pad).
+### 4. Pädagogische Hilfen
+*   **Kontext-Hilfe**: Rechtsklick auf einen beliebigen Block öffnet direkt das passende Kapitel im Handbuch.
+*   **Beispiel-Programme**: Jedes neue Feature wird im Handbuch mit logischen Code-Beispielen erklärt.
 
-## 🧩 Bidirektionaler Python-Sync
-- **Live-Synchronisation**: Änderungen an den Blockly-Blöcken erscheinen sofort als Python-Code. Python-Code wird (bei korrekter API-Nutzung) zurück in Blöcke übersetzt.
-- **Ace Editor**: Professioneller Code-Editor mit IntelliSense und Syntax-Highlighting.
+## 🕹️ Steuerung
+- **PC**: WASD / Pfeiltasten.
+- **Mobil**: On-Screen D-Pad (unten links).
+- **IDE**: Blockly am linken Rand öffnen oder im Python-Modus schreiben.
 
-## 💡 Technische Architektur (Modularisiert)
-- **Core**: Three.js (WebGL), Skulpt (Python Interpreter im Browser).
-- **ES6-ready via Global Namespace**: Die ehemalige monolithische 2.900-Zeilen-Datei wurde für Open-Source-Beiträge in logische Komponenten aufgeteilt:
-  - `config.js` (Story & Konstanten)
-  - `ui.js` (DOM & Handbuch)
-  - `pythonBridge.js` (Skulpt Interpreter)
-  - `engine.js` (Game Loop & Three.js 3D-Welt)
-- **Serverless**: Läuft zu 100% im Browser (via GitHub Pages). Es ist kein Backend oder Docker-Container zur Code-Ausführung nötig.
-
-## 🔧 Installation & Betrieb
-1. Repository klonen.
-2. Lokalen Webserver starten (z.B. `python3 -m http.server 8080`).
-3. Im Browser öffnen: `http://localhost:8080` (Oder direkt über GitHub Pages nutzen).
+## 🛠️ Technische Details
+- **Versionierung**: Aktuell `v29` (erzwingt Cache-Refresh für CSS/JS).
+- **Engine**: Three.js WebGL mit erweitertem Atmosphere-Shader.
+- **Audio**: Reiner Web Audio API Synthesizer.
 
 ---
-*Entwickelt für pädagogische Anwendungen in der Informatik. Solarpunk Release — April 2026.*
+© 2026 RoboQuest Team | [Thorlogy/roboquest](https://github.com/Thorlogy/roboquest)
