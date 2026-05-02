@@ -333,6 +333,13 @@ Blockly.defineBlocksWithJsonArray([
     "helpUrl": ""
   },
 
+  {
+    "type": "action_clean_water",
+    "message0": "Wasser reinigen 💧",
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": 280,
+    "tooltip": "Startet den Reinigungsprozess, wenn der Eco-Bot am Fluss steht.",
     "helpUrl": "#help-clean-water"
   },
 
