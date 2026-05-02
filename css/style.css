@@ -754,19 +754,65 @@ body {
 /* Responsive                                 */
 /* ═══════════════════════════════════════════ */
 @media (max-width: 600px) {
-  .sidebar { width: 44px; }
-  .nav-btn { height: 44px; font-size: 1.1rem; }
-  .dpad {
-    grid-template-columns: 50px 50px 50px;
-    grid-template-rows: 50px 50px 50px;
-    bottom: 12px; left: 12px;
+  /* --- Sidebar: schmal --- */
+  .sidebar { width: 36px; }
+  .nav-btn { height: 36px; font-size: 0.9rem; }
+
+  /* --- HUD: kompakt mit Zeilenumbruch --- */
+  .hud-panel {
+    top: 4px; left: 4px;
+    gap: 2px;
+    max-width: calc(100vw - 50px);
   }
-  .dpad-btn { width: 50px; height: 50px; font-size: 1.1rem; }
-  .sensor-overlay { width: 200px; right: 8px; bottom: 80px; }
-  .hud-panel { top: 8px; left: 8px; }
-  .hud-score { font-size: 1rem; padding: 8px 12px; }
-  .hud-quest { font-size: 0.85rem; padding: 6px 10px; }
+  .hud-score { font-size: 0.85rem; padding: 5px 10px; }
+  .hud-quest { font-size: 0.72rem; padding: 4px 8px; }
+  .hud-energy { font-size: 0.72rem; padding: 3px 8px; }
+  .hud-map-coverage { font-size: 0.7rem; padding: 3px 8px; }
+  .hud-btns {
+    flex-wrap: wrap;
+    gap: 3px;
+  }
+  .hud-action-btn {
+    font-size: 0.65rem;
+    padding: 3px 6px;
+  }
+  .level-badge { font-size: 0.6rem; padding: 1px 5px; }
+
+  /* --- D-Pad: links unten, daumenfreundlich --- */
+  .dpad {
+    grid-template-columns: 46px 46px 46px;
+    grid-template-rows: 46px 46px 46px;
+    bottom: 70px; left: 42px;
+    gap: 2px;
+  }
+  .dpad-btn { width: 46px; height: 46px; font-size: 1rem; }
+
+  /* --- Sensor Overlay: minimal, unten rechts --- */
+  .sensor-overlay {
+    width: 160px; right: 4px; bottom: 64px;
+  }
+  .overlay-header {
+    font-size: 0.7rem; padding: 4px 6px;
+  }
+  .overlay-body {
+    font-size: 0.65rem; padding: 4px 6px;
+    min-height: 30px; line-height: 1.3;
+  }
+
+  /* --- Bottom Bar: kompakter --- */
+  .bottom-bar {
+    height: 56px;
+    padding-bottom: 8px;
+  }
+  .action-btn {
+    width: 44px; height: 44px;
+    font-size: 16px;
+    margin: 0 4px;
+  }
+
+  /* --- Ausblenden --- */
   .story-panel { display: none; }
+  #minimap-container { display: none !important; }
   
   /* IDE Fullscreen on Mobile */
   #code-ide {
@@ -802,11 +848,6 @@ body {
   .hb-tab-btn.active {
     border-left: none !important;
     border-bottom: 3px solid #4ade80;
-  }
-  
-  /* Hide Minimap to save space */
-  #minimap-container {
-    display: none !important;
   }
 }
 
@@ -1088,29 +1129,119 @@ body {
   font-family: monospace;
 }
 
-/* 📱 Mobile UI Scaling & Optimizations */
+/* 📱 Mobile UI – Comprehensive Smartphone Optimization */
 @media (max-width: 480px) {
+
+  /* --- Sidebar: schmaler & kompakter --- */
+  .sidebar {
+    width: 36px !important;
+  }
+  .nav-btn {
+    height: 36px !important;
+    font-size: 0.9rem !important;
+    padding: 0 !important;
+  }
+
+  /* --- HUD: kompakt, kleiner Text, weniger Padding --- */
   .hud-panel {
-    top: 8px !important; 
-    left: 8px !important;
-    transform: scale(0.8);
-    transform-origin: top left;
+    top: 4px !important;
+    left: 4px !important;
+    gap: 3px !important;
+    max-width: calc(100vw - 80px);
   }
-  .dpad {
-    bottom: 10px !important; 
-    right: 10px !important;
-    transform: scale(0.85);
-    transform-origin: bottom right;
-  }
-  .story-panel {
-    left: 10px !important; 
-    bottom: 160px !important;
-    width: 200px !important;
+  .hud-score {
     font-size: 0.8rem !important;
+    padding: 4px 8px !important;
   }
+  .hud-quest {
+    font-size: 0.7rem !important;
+    padding: 3px 8px !important;
+  }
+  .hud-energy {
+    font-size: 0.7rem !important;
+    padding: 3px 8px !important;
+  }
+  .hud-btns {
+    gap: 4px !important;
+  }
+  .hud-action-btn {
+    font-size: 0.65rem !important;
+    padding: 3px 6px !important;
+  }
+  .level-badge {
+    font-size: 0.6rem !important;
+    padding: 1px 5px !important;
+  }
+  .multiplier-badge {
+    font-size: 0.6rem !important;
+    padding: 2px 6px !important;
+  }
+
+  /* --- D-Pad: links unten, kompakter --- */
+  .dpad {
+    bottom: 90px !important;
+    left: 44px !important;
+    right: auto !important;
+    grid-template-columns: 44px 44px 44px !important;
+    grid-template-rows: 44px 44px 44px !important;
+    gap: 2px !important;
+  }
+  .dpad-btn {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 1rem !important;
+    border-radius: 8px !important;
+  }
+
+  /* --- Sensor Overlay: unten rechts, minimal --- */
+  .sensor-overlay {
+    right: 4px !important;
+    bottom: 84px !important;
+    width: 180px !important;
+  }
+  .overlay-header {
+    font-size: 0.75rem !important;
+    padding: 5px 8px !important;
+  }
+  .overlay-body {
+    font-size: 0.7rem !important;
+    padding: 6px 8px !important;
+    min-height: 40px !important;
+    line-height: 1.4 !important;
+  }
+
+  /* --- Bottom Bar: Play/Stop kleiner --- */
+  .bottom-bar {
+    height: 60px !important;
+    padding-bottom: 10px !important;
+  }
+  .action-btn {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 16px !important;
+    margin: 0 4px !important;
+  }
+
+  /* --- Story Panel: verstecken auf Mobile --- */
+  .story-panel {
+    display: none !important;
+  }
+
+  /* --- Minimap: verstecken --- */
+  #minimap-container {
+    display: none !important;
+  }
+
+  /* --- Handbook: Vollbild --- */
   .handbook-modal {
-    width: 100vw !important; 
+    width: 100vw !important;
     height: 100vh !important;
     border-radius: 0 !important;
+  }
+
+  /* --- Map Coverage: kleiner --- */
+  .hud-map-coverage {
+    font-size: 0.7rem !important;
+    padding: 3px 8px !important;
   }
 }
