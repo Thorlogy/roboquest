@@ -1145,6 +1145,37 @@ body {
   font-family: monospace;
 }
 
+.block-help-section {
+  margin-top: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 4px solid var(--accent-blue);
+  border-radius: 4px;
+}
+
+.block-help-section h4 {
+  margin-bottom: 8px;
+  color: var(--accent-blue);
+}
+
+.example-code {
+  margin-top: 10px;
+  padding: 10px;
+  background: #0f172a;
+  border-radius: 6px;
+  font-family: 'Inter', monospace;
+  font-size: 0.9rem;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+.example-code em {
+  color: #64748b;
+  font-size: 0.8rem;
+  display: block;
+  margin-bottom: 5px;
+}
+
 /* 📱 Mobile UI – Comprehensive Smartphone Optimization */
 @media (max-width: 480px) {
 

@@ -199,12 +199,25 @@
                                 <li>Ziehe Blöcke in den Arbeitsbereich und verbinde sie.</li>
                                 <li>Klicke unten in der Mitte auf <strong>▶ (Play)</strong>, um das Programm auf den Roboter zu übertragen.</li>
                             </ul>
-                            <h4>Wichtige Sensoren</h4>
-                            <p>Du kannst <strong>WENN/DANN</strong>-Blöcke nutzen, um auf Sensoren zu reagieren:</p>
-                            <ul>
-                                <li><code>LiDAR Distanz &lt; 20</code>: Prüft, ob ein Hindernis vor dir ist.</li>
-                                <li><code>Objekt erkannt = 'trash'</code>: Erkennt per Kamera, was vor dir liegt.</li>
-                            </ul>
+                            
+                            <div class="block-help-section">
+                                <h4 id="help-clean-water">💧 Wasser reinigen</h4>
+                                <p><strong>Was es macht:</strong> Verwandelt verschmutztes braunes Wasser in sauberes blaues Solarpunk-Wasser.</p>
+                                <p><strong>So geht's:</strong> Du musst zuerst zum Fluss fahren (Z = -35). Nutze dafür z.B. eine Schleife mit "fahre vorwärts". Wenn du dort stehst, führe diesen Block aus.</p>
+                                <div class="example-code">
+                                    <em>Beispiel-Logik:</em><br>
+                                    <code>Wiederhole 35 mal:<br>&nbsp;&nbsp;Fahre vorwärts für 1s<br>Wasser reinigen 💧</code>
+                                </div>
+                            </div>
+
+                            <div class="block-help-section">
+                                <h4 id="help-gripper">✊ Greifer öffnen/schließen</h4>
+                                <p><strong>Was es macht:</strong> Sammelt Müll oder Samen auf, wenn sie direkt vor dem Roboter liegen.</p>
+                                <div class="example-code">
+                                    <em>Beispiel-Logik:</em><br>
+                                    <code>Greifer schließen ✊<br>Fahre vorwärts zum Hub...<br>Greifer öffnen 🖐️</code>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Python Tab -->

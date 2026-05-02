@@ -45,5 +45,29 @@ function setupDPad() {
             });
         });
     }
+
+    // Overwrite Blockly help callback to open handbook
+    if (window.Blockly) {
+        Blockly.Workspace.prototype.helpUrlCallback = function(url) {
+            if (url.startsWith('#')) {
+                const hbModal = document.getElementById('handbook-modal');
+                if (hbModal) {
+                    hbModal.style.display = 'flex';
+                    // Switch to Blocks tab
+                    const btnBlocks = document.querySelector('.hb-tab-btn[data-target="hb-blocks"]');
+                    if (btnBlocks) btnBlocks.click();
+                    
+                    // Scroll to specific section
+                    const targetId = url.substring(1);
+                    setTimeout(() => {
+                        const el = document.getElementById(targetId);
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                }
+            } else {
+                window.open(url, '_blank');
+            }
+        };
+    }
 }
 

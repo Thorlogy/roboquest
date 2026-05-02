@@ -271,7 +271,7 @@ Blockly.defineBlocksWithJsonArray([
     "nextStatement": null,
     "colour": 280,
     "tooltip": "Öffnet oder schließt den Greifer am Eco-Bot.",
-    "helpUrl": ""
+    "helpUrl": "#help-gripper"
   },
 
   {
@@ -340,7 +340,7 @@ Blockly.defineBlocksWithJsonArray([
     "nextStatement": null,
     "colour": 280,
     "tooltip": "Startet den Reinigungsprozess, wenn der Eco-Bot am Fluss steht.",
-    "helpUrl": ""
+    "helpUrl": "#help-clean-water"
   },
 
   // ── 📡 SENSOREN ───────────────────────────────────────────────
