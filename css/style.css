@@ -219,6 +219,21 @@ body {
 .hud-energy.crit { color: #ef4444; animation: blinkCrit 1s infinite alternate; }
 .hud-energy.charging { color: #22d3ee; animation: pulseCharge 0.8s ease-in-out infinite alternate; }
 
+.hud-vitality {
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4ade80;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 0 15px rgba(74, 222, 128, 0.2);
+}
+
 @keyframes blinkCrit {
   from { opacity: 1; }
   to { opacity: 0.5; }
@@ -767,6 +782,7 @@ body {
   .hud-score { font-size: 0.85rem; padding: 5px 10px; }
   .hud-quest { font-size: 0.72rem; padding: 4px 8px; }
   .hud-energy { font-size: 0.72rem; padding: 3px 8px; }
+  .hud-vitality { font-size: 0.72rem; padding: 3px 8px; }
   .hud-map-coverage { font-size: 0.7rem; padding: 3px 8px; }
   .hud-btns {
     flex-wrap: wrap;
@@ -1158,6 +1174,10 @@ body {
     padding: 3px 8px !important;
   }
   .hud-energy {
+    font-size: 0.7rem !important;
+    padding: 3px 8px !important;
+  }
+  .hud-vitality {
     font-size: 0.7rem !important;
     padding: 3px 8px !important;
   }

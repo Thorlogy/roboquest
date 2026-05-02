@@ -17,6 +17,19 @@ function buildClouds() {
 }
 
 let environmentGroup = null;
+let riverMesh;
+let isWaterClean = false;
+let vitalityScore = 0;
+
+function updateVitalityHUD() {
+    const el = document.getElementById('vitality-level');
+    if (el) el.innerText = vitalityScore;
+}
+
+function addVitality(amount) {
+    vitalityScore = Math.min(100, vitalityScore + amount);
+    updateVitalityHUD();
+}
 
 // ════════════════════════════════════════════════════════════════
 // SOLARPUNK & ANIMALS
@@ -416,19 +429,20 @@ function updateAtmosphere(delta, time) {
     }
 }
 
-let isWaterClean = false;
 function cleanWater() {
     if (isWaterClean || !riverMesh) return;
     isWaterClean = true;
     
+    // Sound effect
+    if (window.audioEngine) window.audioEngine.playWaterCleanSound();
+    
     // Smooth transition to Solarpunk Blue
     const targetColor = new THREE.Color(0x0ea5e9);
-    const startColor = riverMesh.material.color.getHex();
     
     let progress = 0;
     const interval = setInterval(() => {
         progress += 0.02;
-        riverMesh.material.color.lerp(targetColor, 0.1);
+        riverMesh.material.color.lerp(targetColor, progress);
         riverMesh.material.opacity = 0.85 - progress * 0.2;
         
         if (progress >= 1) {
@@ -436,6 +450,8 @@ function cleanWater() {
             riverMesh.material.color.set(targetColor);
             riverMesh.material.opacity = 0.65;
             showSuccess('💧 Das Wasser ist wieder rein! Ein Sieg für die Natur.', '🎉');
+            showActionFlash("💧 Wasser gereinigt!");
+            addVitality(30); // 30% for the river
         }
     }, 50);
 }

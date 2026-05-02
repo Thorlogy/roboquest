@@ -1399,3 +1399,6 @@ let programSpeed = 1.0;
 init();
 setupDPad();
 
+// Start ambient sound loop
+if (window.audioEngine) window.audioEngine.startAmbientSounds();
+

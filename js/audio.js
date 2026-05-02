@@ -80,11 +80,63 @@ function playDiscoverySound() {
     setTimeout(() => playTone(659, 'sine', 0.4, 0.2), 400);
 }
 
+// 7. Water Cleaning Sound (gurgling bubbles)
+function playWaterCleanSound() {
+    initAudio();
+    const now = audioCtx.currentTime;
+    for (let i = 0; i < 15; i++) {
+        const time = now + i * 0.1;
+        const freq = 400 + Math.random() * 600;
+        playTone(freq, 'sine', 0.15, 0.05);
+    }
+}
+
+// 8. Ambient Sounds (Generative)
+let ambientInterval = null;
+function startAmbientSounds() {
+    if (ambientInterval) return;
+    initAudio();
+    
+    ambientInterval = setInterval(() => {
+        const type = Math.random();
+        if (type > 0.92) { // Random Bird Beep
+            const base = 2000 + Math.random() * 1000;
+            playTone(base, 'sine', 0.05, 0.03, base + 200);
+            setTimeout(() => playTone(base + 200, 'sine', 0.05, 0.03, base + 400), 60);
+        } else if (type < 0.05) { // Wind Gust
+            const noise = audioCtx.createBufferSource();
+            const bufferSize = audioCtx.sampleRate * 2;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+            
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(400, audioCtx.currentTime);
+            filter.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 1);
+            filter.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 2);
+            
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(0, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 1);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 2);
+            
+            noise.buffer = buffer;
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            noise.start();
+        }
+    }, 1000);
+}
+
 window.audioEngine = {
     playMoveSound,
     playServoSound,
     playHappyBeep,
     playSadBoop,
     playScanSound,
-    playDiscoverySound
+    playDiscoverySound,
+    playWaterCleanSound,
+    startAmbientSounds
 };
