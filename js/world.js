@@ -475,7 +475,7 @@ function updateAtmosphere(delta, time) {
     }
 }
 
-function cleanWater() {
+window.cleanWater = function() {
     if (isWaterClean || !riverMesh) return;
     isWaterClean = true;
     
