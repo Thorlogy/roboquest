@@ -495,7 +495,7 @@ window.cleanWater = function() {
             clearInterval(interval);
             riverMesh.material.color.set(targetColor);
             riverMesh.material.opacity = 0.65;
-            showSuccess('💧 Das Wasser ist wieder rein! Ein Sieg für die Natur.', '🎉');
+            showActionFlash('💧 Das Wasser ist wieder rein! 🎉');
             showActionFlash("💧 Wasser gereinigt!");
             if (window.addVitality) window.addVitality(30); // 30% for the river
         }
