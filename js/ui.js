@@ -172,12 +172,6 @@ function setupDPad() {
                 toggleSettings();
             });
         }
-        if (introSettingsIcon) {
-            introSettingsIcon.addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleSettings();
-            });
-        }
         const btnSettingsHub = document.getElementById('btn-settings-hub');
         if (btnSettingsHub) {
             btnSettingsHub.addEventListener('click', (e) => {

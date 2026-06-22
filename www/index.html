@@ -19,11 +19,10 @@
         <!-- Intro Overlay -->
         <div class="intro-overlay" id="intro-overlay">
             <div class="intro-topbar">
-                <div class="intro-logo-container">
-                    <span class="intro-leaf-icon">🍃</span>
+                <div class="intro-logo">
+                    <span class="intro-leaf">🍃</span>
                     <span class="intro-logo-text">ROBO-QUEST</span>
                 </div>
-                <div class="intro-settings-icon">⚙️</div>
             </div>
             
             <div class="intro-content-modern">
@@ -265,7 +264,7 @@ mod.stop_motor()</code></pre>
 
 
     <!-- Worlds Preview Modal -->
-    <div id="worlds-preview-modal" class="modal-overlay" style="display: none;">
+    <div id="worlds-preview-modal" class="handbook-modal" style="display: none; width: 450px; max-width: 90%; height: auto; padding: 20px;">
         <div class="modal-content glass-panel" style="max-width: 500px; text-align: left;">
             <button class="modal-close" id="btn-close-worlds">×</button>
             <h2 class="modal-title" style="text-align: center; margin-bottom: 20px;">🌍 Bekannte Welten</h2>
@@ -421,7 +420,7 @@ mod.stop_motor()</code></pre>
     </div>
 
     <!-- Settings Modal (Solarpunk Design) -->
-    <div class="handbook-modal" id="settings-modal" style="display:none; width: 400px; height: auto; max-height: 80vh; max-width: 90%;">
+    <div class="handbook-modal" id="settings-modal" style="display:none; width: 400px; height: auto; max-height: 80vh; max-width: 90%; z-index: 10000;">
         <div class="hb-header">
             <h2>⚙️ Einstellungen</h2>
             <button class="hb-close-btn" id="btn-close-settings">✖</button>
