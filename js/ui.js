@@ -178,6 +178,13 @@ function setupDPad() {
                 toggleSettings();
             });
         }
+        const btnSettingsHub = document.getElementById('btn-settings-hub');
+        if (btnSettingsHub) {
+            btnSettingsHub.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleSettings();
+            });
+        }
 
         if (btnCloseSettings) {
             btnCloseSettings.addEventListener('click', () => {
@@ -257,18 +264,30 @@ function setupDPad() {
     const btnOpenMissions = document.getElementById('btn-open-missions');
     const missionsModal = document.getElementById('missions-modal');
     const btnCloseMissions = document.getElementById('btn-close-missions');
+    const hubModal = document.getElementById('mission-hub');
 
-    if (btnOpenMissions && missionsModal) {
+    if (btnOpenMissions) {
         btnOpenMissions.addEventListener('click', () => {
+            // Wenn keine Mission aktiv ist (Free Explore Modus), öffne den Hub (Missionsauswahl)
+            if (window.missionManager && !window.missionManager.currentMission && hubModal) {
+                if (window.missionManager.showHub) {
+                    window.missionManager.showHub();
+                } else {
+                    hubModal.style.display = 'flex';
+                }
+                return;
+            }
+
+            // Ansonsten öffne das Missions-Modal
             const actSrc = document.getElementById('story-act');
             const objSrc = document.getElementById('story-objectives');
-            const modAct = document.getElementById('missions-modal-desc'); // target the desc paragraph for the act text
+            const modAct = document.getElementById('missions-modal-desc'); 
             const modObj = document.getElementById('missions-modal-objectives');
             
             if (actSrc && modAct) modAct.innerText = actSrc.innerText;
             if (objSrc && modObj) modObj.innerHTML = objSrc.innerHTML;
             
-            missionsModal.style.display = 'flex';
+            if (missionsModal) missionsModal.style.display = 'flex';
         });
     }
 
@@ -303,4 +322,55 @@ function setupDPad() {
             }
         });
     }
+
+    // Global Swipe Gesture for "Back" (right to left)
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    function handleSwipe() {
+        // Delta < 0 means swipe from right to left
+        // Delta > 0 means swipe from left to right
+        // The user specifically asked for "von rechts nach links" (right to left)
+        const SWIPE_THRESHOLD = -50; 
+        
+        if (touchEndX - touchStartX < SWIPE_THRESHOLD) {
+            goBack();
+        }
+    }
+
+    function goBack() {
+        const modals = [
+            document.getElementById('settings-modal'),
+            document.getElementById('handbook-modal'),
+            document.getElementById('missions-modal'),
+            document.getElementById('worlds-preview-modal')
+        ];
+
+        // 1. Close any open modal
+        for (const modal of modals) {
+            if (modal && modal.style.display === 'flex') {
+                modal.style.display = 'none';
+                return; // Stop after closing one modal
+            }
+        }
+
+        // 2. If no modal is open and we are in-game (Hub is hidden), go back to Hub
+        const hubModal = document.getElementById('mission-hub');
+        if (hubModal && hubModal.style.display === 'none') {
+            if (window.missionManager && window.missionManager.showHub) {
+                window.missionManager.showHub();
+            } else {
+                hubModal.style.display = 'flex';
+            }
+        }
+    }
+
+    document.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    document.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, { passive: true });
 }
