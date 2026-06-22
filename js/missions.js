@@ -170,6 +170,53 @@ class MissionManager {
     // ═══════════════════════════════════════════════
     // MISSION LADEN (GDD 4.1 Ablauf)
     // ═══════════════════════════════════════════════
+    // ═══════════════════════════════════════════════
+    // FREIE ERKUNDUNG (GDD 7: Sandbox)
+    // ═══════════════════════════════════════════════
+    startFreeExplore() {
+        this.currentMission = null;
+        this.missionActive = false;
+
+        // Hub ausblenden
+        const hub = document.getElementById('mission-hub');
+        if (hub) hub.style.display = 'none';
+
+        // Editor einblenden (damit man in der Sandbox programmieren kann)
+        const editor = document.getElementById('simple-coding-bar');
+        if (editor) editor.style.display = 'flex';
+
+        // Alle Blöcke freischalten
+        if (window.simpleCoding) {
+            // In Sandbox sind alle Blöcke aus Level 3 verfügbar
+            window.simpleCoding.unlockBlocksForMission(3);
+            window.simpleCoding.clearProgram();
+        }
+
+        // Normale Welt aufbauen (Natur)
+        if (typeof buildEnvironment === 'function') {
+            buildEnvironment();
+        }
+
+        // Roboter zentrieren
+        if (typeof roverGroup !== 'undefined' && roverGroup) {
+            roverGroup.position.set(0, 0.1, 0);
+            roverGroup.rotation.set(0, 0, 0);
+        }
+
+        // Ada Info
+        if (window.ada) {
+            window.ada.introduceFeature("Freier Modus", "Erkunde die Welt! Du kannst programmieren oder das Steuerkreuz nutzen, um versteckte Winkel zu entdecken.", () => {
+                window.ada.say("Die Welt liegt dir zu Füßen, ROBO.");
+            });
+        }
+
+        // HUD Text anpassen
+        const questText = document.getElementById('quest-text');
+        if (questText) questText.textContent = '🌍 Freie Erkundung';
+        const levelBadge = document.getElementById('level-badge');
+        if (levelBadge) levelBadge.textContent = 'Sandbox';
+    }
+
     loadMission(missionId) {
         const mission = this.missions.find(m => m.id === missionId);
         if (!mission) { console.error('Mission not found:', missionId); return; }

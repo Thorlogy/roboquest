@@ -264,6 +264,32 @@ mod.stop_motor()</code></pre>
             </div>
 
 
+    <!-- Worlds Preview Modal -->
+    <div id="worlds-preview-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content glass-panel" style="max-width: 500px; text-align: left;">
+            <button class="modal-close" id="btn-close-worlds">×</button>
+            <h2 class="modal-title" style="text-align: center; margin-bottom: 20px;">🌍 Bekannte Welten</h2>
+            
+            <div class="world-preview-card active-world" style="background: rgba(74,222,128,0.1); border-left: 4px solid #4ade80; padding: 15px; margin-bottom: 15px; border-radius: 8px;">
+                <h3 style="margin-top: 0; color: #4ade80;">Welt 1: Verlassene Werkstatt</h3>
+                <p style="margin-bottom: 0; font-size: 14px; opacity: 0.9;">Die erste Lektion in der Natur. Lerne grundlegende Bewegungen, sammle verstreuten Schrott und hilf dabei, die Solarenergie wiederherzustellen.</p>
+            </div>
+
+            <div class="world-preview-card locked-world" style="background: rgba(255,255,255,0.05); border-left: 4px solid #94a3b8; padding: 15px; margin-bottom: 15px; border-radius: 8px; opacity: 0.6;">
+                <h3 style="margin-top: 0; color: #94a3b8;">🔒 Welt 2: Die Rostige Schlucht</h3>
+                <p style="margin-bottom: 0; font-size: 14px;">Fokus auf komplexe Sensor-Logik und unwegsames, steiniges Terrain. Finde den Weg durch das Labyrinth der alten Minen.</p>
+            </div>
+
+            <div class="world-preview-card locked-world" style="background: rgba(255,255,255,0.05); border-left: 4px solid #94a3b8; padding: 15px; margin-bottom: 15px; border-radius: 8px; opacity: 0.6;">
+                <h3 style="margin-top: 0; color: #94a3b8;">🔒 Welt 3: Solarpunk Metropole</h3>
+                <p style="margin-bottom: 0; font-size: 14px;">Die finale Herausforderung. Optimiere die vernetzten Smart-Grids der Stadt mit Schleifen, Sensoren und perfektem Timing.</p>
+            </div>
+            
+            <p style="text-align: center; font-size: 12px; opacity: 0.7; margin-top: 20px;">Schließe mehr Missionen ab, um neue Welten freizuschalten!</p>
+        </div>
+    </div>
+
+
     <!-- Mission Hub (Solarpunk Design) -->
     <div id="mission-hub" class="mission-hub-modern" style="display:none;">
         <div class="hub-modern-header">

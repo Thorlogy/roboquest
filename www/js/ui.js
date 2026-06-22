@@ -277,4 +277,30 @@ function setupDPad() {
             missionsModal.style.display = 'none';
         });
     }
+
+    // Hub Navigation Logic (Weltkugel & Joystick)
+    const btnNavMissions = document.getElementById('nav-btn-missions');
+    const btnNavWorld = document.getElementById('nav-btn-world');
+    const worldsPreviewModal = document.getElementById('worlds-preview-modal');
+    const btnCloseWorlds = document.getElementById('btn-close-worlds');
+
+    if (btnNavMissions && worldsPreviewModal) {
+        btnNavMissions.addEventListener('click', () => {
+            worldsPreviewModal.style.display = 'flex';
+        });
+    }
+
+    if (btnCloseWorlds && worldsPreviewModal) {
+        btnCloseWorlds.addEventListener('click', () => {
+            worldsPreviewModal.style.display = 'none';
+        });
+    }
+
+    if (btnNavWorld) {
+        btnNavWorld.addEventListener('click', () => {
+            if (window.missionManager) {
+                window.missionManager.startFreeExplore();
+            }
+        });
+    }
 }
