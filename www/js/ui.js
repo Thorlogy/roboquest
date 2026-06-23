@@ -306,6 +306,15 @@ function setupDPad() {
         });
     }
 
+    const btnGoToHub = document.getElementById('btn-go-to-hub');
+    if (btnGoToHub) {
+        btnGoToHub.addEventListener('click', () => {
+            if (window.missionManager && window.missionManager.showHub) {
+                window.missionManager.showHub();
+            }
+        });
+    }
+
     // Hub Navigation Logic (Weltkugel & Joystick)
     const btnNavMissions = document.getElementById('nav-btn-missions');
     const btnNavWorld = document.getElementById('nav-btn-world');
