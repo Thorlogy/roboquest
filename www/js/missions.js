@@ -152,11 +152,11 @@ class MissionManager {
                 goalRadius: 0,
                 obstacles: [],
                 collectibles: [
-                    { x: 0, z: -2, type: 'scrap', icon: '🥤' },
-                    { x: 0, z: -4, type: 'scrap', icon: '🥤' },
-                    { x: 0, z: -6, type: 'scrap', icon: '🥤' },
-                    { x: 0, z: -8, type: 'scrap', icon: '🥤' },
-                    { x: 0, z: -10, type: 'scrap', icon: '🥤' }
+                    { x: 0, z: -5, type: 'scrap', icon: '🥤' },
+                    { x: 0, z: -10, type: 'scrap', icon: '🥤' },
+                    { x: 0, z: -15, type: 'scrap', icon: '🥤' },
+                    { x: 0, z: -20, type: 'scrap', icon: '🥤' },
+                    { x: 0, z: -25, type: 'scrap', icon: '🥤' }
                 ],
                 requiredCollectibles: 5,
                 fogEnabled: false,
@@ -175,15 +175,15 @@ class MissionManager {
                 unlockedBlocks: ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'GRAB', 'REPEAT_ALL'],
                 silverLimit: 6,
                 startPos: { x: 0, z: 0, rot: Math.PI },
-                goalPos: { x: 4, z: -8 },
+                goalPos: { x: 5, z: -15 },
                 goalRadius: 2.5,
                 obstacles: [
-                    { x: 0, z: -3, w: 2.5, d: 1, h: 1.5, color: 0x8b5e3c },
-                    { x: 2, z: -6, w: 2.5, d: 1, h: 1.5, color: 0x8b5e3c }
+                    { x: 0, z: -5, w: 2.5, d: 2.5, h: 1.5, color: 0x8b5e3c },
+                    { x: 5, z: -10, w: 2.5, d: 2.5, h: 1.5, color: 0x8b5e3c }
                 ],
                 collectibles: [
-                    { x: 2, z: -3, type: 'scrap', icon: '🥤' },
-                    { x: 0, z: -6, type: 'scrap', icon: '🥤' }
+                    { x: 5, z: -5, type: 'scrap', icon: '🥤' },
+                    { x: 0, z: -10, type: 'scrap', icon: '🥤' }
                 ],
                 requiredCollectibles: 2,
                 fogEnabled: false,
@@ -226,16 +226,16 @@ class MissionManager {
                 unlockedBlocks: ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'GRAB', 'REPEAT_ALL', 'IF_COLOR', 'ELSE', 'END_IF'],
                 silverLimit: 10,
                 startPos: { x: 0, z: 0, rot: Math.PI },
-                goalPos: { x: 0, z: -10 },
+                goalPos: { x: 0, z: -15 },
                 goalRadius: 2.5,
                 obstacles: [],
                 colorZones: [
-                    { x: -3, z: -4, radius: 2.0, color: 'blue' },
-                    { x: 3, z: -4, radius: 2.0, color: 'red' }
+                    { x: -5, z: -5, radius: 2.5, color: 'blue' },
+                    { x: 5, z: -5, radius: 2.5, color: 'red' }
                 ],
                 collectibles: [
-                    { x: 0, z: -3, type: 'scrap', icon: '🥤', color: 'blue' },
-                    { x: 0, z: -6, type: 'scrap', icon: '🔋', color: 'red' }
+                    { x: 0, z: -5, type: 'scrap', icon: '🥤', color: 'blue' },
+                    { x: 0, z: -10, type: 'scrap', icon: '🔋', color: 'red' }
                 ],
                 requiredCollectibles: 2,
                 fogEnabled: false,
@@ -254,17 +254,17 @@ class MissionManager {
                 unlockedBlocks: ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'GRAB', 'REPEAT_ALL', 'IF_COLOR', 'ELSE', 'END_IF', 'WAIT_UNTIL_COLOR'],
                 silverLimit: 12,
                 startPos: { x: 0, z: 0, rot: Math.PI },
-                goalPos: { x: 6, z: -6 },
+                goalPos: { x: 5, z: 0 },
                 goalRadius: 2.5,
                 obstacles: [
-                    { x: 2, z: -3, w: 1.5, d: 1.5, h: 2.5, color: 0x22c55e }
+                    { x: 2.5, z: -5, w: 2.0, d: 2.0, h: 2.5, color: 0x22c55e }
                 ],
                 colorZones: [
-                    { x: 6, z: -6, radius: 2.5, color: 'blue' }
+                    { x: 5, z: 0, radius: 2.5, color: 'blue' }
                 ],
                 collectibles: [
-                    { x: 0, z: -3, type: 'scrap', icon: '🥤', color: 'blue' },
-                    { x: 4, z: -3, type: 'scrap', icon: '🥤', color: 'blue' }
+                    { x: 0, z: -5, type: 'scrap', icon: '🥤', color: 'blue' },
+                    { x: 5, z: -5, type: 'scrap', icon: '🥤', color: 'blue' }
                 ],
                 requiredCollectibles: 2,
                 fogEnabled: false,
