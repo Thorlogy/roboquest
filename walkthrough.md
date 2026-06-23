@@ -8,11 +8,11 @@ Ich habe die im Implementierungsplan beschriebenen Anpassungen, den automatische
   * In `js/simple_coding.js` wird die Klasse `editor-mode-a` (eingeklappt) oder `editor-mode-b` (aufgezogen) auf das `<body>`-Element gelegt.
   * In `css/style.css` sorgen CSS-Transitions dafür, dass die Steuerungstasten und die Sensor-Ausgabe flüssig nach oben gleiten (`bottom: calc(50vh + 30px)`), sobald die Klasse aktiv ist, und beim Einklappen sanft wieder nach unten sinken. Sie sind dadurch in jedem Modus uneingeschränkt sichtbar und bedienbar.
 
-## 2. Textloser Kamera-Button mit Aktiv-Status
-* **Verhalten**: Die Text-Anzeige ("Ansicht: Follow/Orbit") wurde entfernt.
+## 2. Kamera-Ansicht (Orbit & Follow) wiederhergestellt
+* **Verhalten**: Die Kamera-Schaltfläche (`#cam-toggle-btn`) befindet sich nun gut sichtbar oben rechts in der HUD-Menüleiste, direkt neben der Missionsübersicht (`🎯`), dem Handbuch (`📖`) und den Einstellungen (`⚙️`).
 * **Icons & States**:
-  * Standardmäßig (Follow-Modus) zeigt das Symbol eine Filmkamera (`🎥`).
-  * Klickst du darauf, wechselt die Kamera in den Orbit-Modus, das Icon ändert sich zu einer Weltkugel (`🌐`) und der Button leuchtet dezent grün auf. Das verdeutlicht visuell den aktiven Zustand der freien Ansicht.
+  - **🎥 Filmkamera**: Verfolgungs-Modus (Follow) – die Kamera folgt dem Rover.
+  - **🌐 Weltkugel**: Orbit-Modus (Freie Steuerung) – du kannst dich frei umschauen. Der Button leuchtet in diesem Zustand dezent grün.
 
 ## 3. Einstellungen (Zahnrad) Optimierung & Toggles
 * **Zahnrad-Toggle**: Wenn das Einstellungs-Menü bereits geöffnet ist, schließt es sich durch einen erneuten Klick auf das Zahnrad-Symbol (`#btn-settings` oder `.intro-settings-icon`) automatisch.
