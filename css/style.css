@@ -812,6 +812,7 @@ body {
 /* STORY PANEL                                */
 /* ═══════════════════════════════════════════ */
 .story-panel {
+  display: none !important;
   position: absolute;
   bottom: 230px;
   left: 80px;
@@ -1589,13 +1590,86 @@ body {
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(240, 253, 244, 0.95);
+  background: rgba(240, 253, 244, 0.98);
   backdrop-filter: blur(10px);
   border: 2px solid #bbf7d0;
   border-radius: 16px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.15);
   animation: modalPopIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   z-index: 1000;
+  color: #1e293b;
+  width: 500px;
+  max-width: 90%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.handbook-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(187, 247, 208, 0.6);
+}
+
+.handbook-header h2 {
+  font-size: 1.2rem;
+  margin: 0;
+  color: #1b5e20;
+}
+
+.handbook-body {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.handbook-content {
+  width: 100%;
+  padding: 24px;
+}
+
+.hb-tab-content h3 {
+  font-size: 1.1rem;
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: #1b5e20;
+}
+
+.hb-tab-content p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 12px;
+  color: #334155;
+}
+
+.hb-tab-content strong {
+  color: #166534;
+}
+
+.close-btn {
+  background: rgba(30, 41, 59, 0.08);
+  border: none;
+  color: #334155;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.close-btn:hover {
+  background: rgba(30, 41, 59, 0.15);
+  color: #0f172a;
+}
+
+.close-btn:active {
+  transform: scale(0.92);
 }
 
 @keyframes modalPopIn {
@@ -2128,4 +2202,64 @@ body {
   font-size: 0.95rem;
   line-height: 1.4;
   max-width: 300px;
+}
+
+/* ADA Question Overlay (Quiz) */
+.ada-question-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 20000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ada-question-card {
+  background: rgba(10, 30, 20, 0.95);
+  border: 2px solid #34d399;
+  border-radius: 15px;
+  padding: 30px;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(52, 211, 153, 0.4);
+}
+
+.ada-question-avatar {
+  font-size: 60px;
+  margin-bottom: 15px;
+}
+
+.ada-question-text {
+  font-size: 24px;
+  color: #fff;
+  font-weight: bold;
+  margin-bottom: 25px;
+}
+
+.ada-question-options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.ada-option-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 15px 20px;
+  font-size: 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ada-option-btn:hover {
+  background: rgba(52, 211, 153, 0.3);
+  border-color: #34d399;
+}
+
+.ada-option-btn.correct {
+  background: #059669;
+  border-color: #34d399;
 }

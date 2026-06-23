@@ -6,7 +6,7 @@
     <title>RoboQuest 3D - Waldabenteuer</title>
     <meta name="description" content="Steuere den Eco-Bot durch den Wald, entdecke Geheimnisse und löse Story-Quests!">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=46">
+    <link rel="stylesheet" href="css/style.css?v=66">
     <!-- SortableJS für Drag & Drop -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <!-- Three.js -->
@@ -20,7 +20,7 @@
         <div class="intro-overlay" id="intro-overlay">
             <div class="intro-topbar">
                 <div class="intro-logo">
-                    <span class="intro-leaf">🍃</span>
+                    <img src="img/roboquest_logo.png" alt="RoboQuest Logo" style="height: 50px; margin-right: 15px; border-radius: 10px;">
                     <span class="intro-logo-text">ROBO-QUEST</span>
                 </div>
             </div>
@@ -54,7 +54,10 @@
         <!-- HUD: Solarpunk Top Bar -->
         <div class="hud-top-bar" id="hud-top-bar" style="pointer-events: auto;">
             <div class="hud-top-left">
-                <div class="hud-logo">🤖 <span class="logo-text">RoboQuest</span></div>
+                <div class="hud-logo">
+                    <img src="img/roboquest_logo.png" alt="RoboQuest Logo" style="height: 40px; margin-right: 10px; border-radius: 8px;">
+                    <span class="logo-text">RoboQuest</span>
+                </div>
                 <div class="hud-score-inline">
                     ⭐ <span id="score-display">0</span>
                     <span class="multiplier-badge hidden" id="multiplier-badge">×2 💥</span>
@@ -159,7 +162,7 @@
             <div class="handbook-modal glass-panel" id="handbook-modal" style="display:none;">
                 <div class="handbook-header">
                     <h2>📖 RoboQuest Story</h2>
-                    <button class="action-btn" id="btn-close-handbook" style="margin-left: auto;">✖</button>
+                    <button class="close-btn" id="btn-close-handbook">✖</button>
                 </div>
                 <div class="handbook-body">
                     <div class="handbook-content" style="width: 100%; border-left: none; padding: 30px;">
@@ -177,8 +180,8 @@
 
     <!-- Worlds Preview Modal -->
     <div id="worlds-preview-modal" class="handbook-modal" style="display: none; width: 450px; max-width: 90%; height: auto; padding: 20px;">
-        <div class="modal-content glass-panel" style="max-width: 500px; text-align: left;">
-            <button class="modal-close" id="btn-close-worlds">×</button>
+        <div class="modal-content glass-panel" style="max-width: 500px; text-align: left; position: relative;">
+            <button class="close-btn" id="btn-close-worlds" style="position: absolute; top: 12px; right: 12px;">×</button>
             <h2 class="modal-title" style="text-align: center; margin-bottom: 20px;">🌍 Bekannte Welten</h2>
             
             <div class="world-preview-card active-world" style="background: rgba(74,222,128,0.1); border-left: 4px solid #4ade80; padding: 15px; margin-bottom: 15px; border-radius: 8px;">
@@ -205,7 +208,7 @@
     <div id="mission-hub" class="mission-hub-modern" style="display:none;">
         <div class="hub-modern-header">
             <div class="hub-modern-logo">
-                <span class="hub-leaf">🍃</span>
+                <img src="img/roboquest_logo.png" alt="RoboQuest Logo" style="height: 60px; margin-right: 15px; border-radius: 12px;">
                 <span class="hub-logo-text">ROBO-<br>QUEST</span>
             </div>
             <div class="hub-modern-score">
@@ -293,24 +296,6 @@
             return false;
         };
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"
-            integrity="sha384-wagZhIFgY4hD+7awjQjR4e2E294y6J2HSnd8eTNc15ZubTeQeVRZwhQJ+W6hnBsf"
-            crossorigin="anonymous"></script>
-    <script src="js/simple_coding.js?v=65"></script>
-    <script src="js/ada.js?v=65"></script>
-    <script src="js/missions.js?v=65"></script>
-    <script src="js/config.js?v=65"></script>
-    <script src="js/audio.js?v=65"></script>
-    <script src="js/effects.js?v=65"></script>
-    <script src="js/sensors.js?v=65"></script>
-    <script src="js/quests.js?v=65"></script>
-    <script src="js/world.js?v=65"></script>
-    <script src="js/robot.js?v=65"></script>
-
-    <script src="js/pythonBridge.js?v=65"></script>
-    <script src="js/ui.js?v=65"></script>
-    <script src="js/engine.js?v=65"></script>
-
     <!-- Missions Modal (Solarpunk Design) -->
     <div class="handbook-modal" id="missions-modal" style="display:none; width: 450px; height: auto; max-height: 80vh; max-width: 90%;">
         <div class="hb-header">
@@ -348,5 +333,23 @@
             </div>
         </div>
     </div>
+
+    <!-- Main Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"
+            integrity="sha384-wagZhIFgY4hD+7awjQjR4e2E294y6J2HSnd8eTNc15ZubTeQeVRZwhQJ+W6hnBsf"
+            crossorigin="anonymous"></script>
+    <script src="js/simple_coding.js?v=66"></script>
+    <script src="js/ada.js?v=66"></script>
+    <script src="js/missions.js?v=66"></script>
+    <script src="js/config.js?v=66"></script>
+    <script src="js/audio.js?v=66"></script>
+    <script src="js/effects.js?v=66"></script>
+    <script src="js/sensors.js?v=66"></script>
+    <script src="js/quests.js?v=66"></script>
+    <script src="js/world.js?v=66"></script>
+    <script src="js/robot.js?v=66"></script>
+    <script src="js/pythonBridge.js?v=66"></script>
+    <script src="js/ui.js?v=66"></script>
+    <script src="js/engine.js?v=66"></script>
 </body>
 </html>
