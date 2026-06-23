@@ -6,7 +6,7 @@
     <title>RoboQuest 3D - Waldabenteuer</title>
     <meta name="description" content="Steuere den Eco-Bot durch den Wald, entdecke Geheimnisse und löse Story-Quests!">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=46">
+    <link rel="stylesheet" href="css/style.css?v=66">
     <!-- SortableJS für Drag & Drop -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <!-- Three.js -->
@@ -20,7 +20,7 @@
         <div class="intro-overlay" id="intro-overlay">
             <div class="intro-topbar">
                 <div class="intro-logo">
-                    <span class="intro-leaf">🍃</span>
+                    <img src="img/roboquest_logo.png" alt="RoboQuest Logo" style="height: 50px; margin-right: 15px; border-radius: 10px;">
                     <span class="intro-logo-text">ROBO-QUEST</span>
                 </div>
             </div>
@@ -54,7 +54,10 @@
         <!-- HUD: Solarpunk Top Bar -->
         <div class="hud-top-bar" id="hud-top-bar" style="pointer-events: auto;">
             <div class="hud-top-left">
-                <div class="hud-logo">🤖 <span class="logo-text">RoboQuest</span></div>
+                <div class="hud-logo">
+                    <img src="img/roboquest_logo.png" alt="RoboQuest Logo" style="height: 40px; margin-right: 10px; border-radius: 8px;">
+                    <span class="logo-text">RoboQuest</span>
+                </div>
                 <div class="hud-score-inline">
                     ⭐ <span id="score-display">0</span>
                     <span class="multiplier-badge hidden" id="multiplier-badge">×2 💥</span>
@@ -205,7 +208,7 @@
     <div id="mission-hub" class="mission-hub-modern" style="display:none;">
         <div class="hub-modern-header">
             <div class="hub-modern-logo">
-                <span class="hub-leaf">🍃</span>
+                <img src="img/roboquest_logo.png" alt="RoboQuest Logo" style="height: 60px; margin-right: 15px; border-radius: 12px;">
                 <span class="hub-logo-text">ROBO-<br>QUEST</span>
             </div>
             <div class="hub-modern-score">
@@ -293,29 +296,11 @@
             return false;
         };
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"
-            integrity="sha384-wagZhIFgY4hD+7awjQjR4e2E294y6J2HSnd8eTNc15ZubTeQeVRZwhQJ+W6hnBsf"
-            crossorigin="anonymous"></script>
-    <script src="js/simple_coding.js?v=65"></script>
-    <script src="js/ada.js?v=65"></script>
-    <script src="js/missions.js?v=65"></script>
-    <script src="js/config.js?v=65"></script>
-    <script src="js/audio.js?v=65"></script>
-    <script src="js/effects.js?v=65"></script>
-    <script src="js/sensors.js?v=65"></script>
-    <script src="js/quests.js?v=65"></script>
-    <script src="js/world.js?v=65"></script>
-    <script src="js/robot.js?v=65"></script>
-
-    <script src="js/pythonBridge.js?v=65"></script>
-    <script src="js/ui.js?v=65"></script>
-    <script src="js/engine.js?v=65"></script>
-
     <!-- Missions Modal (Solarpunk Design) -->
     <div class="handbook-modal" id="missions-modal" style="display:none; width: 450px; height: auto; max-height: 80vh; max-width: 90%;">
-        <div class="hb-header">
+        <div class="handbook-header">
             <h2>🎯 Missions-Übersicht</h2>
-            <button class="hb-close-btn" id="btn-close-missions">✖</button>
+            <button class="close-btn" id="btn-close-missions">✖</button>
         </div>
         <div class="hb-content" style="padding: 25px; flex-direction: column; gap: 15px; display: flex;">
             <div style="background: rgba(255,255,255,0.6); padding: 15px; border-radius: 12px; border: 1px solid #bbf7d0;">
@@ -333,9 +318,9 @@
 
     <!-- Settings Modal (Solarpunk Design) -->
     <div class="handbook-modal" id="settings-modal" style="display:none; width: 400px; height: auto; max-height: 80vh; max-width: 90%; z-index: 10000;">
-        <div class="hb-header">
+        <div class="handbook-header">
             <h2>⚙️ Einstellungen</h2>
-            <button class="hb-close-btn" id="btn-close-settings">✖</button>
+            <button class="close-btn" id="btn-close-settings">✖</button>
         </div>
         <div class="hb-content" style="display: flex; flex-direction: column; gap: 20px; padding: 25px;">
             <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.5); padding: 15px 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
@@ -348,5 +333,23 @@
             </div>
         </div>
     </div>
+
+    <!-- Main Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"
+            integrity="sha384-wagZhIFgY4hD+7awjQjR4e2E294y6J2HSnd8eTNc15ZubTeQeVRZwhQJ+W6hnBsf"
+            crossorigin="anonymous"></script>
+    <script src="js/simple_coding.js?v=66"></script>
+    <script src="js/ada.js?v=66"></script>
+    <script src="js/missions.js?v=66"></script>
+    <script src="js/config.js?v=66"></script>
+    <script src="js/audio.js?v=66"></script>
+    <script src="js/effects.js?v=66"></script>
+    <script src="js/sensors.js?v=66"></script>
+    <script src="js/quests.js?v=66"></script>
+    <script src="js/world.js?v=66"></script>
+    <script src="js/robot.js?v=66"></script>
+    <script src="js/pythonBridge.js?v=66"></script>
+    <script src="js/ui.js?v=66"></script>
+    <script src="js/engine.js?v=66"></script>
 </body>
 </html>

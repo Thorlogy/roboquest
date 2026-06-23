@@ -1,4 +1,12 @@
 function setupDPad() {
+    window.closeAllModals = function() {
+        const modalIds = ['handbook-modal', 'settings-modal', 'missions-modal', 'worlds-preview-modal'];
+        modalIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+    };
+
     document.getElementById('reset-btn').addEventListener('click', () => {
         if (window.missionManager && window.missionManager.currentMission) {
             window.missionManager.loadMission(window.missionManager.currentMission.id);
@@ -40,8 +48,17 @@ function setupDPad() {
                 if (hbModal.style.display === 'flex') {
                     hbModal.style.display = 'none';
                 } else {
+                    if (window.closeAllModals) window.closeAllModals();
                     hbModal.style.display = 'flex';
                 }
+            });
+        }
+        
+        const navBtnHandbook = document.getElementById('nav-btn-handbook');
+        if (navBtnHandbook) {
+            navBtnHandbook.addEventListener('click', () => {
+                if (window.closeAllModals) window.closeAllModals();
+                hbModal.style.display = 'flex';
             });
         }
         
@@ -161,6 +178,7 @@ function setupDPad() {
             if (settingsModal.style.display === 'flex') {
                 settingsModal.style.display = 'none';
             } else {
+                if (window.closeAllModals) window.closeAllModals();
                 updateSettingsUI();
                 settingsModal.style.display = 'flex';
             }
@@ -236,6 +254,7 @@ function setupDPad() {
             if (url.startsWith('#')) {
                 const hbModal = document.getElementById('handbook-modal');
                 if (hbModal) {
+                    if (window.closeAllModals) window.closeAllModals();
                     hbModal.style.display = 'flex';
                     // Switch to Blocks tab
                     const btnBlocks = document.querySelector('.hb-tab-btn[data-target="hb-blocks"]');
@@ -262,17 +281,13 @@ function setupDPad() {
 
     if (btnOpenMissions) {
         btnOpenMissions.addEventListener('click', () => {
-            // Wenn keine Mission aktiv ist (Free Explore Modus), öffne den Hub (Missionsauswahl)
-            if (window.missionManager && !window.missionManager.currentMission && hubModal) {
-                if (window.missionManager.showHub) {
-                    window.missionManager.showHub();
-                } else {
-                    hubModal.style.display = 'flex';
-                }
-                return;
+            if (window.closeAllModals) window.closeAllModals();
+            // Immer das Missions-Modal öffnen (wie vom Nutzer gewünscht: "bei der zielscheibe kommt man immer zu den missionen")
+            if (missionsModal) {
+                missionsModal.style.display = 'flex';
             }
 
-            // Ansonsten öffne das Missions-Modal
+            // Ansonsten öffne das Missions-Modal und fülle Daten ab
             const actSrc = document.getElementById('story-act');
             const objSrc = document.getElementById('story-objectives');
             const modAct = document.getElementById('missions-modal-desc'); 
@@ -299,6 +314,7 @@ function setupDPad() {
 
     if (btnNavMissions && worldsPreviewModal) {
         btnNavMissions.addEventListener('click', () => {
+            if (window.closeAllModals) window.closeAllModals();
             worldsPreviewModal.style.display = 'flex';
         });
     }
@@ -314,6 +330,14 @@ function setupDPad() {
             if (window.missionManager) {
                 window.missionManager.startFreeExplore();
             }
+            if (missionsModal) missionsModal.style.display = 'none';
+            const handbookModal = document.getElementById('handbook-modal');
+            if (handbookModal) handbookModal.style.display = 'none';
+            if (worldsPreviewModal) worldsPreviewModal.style.display = 'none';
+            const hub = document.getElementById('mission-hub');
+            if (hub) hub.style.display = 'none';
+            const uiOverlay = document.getElementById('ui-overlay');
+            if (uiOverlay) uiOverlay.style.display = 'flex';
         });
     }
 
