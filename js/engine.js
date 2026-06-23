@@ -447,7 +447,12 @@ function rStep() {
     else if (b.type === 'scan_object') {
         if (ctx.state === 0) {
             ctx.state = 1;
-            document.getElementById('sensor-output').innerText = '🔍 Scan: ' + sensorCameraObjectName() + ' | 📏' + sensorUltrasonic() + 'cm | ☀️' + sensorLight() + '%';
+            const missionId = window.missionManager && window.missionManager.currentMission && window.missionManager.missionActive ? window.missionManager.currentMission.id : 0;
+            if (missionId === 5) {
+                document.getElementById('sensor-output').innerText = '🔍 Scan: ' + sensorCameraObjectName() + ' | 📏' + sensorUltrasonic() + 'cm';
+            } else {
+                document.getElementById('sensor-output').innerText = '🔍 Scan: ' + sensorCameraObjectName() + ' | 📏' + sensorUltrasonic() + 'cm | ☀️' + sensorLight() + '%';
+            }
             revealFog(roverGroup.position.x, roverGroup.position.z, 35);
             for (const zone of SECRET_ZONES) {
                 if (zone.requireScan && !storyState.zonesDiscovered.includes(zone.id)) {
@@ -1169,25 +1174,40 @@ let creatures = [];
 function updateLiveSensors() {
     if (!roverGroup || isRunning) return; // Don't override program output
 
-    // Sensor-Freischaltung prüfen (Erst ab Mission 4 oder im Freien Spiel)
-    let sensorsUnlocked = false;
-    if (window.missionManager) {
-        if (window.missionManager.missionActive) {
-            sensorsUnlocked = window.missionManager.currentMission && window.missionManager.currentMission.id >= 4;
-        } else {
-            // Freies Spiel schaltet standardmäßig alle Blöcke inklusive SCAN frei
-            sensorsUnlocked = true;
-        }
-    }
-
     const header = document.querySelector('.sensor-overlay .overlay-header');
     const out = document.getElementById('sensor-output');
 
+    let missionId = 0;
+    let isMissionActive = false;
+    if (window.missionManager) {
+        isMissionActive = window.missionManager.missionActive;
+        if (isMissionActive && window.missionManager.currentMission) {
+            missionId = window.missionManager.currentMission.id;
+        }
+    }
+
+    // Bestimme, ob für diese Mission Sensoren freigeschaltet sind
+    // Sensoren sind freigeschaltet in Mission 5, 8, 9, 10 und im Freien Spiel (missionId === 0)
+    const sensorsUnlocked = !isMissionActive || missionId === 5 || missionId === 8 || missionId === 9 || missionId === 10;
+
     if (!sensorsUnlocked) {
         if (header) header.innerHTML = '<span>▼</span> System-Status:';
-        // Falls der Inhalt leer ist oder Sensorwerte enthält, setzen wir den Standardtext
-        if (out && (out.innerText === '' || out.innerText.startsWith('📏') || out.innerText.startsWith('🔍 Scan:') || out.innerText.includes('Distanz:'))) {
-            out.innerText = 'Eco-Bot bereit. Nutze WASD zum Steuern oder klicke links [⚏] zum Programmieren!';
+        if (out) {
+            let statusText = 'Eco-Bot bereit. Nutze WASD zum Steuern oder klicke links [⚏] zum Programmieren!';
+            if (missionId === 1) {
+                statusText = 'Eco-Bot bereit. Ziehe den Befehl [Vor] in dein Programm und klicke auf Start, um das grüne Feld zu erreichen!';
+            } else if (missionId === 2) {
+                statusText = 'Umgehe das Hindernis! Nutze die Befehle [Drehe Links] und [Drehe Rechts], um den Weg zum Ziel zu finden.';
+            } else if (missionId === 3) {
+                statusText = 'Sammle Ersatzteile! Steuere den Eco-Bot direkt über ein Schrotteil und nutze den Befehl [Greifen].';
+            } else if (missionId === 4) {
+                statusText = 'Nutze den neuen Schleifen-Block [Wiederhole alles], um den Code für die Umfahrung der Kiste abzukürzen!';
+            } else if (missionId === 6) {
+                statusText = 'Eco-Bot im Stadtpark bereit! Nutze eine Schleife [Wiederhole alles], um alle 5 Flaschen in einer Reihe zu sammeln.';
+            } else if (missionId === 7) {
+                statusText = 'Plane deinen Slalom! Verwende eine Schleife mit Rechts- und Linksdrehungen, um geschickt um die Parkbänke herumzufahren.';
+            }
+            out.innerText = statusText;
         }
         return;
     }
@@ -1198,23 +1218,37 @@ function updateLiveSensors() {
     const dist = sensorUltrasonic();
     const light = sensorLight();
     const rot = sensorRotation();
-    const tilt = sensorTilt();
     const nearest = sensorCameraObjectName();
     const touch = sensorTouch();
     
     if (out) {
-        let colorText = '';
-        if (window.missionManager && window.missionManager.currentMission && window.missionManager.currentMission.id >= 8) {
+        let lines = [];
+        
+        if (missionId === 0) {
+            // Freies Spiel: Zeige alle relevanten Sensoren an
+            lines.push('📏 Distanz: ' + dist + 'cm' + (dist < 30 ? ' ⚠️' : ''));
+            lines.push('☀️ Licht: ' + light + '%  🔄 Kompass: ' + rot + '°');
             const colorVal = getColorUnderRobot();
             const colorEmojis = { 'blue': '🔵 Blau', 'red': '🔴 Rot', 'green': '🟢 Grün', 'none': '⚪ Keine' };
-            colorText = '  🎨 Bodenfarbe: ' + (colorEmojis[colorVal] || '⚪ Keine');
+            const colorText = '  🎨 Bodenfarbe: ' + (colorEmojis[colorVal] || '⚪ Keine');
+            lines.push('📸 ' + nearest + (touch ? '  👆 Kontakt!' : '') + colorText);
+        } else {
+            // Missions-Modus: Zeige nur die Sensoren, die für diese Mission wirklich hilfreich und gelernt sind!
+            
+            // Mission 5: LiDAR Scan (Ultraschall & Kamera)
+            if (missionId === 5) {
+                lines.push('📏 Distanz: ' + dist + 'cm' + (dist < 30 ? ' ⚠️' : ''));
+                lines.push('📸 Kamera: ' + nearest + (touch ? '  👆 Kontakt!' : ''));
+            }
+            
+            // Mission 8, 9, 10: Farbsensor
+            if (missionId === 8 || missionId === 9 || missionId === 10) {
+                const colorVal = getColorUnderRobot();
+                const colorEmojis = { 'blue': '🔵 Blau', 'red': '🔴 Rot', 'green': '🟢 Grün', 'none': '⚪ Keine' };
+                lines.push('🎨 Farbsensor: ' + (colorEmojis[colorVal] || '⚪ Keine'));
+            }
         }
         
-        const lines = [
-            '📏 Distanz: ' + dist + 'cm' + (dist < 30 ? ' ⚠️' : ''),
-            '☀️ Licht: ' + light + '%  🔄 ' + rot + '°  ⛰️ ' + tilt + '°',
-            '📸 ' + nearest + (touch ? '  👆 Kontakt!' : '') + colorText
-        ];
         out.innerText = lines.join('\n');
     }
 }
