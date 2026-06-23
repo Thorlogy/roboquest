@@ -174,12 +174,17 @@ class MissionManager {
     // FREIE ERKUNDUNG (GDD 7: Sandbox)
     // ═══════════════════════════════════════════════
     startFreeExplore() {
+        if (window.closeAllModals) window.closeAllModals();
         this.currentMission = null;
         this.missionActive = false;
 
         // Hub ausblenden
         const hub = document.getElementById('mission-hub');
         if (hub) hub.style.display = 'none';
+
+        // UI Overlay einblenden
+        const uiOverlay = document.getElementById('ui-overlay');
+        if (uiOverlay) uiOverlay.style.display = 'flex';
 
         // Editor einblenden (damit man in der Sandbox programmieren kann)
         const editor = document.getElementById('simple-coding-bar');
@@ -218,6 +223,7 @@ class MissionManager {
     }
 
     loadMission(missionId) {
+        if (window.closeAllModals) window.closeAllModals();
         const mission = this.missions.find(m => m.id === missionId);
         if (!mission) { console.error('Mission not found:', missionId); return; }
 
@@ -239,6 +245,10 @@ class MissionManager {
         // Hub ausblenden
         const hub = document.getElementById('mission-hub');
         if (hub) hub.style.display = 'none';
+
+        // UI Overlay einblenden
+        const uiOverlay = document.getElementById('ui-overlay');
+        if (uiOverlay) uiOverlay.style.display = 'flex';
 
         // Editor einblenden
         const editor = document.getElementById('simple-coding-bar');
@@ -391,7 +401,15 @@ class MissionManager {
         if (starsEl) starsEl.textContent = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
         if (blocksEl) blocksEl.textContent = 'Befehle genutzt: ' + blockCount + (stars >= 2 ? ' (Effizient! 💪)' : '');
         if (msgEl) msgEl.textContent = mission.adaSuccess;
-        if (pointsEl) pointsEl.textContent = '+' + (stars * 100) + ' Punkte';
+        if (pointsEl) {
+            const addedPoints = stars * 100;
+            pointsEl.textContent = '+' + addedPoints + ' Punkte';
+            if (typeof score !== 'undefined') {
+                score += addedPoints;
+                const sd = document.getElementById('score-display');
+                if (sd) sd.innerText = score;
+            }
+        }
 
         if (overlay) overlay.style.display = 'flex';
 
@@ -431,6 +449,7 @@ class MissionManager {
     // HUB ANZEIGEN (GDD 6: Weltkarte)
     // ═══════════════════════════════════════════════
     showHub() {
+        if (window.closeAllModals) window.closeAllModals();
         // Editor ausblenden
         const editor = document.getElementById('simple-coding-bar');
         if (editor) editor.style.display = 'none';

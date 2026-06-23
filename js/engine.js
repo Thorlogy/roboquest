@@ -1025,6 +1025,7 @@ function setupInputHandlers() {
     const btnStartGame = document.getElementById('btn-start-game');
     if (btnStartGame) {
         btnStartGame.addEventListener('click', () => {
+            if (window.closeAllModals) window.closeAllModals();
             const intro = document.getElementById('intro-overlay');
             if (intro) {
                 intro.style.transition = 'opacity 0.5s ease';
@@ -1043,6 +1044,7 @@ function setupInputHandlers() {
     const btnTutorial = document.getElementById('btn-tutorial');
     if (btnTutorial) {
         btnTutorial.addEventListener('click', () => {
+            if (window.closeAllModals) window.closeAllModals();
             const handbook = document.getElementById('handbook-modal');
             if (handbook) handbook.style.display = 'flex';
         });

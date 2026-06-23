@@ -441,9 +441,9 @@ function buildEnvironment() {
         environmentGroup.add(solarpunkRing);
     }
 
-    // Spawn Foxes
+    // Spawn Foxes (kommen erst in späteren Welten laut User-Feedback)
     foxes.forEach(f => scene.remove(f)); foxes = [];
-    for (let i=0; i<6; i++) foxes.push(buildFox(seededRandom() * 200 - 100, seededRandom() * 200 - 100));
+    // for (let i=0; i<6; i++) foxes.push(buildFox(seededRandom() * 200 - 100, seededRandom() * 200 - 100));
     
     // Spawn Wind Turbines
     turbines.forEach(t => scene.remove(t)); turbines = [];

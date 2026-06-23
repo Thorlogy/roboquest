@@ -1,12 +1,12 @@
-function setupDPad() {
-    window.closeAllModals = function() {
-        const modalIds = ['handbook-modal', 'settings-modal', 'missions-modal', 'worlds-preview-modal'];
-        modalIds.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.style.display = 'none';
-        });
-    };
+window.closeAllModals = function() {
+    const modalIds = ['handbook-modal', 'settings-modal', 'missions-modal', 'worlds-preview-modal'];
+    modalIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+};
 
+function setupDPad() {
     document.getElementById('reset-btn').addEventListener('click', () => {
         if (window.missionManager && window.missionManager.currentMission) {
             window.missionManager.loadMission(window.missionManager.currentMission.id);
