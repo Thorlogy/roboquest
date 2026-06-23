@@ -24,7 +24,7 @@ class SimpleCoding {
             'TURN_RIGHT':  { icon: '⟳',  label: 'Rechts',   type: 'move',   unlock: 2 },
             'GRAB':        { icon: '🖐️', label: 'Greifen',  type: 'action', unlock: 3 },
             'REPEAT_ALL':  { icon: '🔁', label: 'Wiederhole alles', type: 'loop', unlock: 4 },
-            'LOOP_END':    { icon: '🛑', label: 'Schleife Ende', type: 'loop', unlock: 4 },
+            'LOOP_END':    { icon: '🔁', label: 'Schleife Ende', type: 'loop', unlock: 4 },
         };
 
         // DOM-Referenzen
