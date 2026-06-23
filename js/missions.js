@@ -637,14 +637,11 @@ class MissionManager {
             // Insert separator at the very beginning (index 0, mission 1)
             if (i === 0) {
                 const sep = document.createElement('div');
-                sep.className = 'world-separator world-separator-w1';
+                sep.className = 'world-separator';
                 sep.innerHTML = `
-                    <div class="world-separator-card">
-                        <div class="world-separator-icon-bg">🛠️</div>
-                        <div class="world-separator-content">
-                            <span class="world-separator-subtitle">KAPITEL 1</span>
-                            <span class="world-separator-title">Verlassene Werkstatt</span>
-                        </div>
+                    <div class="world-separator-badge" style="background: linear-gradient(135deg, #1e293b, #475569); border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                        <span class="world-separator-icon">🛠️</span>
+                        <span class="world-separator-text">Welt 1: Werkstatt</span>
                     </div>
                 `;
                 stationsContainer.appendChild(sep);
@@ -653,14 +650,11 @@ class MissionManager {
             // Insert separator before World 2 (index 5, mission 6)
             if (i === 5) {
                 const sep = document.createElement('div');
-                sep.className = 'world-separator world-separator-w2';
+                sep.className = 'world-separator';
                 sep.innerHTML = `
-                    <div class="world-separator-card">
-                        <div class="world-separator-icon-bg">🌳</div>
-                        <div class="world-separator-content">
-                            <span class="world-separator-subtitle">KAPITEL 2</span>
-                            <span class="world-separator-title">Verschmutzter Stadtpark</span>
-                        </div>
+                    <div class="world-separator-badge">
+                        <span class="world-separator-icon">🌳</span>
+                        <span class="world-separator-text">Welt 2: Stadtpark</span>
                     </div>
                 `;
                 stationsContainer.appendChild(sep);
@@ -717,14 +711,11 @@ class MissionManager {
 
         // Insert separator for World 3 at the end of the timeline
         const sep3 = document.createElement('div');
-        sep3.className = 'world-separator world-separator-w3';
+        sep3.className = 'world-separator';
         sep3.innerHTML = `
-            <div class="world-separator-card">
-                <div class="world-separator-icon-bg">🔒 🌊</div>
-                <div class="world-separator-content">
-                    <span class="world-separator-subtitle">KAPITEL 3 (DEMNÄCHST)</span>
-                    <span class="world-separator-title">Küsten-Rettung</span>
-                </div>
+            <div class="world-separator-badge" style="background: linear-gradient(135deg, #0f172a, #1e293b); border-color: #475569; opacity: 0.65; box-shadow: none;">
+                <span class="world-separator-icon">🔒 🌊</span>
+                <span class="world-separator-text" style="color: #94a3b8;">Welt 3: Küsten-Rettung</span>
             </div>
         `;
         stationsContainer.appendChild(sep3);
