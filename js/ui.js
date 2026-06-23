@@ -282,21 +282,71 @@ function setupDPad() {
     if (btnOpenMissions) {
         btnOpenMissions.addEventListener('click', () => {
             if (window.closeAllModals) window.closeAllModals();
-            // Immer das Missions-Modal öffnen (wie vom Nutzer gewünscht: "bei der zielscheibe kommt man immer zu den missionen")
             if (missionsModal) {
                 missionsModal.style.display = 'flex';
             }
 
-            // Ansonsten öffne das Missions-Modal und fülle Daten ab
-            const actSrc = document.getElementById('story-act');
-            const objSrc = document.getElementById('story-objectives');
-            const modAct = document.getElementById('missions-modal-desc'); 
-            const modObj = document.getElementById('missions-modal-objectives');
-            
-            if (actSrc && modAct) modAct.innerText = actSrc.innerText;
-            if (objSrc && modObj) modObj.innerHTML = objSrc.innerHTML;
-            
-            if (missionsModal) missionsModal.style.display = 'flex';
+            if (window.missionManager && window.missionManager.currentMission) {
+                const mission = window.missionManager.currentMission;
+                const modalAct = document.getElementById('missions-modal-act');
+                const modalDesc = document.getElementById('missions-modal-desc');
+                const modalObj = document.getElementById('missions-modal-objectives');
+
+                if (modalAct) {
+                    const worldNum = mission.id <= 5 ? 1 : 2;
+                    modalAct.innerHTML = `🌍 Welt ${worldNum} &bull; Mission ${mission.id}`;
+                }
+                if (modalDesc) {
+                    modalDesc.innerHTML = `<strong>${mission.title}</strong><br>${mission.description}`;
+                }
+                if (modalObj) {
+                    let objectivesHTML = '';
+                    
+                    // Objective 1: Collect items
+                    if (mission.requiredCollectibles > 0) {
+                        const collected = window.missionManager._collectedItems || 0;
+                        const done = collected >= mission.requiredCollectibles;
+                        const icon = done ? '✅' : '⬜';
+                        const label = mission.id >= 6 ? 'Plastikflaschen' : 'Schrotteile';
+                        objectivesHTML += `
+                            <div class="story-obj ${done ? 'done' : ''}" style="color: #064e3b; font-size: 0.95rem; margin-bottom: 5px;">
+                                ${icon} Sammle ${mission.requiredCollectibles} ${label} (${collected} / ${mission.requiredCollectibles})
+                            </div>
+                        `;
+                    }
+                    
+                    // Objective 2: Reach Goal
+                    if (mission.goalPos) {
+                        let done = false;
+                        if (window.roverGroup) {
+                            const dx = window.roverGroup.position.x - mission.goalPos.x;
+                            const dz = window.roverGroup.position.z - mission.goalPos.z;
+                            const dist = Math.hypot(dx, dz);
+                            done = dist <= mission.goalRadius;
+                        }
+                        const icon = done ? '✅' : '⬜';
+                        const label = mission.id === 8 ? 'Fahre bis zur blauen Recyclingtonne' : 'Erreiche das grüne Zielfeld';
+                        objectivesHTML += `
+                            <div class="story-obj ${done ? 'done' : ''}" style="color: #064e3b; font-size: 0.95rem; margin-bottom: 5px;">
+                                ${icon} ${label}
+                            </div>
+                        `;
+                    }
+                    
+                    modalObj.innerHTML = objectivesHTML;
+                }
+            } else {
+                // Fallback to Story mode
+                const actSrc = document.getElementById('story-act');
+                const objSrc = document.getElementById('story-objectives');
+                const modalAct = document.getElementById('missions-modal-act');
+                const modalDesc = document.getElementById('missions-modal-desc'); 
+                const modalObj = document.getElementById('missions-modal-objectives');
+                
+                if (modalAct) modalAct.innerText = "Aktuelle Story";
+                if (actSrc && modalDesc) modalDesc.innerText = actSrc.innerText;
+                if (objSrc && modalObj) modalObj.innerHTML = objSrc.innerHTML;
+            }
         });
     }
 
