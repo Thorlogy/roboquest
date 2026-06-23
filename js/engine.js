@@ -344,6 +344,57 @@ function evaluateSensorBlock(block) {
 // ════════════════════════════════════════════════════════════════
 // AST INTERPRETER (rStep)
 // ════════════════════════════════════════════════════════════════
+function getColorUnderRobot() {
+    if (!roverGroup) return 'none';
+    const rx = roverGroup.position.x;
+    const rz = roverGroup.position.z;
+    
+    // Check if robot is near a collectible with color
+    if (typeof collectibles !== 'undefined') {
+        for (const c of collectibles) {
+            if (!c.collected) {
+                const dist = Math.hypot(rx - c.x, rz - c.z);
+                if (dist < 2.0 && c.color) {
+                    return c.color;
+                }
+            }
+        }
+    }
+    
+    if (window.missionManager && window.missionManager.currentMission) {
+        const mission = window.missionManager.currentMission;
+        
+        // Mission 8: Zielfeld ist blau
+        if (mission.id === 8 && mission.goalPos) {
+            const dist = Math.hypot(rx - mission.goalPos.x, rz - mission.goalPos.z);
+            if (dist < 3.0) return 'blue';
+        }
+        
+        // Allgemeine Farbbereiche für Missionen
+        if (mission.colorZones) {
+            for (const zone of mission.colorZones) {
+                const dist = Math.hypot(rx - zone.x, rz - zone.z);
+                if (dist < (zone.radius || 2.0)) {
+                    return zone.color;
+                }
+            }
+        }
+    }
+    return 'none';
+}
+
+function skipUntilBranch(targetActions) {
+    while (rStack.length > 0) {
+        const popped = rStack.pop();
+        if (popped && popped.block && targetActions.includes(popped.block.action)) {
+            break;
+        }
+    }
+}
+
+// ════════════════════════════════════════════════════════════════
+// AST INTERPRETER (rStep)
+// ════════════════════════════════════════════════════════════════
 function rStep() {
     if (rStack.length === 0) return null;
     let ctx = rStack[rStack.length - 1];
@@ -373,7 +424,6 @@ function rStep() {
         if (ctx.state === 0) {
             ctx.state = 1;
             const dir = b.getFieldValue('DIRECTION');
-            // Reset motor state and set only the new direction
             programMotorState = { forward: false, backward: false, left: false, right: false };
             if (dir === 'FORWARD') programMotorState.forward = true;
             else if (dir === 'BACKWARD') programMotorState.backward = true;
@@ -389,7 +439,6 @@ function rStep() {
             return { action: 'stopMotor', id: b.id };
         } else { rStack.pop(); rPush(b.getNextBlock()); return rStep(); }
     }
-    // ... (rest of rStep remains same logic)
     else if (b.type === 'turn_robot') {
         if (ctx.state === 0) { ctx.totalDist = parseInt(b.getFieldValue('DISTANCE'), 10) || 1; ctx.state = 1; }
         if (ctx.state <= ctx.totalDist) { ctx.state++; return { action: b.getFieldValue('DIRECTION') === 'LEFT' ? 'turnLeft' : 'turnRight', id: b.id }; }
@@ -400,7 +449,6 @@ function rStep() {
             ctx.state = 1;
             document.getElementById('sensor-output').innerText = '🔍 Scan: ' + sensorCameraObjectName() + ' | 📏' + sensorUltrasonic() + 'cm | ☀️' + sensorLight() + '%';
             revealFog(roverGroup.position.x, roverGroup.position.z, 35);
-            // Check if near owl zone and scanning (fulfills requireScan)
             for (const zone of SECRET_ZONES) {
                 if (zone.requireScan && !storyState.zonesDiscovered.includes(zone.id)) {
                     if (Math.hypot(roverGroup.position.x - zone.x, roverGroup.position.z - zone.z) < zone.radius + 5) {
@@ -432,13 +480,60 @@ function rStep() {
     }
     else if (b.type === 'wait_until_sensor') {
         if (ctx.state === 0) { ctx.waitTimer = 0; ctx.state = 1; }
-        ctx.waitTimer = (ctx.waitTimer || 0) + 0.016; // ~1 frame at 60fps
-        if (ctx.waitTimer > 30) { // 30s Timeout
+        ctx.waitTimer = (ctx.waitTimer || 0) + 0.016;
+        if (ctx.waitTimer > 30) {
             document.getElementById('sensor-output').innerText = '⏱ Timeout: Bedingung nie erfüllt!';
             rStack.pop(); rPush(b.getNextBlock()); return rStep();
         }
-        // Evaluation happens in animate loop for real-time response!
         return { action: 'waitUntil', id: b.id, conditionBlock: b.getInputTargetBlock('CONDITION') };
+    }
+    else if (b.type === 'wait_until_color') {
+        if (ctx.state === 0) {
+            ctx.state = 1;
+            ctx.waitTimer = 0;
+            programMotorState.forward = true;
+        }
+        ctx.waitTimer = (ctx.waitTimer || 0) + 0.016;
+        if (ctx.waitTimer > 15) {
+            document.getElementById('sensor-output').innerText = '⏳ Timeout: Farbe nie erkannt!';
+            programMotorState.forward = false;
+            rStack.pop();
+            return rStep();
+        }
+        const colorUnder = getColorUnderRobot();
+        if (colorUnder === b.param) {
+            programMotorState.forward = false;
+            document.getElementById('sensor-output').innerText = '⏳ Farbe ' + b.param.toUpperCase() + ' erkannt!';
+            rStack.pop();
+            return rStep();
+        }
+        return { action: 'wait', id: b.id, duration: 0.1 };
+    }
+    else if (b.type === 'if_color') {
+        if (ctx.state === 0) {
+            ctx.state = 1;
+            const colorUnder = getColorUnderRobot();
+            if (colorUnder === b.param) {
+                rStack.pop();
+                return rStep();
+            } else {
+                rStack.pop();
+                skipUntilBranch(['ELSE', 'END_IF']);
+                return rStep();
+            }
+        } else {
+            rStack.pop();
+            return rStep();
+        }
+    }
+    else if (b.type === 'else_branch') {
+        rStack.pop();
+        skipUntilBranch(['END_IF']);
+        return rStep();
+    }
+    else if (b.type === 'end_if_branch') {
+        rStack.pop();
+        return rStep();
     }
     else if (b.type === 'action_build') {
         if (ctx.state === 0) { ctx.state = 1; return { action: 'build', id: b.id }; }
@@ -825,11 +920,17 @@ function init() {
                 else if (action === 'TURN_RIGHT') blockType = 'turn_robot';
                 else if (action === 'GRAB') blockType = 'gripper_action';
                 else if (action === 'SCAN') blockType = 'scan_object';
+                else if (action === 'WAIT_UNTIL_COLOR') blockType = 'wait_until_color';
+                else if (action === 'IF_COLOR') blockType = 'if_color';
+                else if (action === 'ELSE') blockType = 'else_branch';
+                else if (action === 'END_IF') blockType = 'end_if_branch';
 
                 // We mock the block methods needed by rStep
                 const bMock = { 
                     type: blockType, 
                     id: i.toString(),
+                    action: action, // Store action for runtime evaluation
+                    param: param,   // Store param (e.g. 'blue', 'red')
                     _simpleIndex: blockIndex, // For highlight tracking
                     getFieldValue: function(field) {
                         if (field === 'DIRECTION') {
@@ -1102,10 +1203,17 @@ function updateLiveSensors() {
     const touch = sensorTouch();
     
     if (out) {
+        let colorText = '';
+        if (window.missionManager && window.missionManager.currentMission && window.missionManager.currentMission.id >= 8) {
+            const colorVal = getColorUnderRobot();
+            const colorEmojis = { 'blue': '🔵 Blau', 'red': '🔴 Rot', 'green': '🟢 Grün', 'none': '⚪ Keine' };
+            colorText = '  🎨 Bodenfarbe: ' + (colorEmojis[colorVal] || '⚪ Keine');
+        }
+        
         const lines = [
             '📏 Distanz: ' + dist + 'cm' + (dist < 30 ? ' ⚠️' : ''),
             '☀️ Licht: ' + light + '%  🔄 ' + rot + '°  ⛰️ ' + tilt + '°',
-            '📸 ' + nearest + (touch ? '  👆 Kontakt!' : '')
+            '📸 ' + nearest + (touch ? '  👆 Kontakt!' : '') + colorText
         ];
         out.innerText = lines.join('\n');
     }

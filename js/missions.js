@@ -134,6 +134,141 @@ class MissionManager {
                 requiredCollectibles: 2,
                 fogEnabled: false,
                 description: 'Sammle die Teile und erreiche das Ziel!'
+            },
+            {
+                id: 6,
+                title: 'Die Flaschen-Jagd',
+                adaIntro: 'Willkommen im Stadtpark! Er ist voller Plastikmüll. Nutze eine Schleife mit 🔁 Wiederhole alles, um alle 5 Flaschen in einer Reihe zu sammeln!',
+                adaSuccess: 'Fantastisch! Die Schleife hat perfekt funktioniert und die Flaschen sind sicher im Greifer!',
+                adaQuestion: {
+                    text: 'Welchen Vorteil bieten Schleifen?',
+                    options: ['Sie machen den Code kürzer', 'Sie machen den Roboter schneller', 'Nichts'],
+                    correct: 0
+                },
+                unlockedBlocks: ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'GRAB', 'REPEAT_ALL'],
+                silverLimit: 4,
+                startPos: { x: 0, z: 0, rot: Math.PI },
+                goalPos: null,
+                goalRadius: 0,
+                obstacles: [],
+                collectibles: [
+                    { x: 0, z: -2, type: 'scrap', icon: '🥤' },
+                    { x: 0, z: -4, type: 'scrap', icon: '🥤' },
+                    { x: 0, z: -6, type: 'scrap', icon: '🥤' },
+                    { x: 0, z: -8, type: 'scrap', icon: '🥤' },
+                    { x: 0, z: -10, type: 'scrap', icon: '🥤' }
+                ],
+                requiredCollectibles: 5,
+                fogEnabled: false,
+                description: 'Sammle 5 Plastikflaschen mit einer Schleife.'
+            },
+            {
+                id: 7,
+                title: 'Slalom-Pfad',
+                adaIntro: 'Einige Parkbänke versperren uns den direkten Weg. Programmiere eine Schleife, die ROBO im Slalom um die Bänke führt!',
+                adaSuccess: 'Unglaublich! ROBO ist elegant um alle Bänke gefahren!',
+                adaQuestion: {
+                    text: 'Was darf in einer Slalom-Schleife stehen?',
+                    options: ['Sowohl Vorwärts- als auch Drehbefehle', 'Nur Vorwärtsbefehle', 'Nichts'],
+                    correct: 0
+                },
+                unlockedBlocks: ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'GRAB', 'REPEAT_ALL'],
+                silverLimit: 6,
+                startPos: { x: 0, z: 0, rot: Math.PI },
+                goalPos: { x: 4, z: -8 },
+                goalRadius: 2.5,
+                obstacles: [
+                    { x: 0, z: -3, w: 2.5, d: 1, h: 1.5, color: 0x8b5e3c },
+                    { x: 2, z: -6, w: 2.5, d: 1, h: 1.5, color: 0x8b5e3c }
+                ],
+                collectibles: [
+                    { x: 2, z: -3, type: 'scrap', icon: '🥤' },
+                    { x: 0, z: -6, type: 'scrap', icon: '🥤' }
+                ],
+                requiredCollectibles: 2,
+                fogEnabled: false,
+                description: 'Fahre Slalom um die Bänke, um den Müll zu sammeln.'
+            },
+            {
+                id: 8,
+                title: 'Warten auf Blau',
+                adaIntro: 'Wir haben Müll geladen! Nutze den neuen Block ⏳ Warte bis Farbe: Blau, um bis zur blauen Recyclingtonne vorzufahren und den Müll dort abzuladen!',
+                adaSuccess: 'Wunderbar! ROBO hat den Müll zielgenau bei der blauen Recyclingtonne abgeliefert!',
+                adaQuestion: {
+                    text: 'Wie weiß ROBO, wann er stoppen muss?',
+                    options: ['Der Farbsensor meldet die Farbe Blau unter ihm', 'ROBO schätzt die Strecke ab', 'Er stoppt zufällig'],
+                    correct: 0
+                },
+                unlockedBlocks: ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'GRAB', 'WAIT_UNTIL_COLOR'],
+                silverLimit: 4,
+                startPos: { x: 0, z: 0, rot: Math.PI },
+                goalPos: { x: 0, z: -10 },
+                goalRadius: 2.5,
+                obstacles: [],
+                colorZones: [
+                    { x: 0, z: -10, radius: 2.5, color: 'blue' }
+                ],
+                collectibles: [],
+                requiredCollectibles: 0,
+                fogEnabled: false,
+                description: 'Fahre bis zur blauen Recyclingtonnen-Zone.'
+            },
+            {
+                id: 9,
+                title: 'Der intelligente Müllsortierer',
+                adaIntro: 'Jetzt wird es anspruchsvoll! Auf dem Weg liegen rote und blaue Müllteile. Scanne sie und nutze Wenn/Dann/Sonst: Wenn es blau ist, bring es nach links, sonst nach rechts!',
+                adaSuccess: 'Hervorragend! Alle Müllteile wurden vollautomatisch nach Farbe vorsortiert!',
+                adaQuestion: {
+                    text: 'Warum ist Wenn/Dann wichtig für schlaue Roboter?',
+                    options: ['Weil sie so auf unterschiedliche Situationen reagieren können', 'Weil der Code dadurch bunter wird', 'Gar nicht'],
+                    correct: 0
+                },
+                unlockedBlocks: ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'GRAB', 'REPEAT_ALL', 'IF_COLOR', 'ELSE', 'END_IF'],
+                silverLimit: 10,
+                startPos: { x: 0, z: 0, rot: Math.PI },
+                goalPos: { x: 0, z: -10 },
+                goalRadius: 2.5,
+                obstacles: [],
+                colorZones: [
+                    { x: -3, z: -4, radius: 2.0, color: 'blue' },
+                    { x: 3, z: -4, radius: 2.0, color: 'red' }
+                ],
+                collectibles: [
+                    { x: 0, z: -3, type: 'scrap', icon: '🥤', color: 'blue' },
+                    { x: 0, z: -6, type: 'scrap', icon: '🔋', color: 'red' }
+                ],
+                requiredCollectibles: 2,
+                fogEnabled: false,
+                description: 'Sortiere Müll nach Farbe: Blau links, Rot rechts.'
+            },
+            {
+                id: 10,
+                title: 'Meisterprüfung Park',
+                adaIntro: 'Die letzte Prüfung im Stadtpark! Kombiniere alles: Fahre die Wiese im S-Kurven-Muster ab, sammle den Müll und sortiere ihn an den Tonnen. Zeig, was du gelernt hast!',
+                adaSuccess: 'Unglaublich! Du hast den gesamten Stadtpark gereinigt! Er blüht wieder voll auf!',
+                adaQuestion: {
+                    text: 'Was hast du in Welt 2 gemeistert?',
+                    options: ['Schleifen und Wenn/Dann-Bedingungen zur Automatisierung', 'Nur einfaches Geradeausfahren', 'Nichts'],
+                    correct: 0
+                },
+                unlockedBlocks: ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'GRAB', 'REPEAT_ALL', 'IF_COLOR', 'ELSE', 'END_IF', 'WAIT_UNTIL_COLOR'],
+                silverLimit: 12,
+                startPos: { x: 0, z: 0, rot: Math.PI },
+                goalPos: { x: 6, z: -6 },
+                goalRadius: 2.5,
+                obstacles: [
+                    { x: 2, z: -3, w: 1.5, d: 1.5, h: 2.5, color: 0x22c55e }
+                ],
+                colorZones: [
+                    { x: 6, z: -6, radius: 2.5, color: 'blue' }
+                ],
+                collectibles: [
+                    { x: 0, z: -3, type: 'scrap', icon: '🥤', color: 'blue' },
+                    { x: 4, z: -3, type: 'scrap', icon: '🥤', color: 'blue' }
+                ],
+                requiredCollectibles: 2,
+                fogEnabled: false,
+                description: 'Säuber die gesamte Wiese im systematischen Raster.'
             }
         ];
     }
@@ -273,6 +408,12 @@ class MissionManager {
                     } else if (newBlocks.includes('SCAN')) {
                         title = "Sensoren online!";
                         text = "Der Block <b>📡 Scan</b> lässt ROBO seine Umgebung prüfen. Das HUD oben rechts zeigt jetzt genaue Distanz-Werte!";
+                    } else if (newBlocks.includes('WAIT_UNTIL_COLOR')) {
+                        title = "Farbsensor online!";
+                        text = "Nutze den neuen Block <b>⏳ Warte bis</b>, damit ROBO fährt, bis er die ausgewählte Farbe auf dem Boden erkennt.";
+                    } else if (newBlocks.includes('IF_COLOR')) {
+                        title = "Entscheidungen treffen!";
+                        text = "Mit <b>❓ Wenn Farbe</b>, <b>❔ Sonst</b> und <b>❓ Ende Wenn</b> kann ROBO entscheiden, was er tut – z. B. blaue Flaschen links sortieren, rote rechts!";
                     }
                     setTimeout(() => {
                         window.ada.introduceFeature(title, text, () => {

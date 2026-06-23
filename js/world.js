@@ -827,7 +827,25 @@ window.missionWorld = {
                 scene.add(group);
                 
                 const def = { color: 0x94a3b8, emissive: 0x475569, name: "Schrottteil", emoji: col.icon || '⚙️' };
-                collectibles.push({ mesh: group, x: col.x, z: col.z, type: col.type, def: def });
+                collectibles.push({ mesh: group, x: col.x, z: col.z, type: col.type, color: col.color, def: def });
+            });
+        }
+
+        // Spawn color zones on the ground
+        if (mission.colorZones) {
+            mission.colorZones.forEach(zone => {
+                const geo = new THREE.RingGeometry(zone.radius ? zone.radius - 0.2 : 1.8, zone.radius || 2.0, 32);
+                const colorHex = zone.color === 'blue' ? 0x2563eb : (zone.color === 'red' ? 0xdc2626 : 0x16a34a);
+                const mat = new THREE.MeshBasicMaterial({ 
+                    color: colorHex, 
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: 0.6
+                });
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.rotation.x = Math.PI / 2; // Flat on the ground
+                mesh.position.set(zone.x, 0.02, zone.z);
+                scene.add(mesh);
             });
         }
 

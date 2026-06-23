@@ -101,25 +101,62 @@ function tryGrabItem() {
 
     // Check if a mission is active and grab a mission item
     if (window.missionManager && window.missionManager.missionActive) {
-        for (let i = collectibles.length - 1; i >= 0; i--) {
-            const c = collectibles[i];
-            if (Math.hypot(rx - c.x, rz - c.z) < 4.0) {
-                scene.remove(c.mesh);
-                collectibles.splice(i, 1);
-                
-                // Visual pickup effect
-                if (typeof spawnActionParticles !== 'undefined') {
-                    const pickupPos = new THREE.Vector3(c.x, 0.1, c.z);
-                    spawnActionParticles('gripper_close', pickupPos);
-                }
-                if (window.audioEngine) window.audioEngine.playHappyBeep();
-
-                window.missionManager.collectItem();
+        const missionId = window.missionManager.currentMission.id;
+        
+        // Mission 9 und 10 erfordern das Tragen und Sortieren von Müll!
+        if (missionId >= 9) {
+            if (storyState.carriedItem) {
+                document.getElementById('sensor-output').innerText = "⚠️ Zuerst das aktuelle Teil abladen!";
                 return;
             }
+            for (let i = collectibles.length - 1; i >= 0; i--) {
+                const c = collectibles[i];
+                if (Math.hypot(rx - c.x, rz - c.z) < 4.0) {
+                    storyState.carriedItem = { type: c.type, color: c.color, def: c.def };
+                    scene.remove(c.mesh);
+                    collectibles.splice(i, 1);
+                    
+                    // Visual on robot
+                    const itemPreview = c.mesh.clone();
+                    itemPreview.scale.set(0.4, 0.4, 0.4);
+                    itemPreview.position.set(0, 1.8, 0.5);
+                    roverGroup.add(itemPreview);
+                    roverGroup.userData.carriedMesh = itemPreview;
+                    
+                    if (typeof spawnActionParticles !== 'undefined') {
+                        const pickupPos = new THREE.Vector3(c.x, 0.1, c.z);
+                        spawnActionParticles('gripper_close', pickupPos);
+                    }
+                    if (window.audioEngine) window.audioEngine.playHappyBeep();
+                    
+                    document.getElementById('sensor-output').innerText = "📦 " + c.def.name + " (" + (c.color === 'blue' ? 'Blau' : 'Rot') + ") aufgenommen. Bringe es zur passenden Tonne!";
+                    showActionFlash("📦 Müll geladen");
+                    return;
+                }
+            }
+            document.getElementById('sensor-output').innerText = "⚠️ Kein Teil in der Nähe zum Greifen!";
+            return;
+        } else {
+            // Normales Greifen für Missionen 1-8
+            for (let i = collectibles.length - 1; i >= 0; i--) {
+                const c = collectibles[i];
+                if (Math.hypot(rx - c.x, rz - c.z) < 4.0) {
+                    scene.remove(c.mesh);
+                    collectibles.splice(i, 1);
+                    
+                    if (typeof spawnActionParticles !== 'undefined') {
+                        const pickupPos = new THREE.Vector3(c.x, 0.1, c.z);
+                        spawnActionParticles('gripper_close', pickupPos);
+                    }
+                    if (window.audioEngine) window.audioEngine.playHappyBeep();
+
+                    window.missionManager.collectItem();
+                    return;
+                }
+            }
+            document.getElementById('sensor-output').innerText = "⚠️ Kein Teil in der Nähe zum Greifen!";
+            return;
         }
-        document.getElementById('sensor-output').innerText = "⚠️ Kein Teil in der Nähe zum Greifen!";
-        return;
     }
 
     if (storyState.carriedItem) {
@@ -170,6 +207,36 @@ function tryDropItem() {
     if (!storyState.carriedItem) return;
     const rx = roverGroup.position.x, rz = roverGroup.position.z;
     
+    // Check if mission is active
+    if (window.missionManager && window.missionManager.missionActive) {
+        const mission = window.missionManager.currentMission;
+        if (mission && mission.colorZones) {
+            for (const zone of mission.colorZones) {
+                if (Math.hypot(rx - zone.x, rz - zone.z) < (zone.radius || 2.5)) {
+                    if (storyState.carriedItem.color === zone.color) {
+                        if (roverGroup.userData.carriedMesh) roverGroup.remove(roverGroup.userData.carriedMesh);
+                        storyState.carriedItem = null;
+                        const cargoHUD = document.getElementById('hud-cargo');
+                        if (cargoHUD) cargoHUD.classList.add('hidden');
+                        
+                        showPickupFlash("✅ Richtig sortiert!");
+                        if (window.audioEngine) window.audioEngine.playHappyBeep();
+                        
+                        window.missionManager.collectItem();
+                        return;
+                    } else {
+                        document.getElementById('sensor-output').innerText = "❌ Falsche Mülltonne! Dieses Teil gehört hier nicht hin.";
+                        showActionFlash("❌ Falsche Tonne");
+                        return;
+                    }
+                }
+            }
+        }
+        document.getElementById('sensor-output').innerText = "❌ Bringe den Müll zu den farbigen Tonnen!";
+        showActionFlash("❌ Nicht bei einer Tonne");
+        return;
+    }
+
     // Check plant spots (if carrying seeds)
     if (storyState.carriedItem.type === 'seed') {
         for (const spot of plantSpots) {
