@@ -16,7 +16,7 @@ class SimpleCoding {
         // Modus: 'a' (kompakt) oder 'b' (Editor groß)
         this.mode = 'b';
 
-        // Block-Definitionen (alle Welt-1-Blöcke)
+        // Block-Definitionen (alle Welt-1 & Welt-2 Blöcke)
         this.blockDefs = {
             'MOVE_FWD':    { icon: '⬆️', label: 'Vor',      type: 'move',   unlock: 1 },
             'MOVE_BWD':    { icon: '⬇️', label: 'Zurück',   type: 'move',   unlock: 1 },
@@ -25,6 +25,11 @@ class SimpleCoding {
             'GRAB':        { icon: '🖐️', label: 'Greifen',  type: 'action', unlock: 3 },
             'REPEAT_ALL':  { icon: '🔁', label: 'Wiederhole alles', type: 'loop', unlock: 4 },
             'LOOP_END':    { icon: '🔁', label: 'Schleife Ende', type: 'loop', unlock: 4 },
+            'SCAN':        { icon: '🔍', label: 'Scannen',  type: 'action', unlock: 5 },
+            'WAIT_UNTIL_COLOR': { icon: '⏳', label: 'Warte bis', type: 'sensor', unlock: 8 },
+            'IF_COLOR':    { icon: '❓', label: 'Wenn Farbe', type: 'condition', unlock: 9 },
+            'ELSE':        { icon: '❔', label: 'Sonst', type: 'condition', unlock: 9 },
+            'END_IF':      { icon: '❓', label: 'Ende Wenn', type: 'condition', unlock: 9 },
         };
 
         // DOM-Referenzen
@@ -246,6 +251,7 @@ class SimpleCoding {
             el.dataset.action = action;
             el.dataset.type = def.type;
             el.textContent = def.icon + ' ' + def.label;
+            el.title = def.label; // Tooltip added for hover
 
             if (!this.unlockedBlocks.includes(action)) {
                 el.classList.add('locked');
@@ -396,25 +402,30 @@ class SimpleCoding {
             delete block.isNew;
         }
 
-        // Visuelles Highlighting für das Klammer-System
-        // Finde heraus, ob wir uns gerade innerhalb einer Schleife befinden
-        let inLoop = false;
-        for (let i = 0; i <= index; i++) {
-            if (this.program[i].action === 'REPEAT_ALL') inLoop = true;
-            if (this.program[i].action === 'LOOP_END' && i < index) inLoop = false; // Block NACH Loop-Ende ist draußen
+        // Visuelles Highlighting für das Klammer-System (Schleifen & Bedingungen)
+        let nestLevel = 0;
+        for (let i = 0; i < index; i++) {
+            const act = this.program[i].action;
+            if (act === 'REPEAT_ALL' || act === 'IF_COLOR') {
+                nestLevel++;
+            }
+            if (act === 'LOOP_END' || act === 'END_IF') {
+                nestLevel = Math.max(0, nestLevel - 1);
+            }
         }
         
-        // Der End-Block selbst darf auch nicht mehr eingerückt werden!
-        if (block.action === 'LOOP_END') {
-            inLoop = false;
+        // Der End-Block selbst und ELSE dürfen nicht eingerückt sein (sie gehören auf das übergeordnete Level)
+        let visualIndent = nestLevel;
+        if (block.action === 'LOOP_END' || block.action === 'END_IF' || block.action === 'ELSE') {
+            visualIndent = Math.max(0, nestLevel - 1);
         }
         
-        if (inLoop && block.action !== 'REPEAT_ALL') {
-            line.style.borderLeft = '6px solid #d946ef'; // Logik-Violett
-            line.style.backgroundColor = 'rgba(217, 70, 239, 0.2)'; // Stärkeres Leuchten in Violett
+        if (visualIndent > 0) {
+            line.style.borderLeft = `${6 * visualIndent}px solid #d946ef`; // Logik-Violett
+            line.style.backgroundColor = `rgba(217, 70, 239, ${0.1 * visualIndent + 0.1})`; 
             line.style.boxShadow = 'inset 0 0 10px rgba(217, 70, 239, 0.1)';
-            line.style.marginLeft = '20px'; // Einrücken für besseres visuelles Feedback!
-            line.style.width = 'calc(100% - 20px)'; // Breite anpassen
+            line.style.marginLeft = `${20 * visualIndent}px`; // Einrücken für visuelles Feedback
+            line.style.width = `calc(100% - ${20 * visualIndent}px)`; // Breite anpassen
         } else {
             line.style.borderLeft = '';
             line.style.backgroundColor = '';
@@ -424,7 +435,13 @@ class SimpleCoding {
         }
 
         // Sicherstellen, dass ein Standardparameter existiert
-        if (block.param === undefined) block.param = 1;
+        if (block.param === undefined) {
+            if (block.action === 'WAIT_UNTIL_COLOR' || block.action === 'IF_COLOR') {
+                block.param = 'blue';
+            } else {
+                block.param = 1;
+            }
+        }
 
         let stepperHTML = '';
         const hasParam = ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'REPEAT_ALL'].includes(block.action);
@@ -437,19 +454,27 @@ class SimpleCoding {
                     <button class="stepper-btn btn-plus">+</button>
                 </div>
             `;
+        } else if (block.action === 'WAIT_UNTIL_COLOR' || block.action === 'IF_COLOR') {
+            const val = block.param || 'blue';
+            stepperHTML = `
+                <select class="block-select" style="margin-left: 8px; background: #ffffff; border: 1px solid #bbf7d0; border-radius: 4px; padding: 2px 4px; color: #064e3b; font-size: 0.9rem; font-family: inherit; pointer-events: auto; outline: none; cursor: pointer;">
+                    <option value="blue" ${val === 'blue' ? 'selected' : ''}>Blau 🔵</option>
+                    <option value="red" ${val === 'red' ? 'selected' : ''}>Rot 🔴</option>
+                </select>
+            `;
         }
 
         line.innerHTML = `
-            <span class="block-drag-handle">☰</span>
-            <span class="block-icon">${block.icon}</span>
-            <span class="block-label">${block.label}</span>
+            <span class="block-drag-handle" title="Block verschieben (Ziehen)">☰</span>
+            <span class="block-icon" title="${block.label}">${block.icon}</span>
+            <span class="block-label" title="${block.label}">${block.label}</span>
             ${stepperHTML}
-            <span class="block-index">${index + 1}</span>
+            <span class="block-index" title="Schritt-Nummer">${index + 1}</span>
             <div class="block-move-btns">
-                <button class="block-move-btn btn-up" aria-label="Nach oben" ${index === 0 ? 'disabled' : ''}>▲</button>
-                <button class="block-move-btn btn-down" aria-label="Nach unten" ${index === this.program.length - 1 ? 'disabled' : ''}>▼</button>
+                <button class="block-move-btn btn-up" aria-label="Nach oben" title="Block nach oben verschieben" ${index === 0 ? 'disabled' : ''}>▲</button>
+                <button class="block-move-btn btn-down" aria-label="Nach unten" title="Block nach unten verschieben" ${index === this.program.length - 1 ? 'disabled' : ''}>▼</button>
             </div>
-            <button class="block-delete-btn" aria-label="Löschen">×</button>
+            <button class="block-delete-btn" aria-label="Löschen" title="Block löschen">×</button>
         `;
 
         // Lösch-Button Event-Listener (Propagation stoppen, damit die Zeile nicht selektiert/gedrückt wird)
@@ -516,6 +541,15 @@ class SimpleCoding {
                     }
                 });
             }
+        }
+
+        const selectEl = line.querySelector('.block-select');
+        if (selectEl) {
+            selectEl.addEventListener('pointerdown', (e) => e.stopPropagation());
+            selectEl.addEventListener('pointerup', (e) => e.stopPropagation());
+            selectEl.addEventListener('change', (e) => {
+                block.param = e.target.value;
+            });
         }
 
         // 1. Drag & Drop Reordering (only on drag handle)

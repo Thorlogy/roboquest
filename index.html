@@ -57,6 +57,7 @@
                 <div class="hud-logo">
                     <img src="img/roboquest_logo.png" alt="RoboQuest Logo" style="height: 40px; margin-right: 10px; border-radius: 8px;">
                     <span class="logo-text">RoboQuest</span>
+                    <span class="world-badge" id="hud-world-badge" style="margin-left: 12px; font-size: 0.75rem; font-weight: 700; color: #1e293b; background: #f1f5f9; padding: 4px 10px; border-radius: 12px; border: 1px solid #cbd5e1; display: inline-block; vertical-align: middle;">Welt 1</span>
                 </div>
                 <div class="hud-score-inline">
                     ⭐ <span id="score-display">0</span>
@@ -64,10 +65,10 @@
                 </div>
             </div>
             <div class="hud-top-right">
-                <button class="hud-icon-btn" id="cam-toggle-btn" title="Kamera-Ansicht"></button>
-                <button class="hud-icon-btn" id="btn-open-missions" title="Missions-Übersicht">🎯</button>
-                <button class="hud-icon-btn" id="handbook-btn" title="Handbuch öffnen">📖</button>
-                <button class="hud-icon-btn" id="btn-settings" title="Einstellungen">⚙️</button>
+                <button class="hud-icon-btn" id="cam-toggle-btn" title="Kamera-Ansicht wechseln (Folgen / Freies Fliegen)"></button>
+                <button class="hud-icon-btn" id="btn-open-missions" title="Aktuelle Mission anzeigen (🎯)">🎯</button>
+                <button class="hud-icon-btn" id="handbook-btn" title="Handbuch / Story öffnen (📖)">📖</button>
+                <button class="hud-icon-btn" id="btn-settings" title="Einstellungen öffnen (⚙️)">⚙️</button>
             </div>
         </div>
 
@@ -113,17 +114,17 @@
 
             <!-- D-Pad (Touch + Click) -->
             <div class="dpad" id="dpad">
-                <button class="dpad-btn dpad-up" data-dir="up" id="dpad-up">▲</button>
-                <button class="dpad-btn dpad-left" data-dir="left" id="dpad-left">◀</button>
-                <button class="dpad-btn dpad-center" id="dpad-center">🤖</button>
-                <button class="dpad-btn dpad-right" data-dir="right" id="dpad-right">▶</button>
-                <button class="dpad-btn dpad-down" data-dir="down" id="dpad-down">▼</button>
+                <button class="dpad-btn dpad-up" data-dir="up" id="dpad-up" title="Roboter vorwärts fahren lassen (▲)">▲</button>
+                <button class="dpad-btn dpad-left" data-dir="left" id="dpad-left" title="Roboter nach links drehen (◀)">◀</button>
+                <button class="dpad-btn dpad-center" id="dpad-center" title="Roboter zur Startposition zurücksetzen (🤖)">🤖</button>
+                <button class="dpad-btn dpad-right" data-dir="right" id="dpad-right" title="Roboter nach rechts drehen (▶)">▶</button>
+                <button class="dpad-btn dpad-down" data-dir="down" id="dpad-down" title="Roboter rückwärts fahren lassen (▼)">▼</button>
             </div>
 
             <!-- Bottom Control Bar -->
             <div class="bottom-bar">
-                <button id="btn-run" class="action-btn">▶</button>
-                <button id="btn-stop" class="action-btn stop">■</button>
+                <button id="btn-run" class="action-btn" title="Programm starten (▶)">▶</button>
+                <button id="btn-stop" class="action-btn stop" title="Programm stoppen & Roboter zurücksetzen (■)">■</button>
             </div>
 
             <!-- Success Overlay -->
@@ -162,7 +163,7 @@
             <div class="handbook-modal glass-panel" id="handbook-modal" style="display:none;">
                 <div class="handbook-header">
                     <h2>📖 RoboQuest Story</h2>
-                    <button class="close-btn" id="btn-close-handbook">✖</button>
+                    <button class="close-btn" id="btn-close-handbook" title="Handbuch schließen">✖</button>
                 </div>
                 <div class="handbook-body">
                     <div class="handbook-content" style="width: 100%; border-left: none; padding: 30px;">
@@ -181,7 +182,7 @@
     <!-- Worlds Preview Modal -->
     <div id="worlds-preview-modal" class="handbook-modal" style="display: none; width: 450px; max-width: 90%; height: auto; padding: 20px;">
         <div class="modal-content glass-panel" style="max-width: 500px; text-align: left; position: relative;">
-            <button class="close-btn" id="btn-close-worlds" style="position: absolute; top: 12px; right: 12px;">×</button>
+            <button class="close-btn" id="btn-close-worlds" style="position: absolute; top: 12px; right: 12px;" title="Fenster schließen">×</button>
             <h2 class="modal-title" style="text-align: center; margin-bottom: 20px;">🌍 Bekannte Welten</h2>
             
             <div class="world-preview-card active-world" style="background: rgba(74,222,128,0.1); border-left: 4px solid #4ade80; padding: 15px; margin-bottom: 15px; border-radius: 8px;">
@@ -217,7 +218,7 @@
             </div>
             <div class="hub-modern-actions">
                 <button class="hub-icon-btn">🔊</button>
-                <button class="hub-icon-btn" id="btn-settings-hub">⚙️</button>
+                <button class="hub-icon-btn" id="btn-settings-hub" title="Einstellungen öffnen">⚙️</button>
             </div>
         </div>
 
@@ -246,15 +247,15 @@
 
         <!-- Bottom Navigation -->
         <div class="hub-bottom-nav">
-            <button class="nav-btn" id="nav-btn-missions">
+            <button class="nav-btn" id="nav-btn-missions" title="Welten-Übersicht öffnen (🌍)">
                 <span class="nav-icon">🌍</span>
                 <span class="nav-label">Welten</span>
             </button>
-            <button class="nav-btn" id="nav-btn-handbook">
+            <button class="nav-btn" id="nav-btn-handbook" title="Handbuch öffnen (📖)">
                 <span class="nav-icon">📖</span>
                 <span class="nav-label">Handbuch</span>
             </button>
-            <button class="nav-btn" id="nav-btn-world">
+            <button class="nav-btn" id="nav-btn-world" title="Spielen / Freie Erkundung starten (🎮)">
                 <span class="nav-icon">🎮</span>
                 <span class="nav-label">Spielen</span>
             </button>
@@ -282,9 +283,9 @@
 
         <!-- Aktionen -->
         <div class="editor-actions">
-            <button class="editor-btn btn-clear" id="btn-clear-editor">🗑️</button>
-            <button class="editor-btn btn-play" id="btn-play">▶ Start</button>
-            <button class="editor-btn btn-stop" id="btn-stop-editor">⏹</button>
+            <button class="editor-btn btn-clear" id="btn-clear-editor" title="Alle Programmschritte löschen (🗑️)">🗑️</button>
+            <button class="editor-btn btn-play" id="btn-play" title="Programm ausführen / Roboter starten (▶)">▶ Start</button>
+            <button class="editor-btn btn-stop" id="btn-stop-editor" title="Programm stoppen / Zurücksetzen (⏹)">⏹</button>
         </div>
     </div>
 
@@ -300,7 +301,7 @@
     <div class="handbook-modal" id="missions-modal" style="display:none; width: 450px; height: auto; max-height: 80vh; max-width: 90%;">
         <div class="handbook-header">
             <h2>🎯 Missions-Übersicht</h2>
-            <button class="close-btn" id="btn-close-missions">✖</button>
+            <button class="close-btn" id="btn-close-missions" title="Missions-Übersicht schließen">✖</button>
         </div>
         <div class="hb-content" style="padding: 25px; flex-direction: column; gap: 15px; display: flex;">
             <div style="background: rgba(255,255,255,0.6); padding: 15px; border-radius: 12px; border: 1px solid #bbf7d0;">
@@ -310,7 +311,7 @@
                     <!-- Objectives injected here -->
                 </div>
             </div>
-            <button class="success-btn" id="btn-go-to-hub" style="width: 100%; font-size: 1rem; padding: 10px; margin-top: 5px;">
+            <button class="success-btn" id="btn-go-to-hub" style="width: 100%; font-size: 1rem; padding: 10px; margin-top: 5px;" title="Zur allgemeinen Missions-Übersicht (🌍)">
                 Zur allgemeinen Missions-Übersicht 🌍
             </button>
             <div style="text-align: center; color: #047857; font-size: 0.9rem; margin-top: 5px;">
@@ -323,16 +324,16 @@
     <div class="handbook-modal" id="settings-modal" style="display:none; width: 400px; height: auto; max-height: 80vh; max-width: 90%; z-index: 10000;">
         <div class="handbook-header">
             <h2>⚙️ Einstellungen</h2>
-            <button class="close-btn" id="btn-close-settings">✖</button>
+            <button class="close-btn" id="btn-close-settings" title="Einstellungen schließen">✖</button>
         </div>
         <div class="hb-content" style="display: flex; flex-direction: column; gap: 20px; padding: 25px;">
             <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.5); padding: 15px 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
                 <span style="font-weight: 700; color: #1e293b; font-size: 1.1rem;">Ton</span>
-                <button id="toggle-sound-btn" style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 0.95rem;">AN</button>
+                <button id="toggle-sound-btn" style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 0.95rem;" title="Sound-Effekte an- oder ausschalten">AN</button>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.5); padding: 15px 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
                 <span style="font-weight: 700; color: #1e293b; font-size: 1.1rem;">Karte</span>
-                <button id="toggle-minimap-btn" style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 0.95rem;">AN</button>
+                <button id="toggle-minimap-btn" style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 0.95rem;" title="Orientierungskreis/Karte an- oder ausschalten">AN</button>
             </div>
         </div>
     </div>

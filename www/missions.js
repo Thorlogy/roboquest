@@ -283,7 +283,7 @@ class MissionManager {
                 const parsed = JSON.parse(data);
                 if (parsed && typeof parsed === 'object') {
                     if (!parsed.missionResults) parsed.missionResults = {};
-                    if (parsed.highestMission === undefined) parsed.highestMission = 1;
+                    parsed.highestMission = 10; // FORCED TO UNLOCK ALL MISSIONS (1-10)
                     if (parsed.currentWorld === undefined) parsed.currentWorld = 1;
                     return parsed;
                 }
@@ -291,7 +291,7 @@ class MissionManager {
         } catch(e) { console.warn('Progress load failed:', e); }
         return {
             currentWorld: 1,
-            highestMission: 1, // Höchste freigeschaltete Mission
+            highestMission: 10, // FORCED TO UNLOCK ALL MISSIONS (1-10)
             missionResults: {}  // { "1": { completed: true, stars: 2, blockCount: 4 }, ... }
         };
     }
@@ -433,6 +433,22 @@ class MissionManager {
         if (questText) questText.textContent = '🎯 ' + mission.description;
         const levelBadge = document.getElementById('level-badge');
         if (levelBadge) levelBadge.textContent = 'Mission ' + missionId;
+
+        const worldBadge = document.getElementById('hud-world-badge');
+        if (worldBadge) {
+            const worldNum = missionId <= 5 ? 1 : 2;
+            const worldName = worldNum === 1 ? "Welt 1" : "Welt 2";
+            worldBadge.textContent = worldName;
+            if (worldNum === 2) {
+                worldBadge.style.color = '#166534';
+                worldBadge.style.background = '#dcfce7';
+                worldBadge.style.borderColor = '#bbf7d0';
+            } else {
+                worldBadge.style.color = '#1e293b';
+                worldBadge.style.background = '#f1f5f9';
+                worldBadge.style.borderColor = '#cbd5e1';
+            }
+        }
     }
 
     // ═══════════════════════════════════════════════
@@ -737,6 +753,14 @@ class MissionManager {
                 if (questText) questText.textContent = '🔍 Erkunde die Welt und löse Quests!';
                 const levelBadge = document.getElementById('level-badge');
                 if (levelBadge) levelBadge.textContent = 'Freies Spiel';
+
+                const worldBadge = document.getElementById('hud-world-badge');
+                if (worldBadge) {
+                    worldBadge.textContent = 'Freies Spiel';
+                    worldBadge.style.color = '#1e293b';
+                    worldBadge.style.background = '#f1f5f9';
+                    worldBadge.style.borderColor = '#cbd5e1';
+                }
             });
         }
 

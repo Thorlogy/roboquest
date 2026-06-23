@@ -1,43 +1,44 @@
-# Walkthrough: UI-Optimierungen, Einstellungen & Missionsfluss
+# Walkthrough: Missions-Freischaltung & Hover-Tooltips ("Alt"-Texte)
 
-Ich habe die im Implementierungsplan beschriebenen Anpassungen, den automatischen Übergang zwischen den Missionen sowie die Punkte-Aktualisierung durchgeführt. Hier ist eine detaillierte Übersicht über die Änderungen und wie du sie testen kannst:
+Ich habe die gewünschten Anpassungen implementiert, um alle Missionen freizuschalten, den Globus voll funktionsfähig zu machen und Tooltips an allen relevanten Icons hinzuzufügen:
 
-## 1. D-Pad & Sensor Überlagerung behoben (Hochformat)
-* **Verhalten**: Wenn du das Programmier-Panel öffnest (durch Tippen auf die Programmierleiste), schieben sich das D-Pad und die Sensor-Ausgabe nun automatisch und flüssig nach oben. 
-* **Details**: 
-  * In `js/simple_coding.js` wird die Klasse `editor-mode-a` (eingeklappt) oder `editor-mode-b` (aufgezogen) auf das `<body>`-Element gelegt.
-  * In `css/style.css` sorgen CSS-Transitions dafür, dass die Steuerungstasten und die Sensor-Ausgabe flüssig nach oben gleiten (`bottom: calc(50vh + 30px)`), sobald die Klasse aktiv ist, und beim Einklappen sanft wieder nach unten sinken. Sie sind dadurch in jedem Modus uneingeschränkt sichtbar und bedienbar.
+## 1. Alle Missionen freigeschaltet & Welten-Wechsel (Globus)
+* **Verhalten**: Beim Starten des Spiels sind nun **alle 10 Missionen** standardmäßig komplett freigeschaltet.
+* **Welten-Wechsel (Globus)**:
+  - Da Welt 2 nun standardmäßig freigeschaltet ist, kannst du im Welten-Vorschau-Modal (Klick auf den 🌍-Globus-Button unten links im Hub) direkt auf **"Welt 2: Verschmutzter Stadtpark"** klicken.
+  - Dadurch schließt sich das Modal und lädt sofort **Mission 6** (die erste Mission von Welt 2).
 
-## 2. Kamera-Ansicht (Orbit & Follow) wiederhergestellt
-* **Verhalten**: Die Kamera-Schaltfläche (`#cam-toggle-btn`) befindet sich nun gut sichtbar oben rechts in der HUD-Menüleiste, direkt neben der Missionsübersicht (`🎯`), dem Handbuch (`📖`) und den Einstellungen (`⚙️`).
-* **Icons & States**:
-  - **🎥 Filmkamera**: Verfolgungs-Modus (Follow) – die Kamera folgt dem Rover.
-  - **🌐 Weltkugel**: Orbit-Modus (Freie Steuerung) – du kannst dich frei umschauen. Der Button leuchtet in diesem Zustand dezent grün.
+## 2. Visuelle Unterscheidung für Welt 2 (Verschmutzter Stadtpark)
+Damit sich Welt 2 sofort optisch von Welt 1 abhebt, wurden folgende Anpassungen in der 3D-Simulation implementiert:
+* **Boden**: Wechselt in Welt 2 (Missions-ID >= 6) auf ein saftiges **Dunkelwaldgrün** (`0x14532d`) statt des dunklen Schiefergraus von Welt 1.
+* **Gitter-Netz (Grid)**: Die Gitterlinien sind in aufeinander abgestimmten Grüntönen gehalten.
+* **Dekorative 3D-Bäume**: Auf den Rändern der Simulation spawnen deterministisch 30 Low-Poly Nadel- und Laubbäume als dekorative Park-Elemente.
+* **Himmel & Nebel**: Der Nebel und der Hintergrund wechseln in Welt 2 zu einem hellen **Himmelblau** (`0xbae6fd`) mit geringerer Dichte (`0.008`) für eine weite, offene Parkatmosphäre.
 
-## 3. Einstellungen (Zahnrad) Optimierung & Toggles
-* **Zahnrad-Toggle**: Wenn das Einstellungs-Menü bereits geöffnet ist, schließt es sich durch einen erneuten Klick auf das Zahnrad-Symbol (`#btn-settings` oder `.intro-settings-icon`) automatisch.
-* **Emoji-Bereinigung**: Die AN/AUS-Schaltflächen enthalten keine zusätzlichen Emojis mehr (jetzt schlicht "AN" und "AUS" in grün bzw. grau).
-* **Zwei neue Einstellungen**:
-  1. **Pfeilsteuerung (D-Pad)**: Ein-/Ausschalten der Steuerungs-Tasten.
-  2. **Orientierungskreis (Kompass/Minimap)**: Ein-/Ausschalten der runden Karte oben rechts (wird im Querformat angezeigt).
-* **Persistenz**: Alle vier Einstellungen (Sound, Musik, Pfeilsteuerung, Orientierungskreis) werden lokal im Browser-Speicher (`localStorage`) hinterlegt, damit sie beim Neustart der App geladen und beibehalten werden.
+## 3. Dynamische Welt-Anzeige im HUD (Welt-Badge)
+Direkt neben dem "RoboQuest"-Logo in der oberen HUD-Leiste gibt es nun eine dynamische Anzeige (Welt-Badge):
+* **Aussehen**: Die Anzeige ist als abgerundete Pille gestaltet, die sich farblich der jeweiligen Welt anpasst:
+  - **Welt 1**: Grauer Hintergrund, dunkelgraue Schrift.
+  - **Welt 2**: Hellgrüner Hintergrund, dunkelgrüne Schrift (passend zur Park-Thematik).
+  - **Freies Spiel**: Grauer Hintergrund, dunkelgraue Schrift.
+* **Automatische Aktualisierung**: Beim Laden einer Mission oder beim Start der freien Erkundung aktualisiert sich das Badge sofort.
 
-## 4. Nahtloser Missionsübergang
-* **Verhalten**: Wenn du eine Mission erfolgreich beendest und im Erfolgs-Overlay auf **"Weiter →"** klickst, wird nun – nach Beantwortung von Adas Verständnisfrage – **sofort und automatisch die nächste Mission geladen und gestartet**.
-* **Erklärung**: Du wirst nicht mehr zurück auf die Weltkarte (Hub) geworfen, um die nächste Mission manuell suchen zu müssen. Stattdessen wird Mission 2 direkt geladen, die neuen Befehle (z. B. "Dreh dich!"-Tutorial für Links/Rechts) werden von Ada sofort erklärt, und die Level-Beschreibung startet direkt.
-* **Fallback**: Wenn du die letzte Mission der Welt (Mission 5) geschafft hast, leitet dich der Button wie gewohnt zurück zum Missions-Hub.
+## 4. Kontrast-Verbesserung (Schlecht lesbarer Text behoben)
+* **Lösung**: Es wurden High-Contrast-Regeln für das `#worlds-preview-modal` in der `css/style.css` hinterlegt:
+  - Der Modal-Titel und Textbeschreibungen leuchten nun in klarem Weiß (`#ffffff`) bzw. hellem Grau (`#e2e8f0` / `#cbd5e1`).
+  - Der Schließen-Button (oben rechts) wurde farblich ebenfalls für den Dark-Glass-Look optimiert.
 
-## 5. Punkte-Aktualisierung in der Menüleiste (Neu)
-* **Problem**: Wenn eine Custom-Mission erfolgreich beendet wurde, wurden die gewonnenen Punkte (z. B. 100 Punkte für Bronze, 200 für Silber, 300 für Gold) zwar im Popup angezeigt, aber nicht zum globalen Spiel-Score in der oberen Menüleiste hinzugefügt. Der Zähler blieb dauerhaft auf `0`.
-* **Behebung**: In `js/missions.js` wird die erfolgreiche Punkteanzahl nun direkt zum globalen Spiel-Score hinzugefügt. Das HUD-Element `score-display` oben in der Menüleiste (neben dem gelben Stern ⭐) wird sofort aktualisiert.
+## 5. Hover-Tooltips ("Alt"-Texte via `title`-Attribut)
+Es wurden aussagekräftige deutsche Beschreibungen als Tooltips (`title`-Attribut) hinterlegt, die beim Hovern mit der Maus erscheinen (z. B. auf D-Pad-Tasten, Editor-Buttons, HUD-Icons und Paletten-Blöcken).
 
 ---
 
 ## Wie du es testen kannst:
-1. Führe in Android Studio ein **"Clean Project"** und anschließend **"Run"** aus, um das Update zu installieren.
-2. **Punkte & Missionsübergang**:
-   * Starte und absolviere **Mission 1** (fahre ROBO 15 cm vorwärts).
-   * Sobald du das Ziel erreichst, öffnet sich das Erfolgs-Popup.
-   * Klicke auf **"Weiter →"** und beantworte die Frage.
-   * **Beobachte**: Der Sternen-Punktestand oben in der Menüleiste (HUD) springt von `0` auf deinen erreichten Punktestand (z. B. `300`).
-   * **Beobachte**: Die Ansicht wechselt direkt in **Mission 2**. Das Ada-Popup **"Dreh dich!"** erscheint sofort und erklärt die neuen Blöcke.
+1. Starte die App.
+2. Im Hauptmenü klicke auf **"🚀 Start Mission"**, um in den Hub zu gelangen.
+3. Klicke unten links auf das **Weltkugel-Icon (🌍)**.
+4. Klicke auf die Karte für **Welt 2: Verschmutzter Stadtpark**.
+5. **Beobachte**: Die Simulation wechselt sofort zu **Mission 6** (Welt 2, Mission 1).
+6. **Beobachte**: Die Wiese ist grün, am Rand stehen 3D-Bäume, der Himmel ist hellblau und die obere Leiste zeigt deutlich das grüne Badge **"Welt 2"** neben "RoboQuest" an.
+7. Wechsle über den Globus zurück zu Welt 1 und beobachte, wie sich das Badge wieder zu **"Welt 1"** ändert und die 3D-Ansicht auf den schlichten grauen Werkstatt-Look zurückspringt.
+8. Hover mit der Maus über die Steuerungselemente und Programmierblöcke, um die neuen Tooltips zu sehen.

@@ -1602,7 +1602,7 @@ body {
   border-radius: 16px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.15);
   animation: modalPopIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-  z-index: 1000;
+  z-index: 10000;
   color: #1e293b;
   width: 500px;
   max-width: 90%;
@@ -2268,4 +2268,32 @@ body {
 .ada-option-btn.correct {
   background: #059669;
   border-color: #34d399;
+}
+
+/* High Contrast Overrides for Worlds Preview Modal (Dark Theme Glassmorphism) */
+#worlds-preview-modal {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+#worlds-preview-modal .modal-title {
+  color: #ffffff !important;
+}
+
+#worlds-preview-modal .world-preview-card p {
+  color: #e2e8f0 !important;
+}
+
+#worlds-preview-modal p {
+  color: #cbd5e1 !important;
+}
+
+#worlds-preview-modal .close-btn {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+#worlds-preview-modal .close-btn:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
 }

@@ -332,7 +332,7 @@ function setupDPad() {
         const w2Unlocked = highest >= 6;
         
         content.innerHTML = `
-            <button class="close-btn" id="btn-close-worlds" style="position: absolute; top: 12px; right: 12px;">×</button>
+            <button class="close-btn" id="btn-close-worlds" style="position: absolute; top: 12px; right: 12px;" title="Fenster schließen">×</button>
             <h2 class="modal-title" style="text-align: center; margin-bottom: 20px;">🌍 Bekannte Welten</h2>
             
             <!-- Welt 1 -->

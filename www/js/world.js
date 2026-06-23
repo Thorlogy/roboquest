@@ -461,8 +461,12 @@ function updateAtmosphere(delta, time) {
     timeOfDay = 0; // Später für Welt 2: (Math.sin(time * 0.05) + 1) / 2;
     
     // Lerp Sky Color (Day: Blue, Night: Dark Purple/Blue)
-    const daySky = new THREE.Color(0x87ceeb);
-    const nightSky = new THREE.Color(0x0a0a2e);
+    const mission = window.missionManager && window.missionManager.currentMission;
+    const isW2 = mission && mission.id >= 6;
+    const isFog = mission && mission.fogEnabled;
+
+    const daySky = isFog ? new THREE.Color(0x020617) : (isW2 ? new THREE.Color(0xbae6fd) : new THREE.Color(0x87ceeb));
+    const nightSky = isFog ? new THREE.Color(0x020617) : new THREE.Color(0x0a0a2e);
     skyColor.copy(daySky).lerp(nightSky, timeOfDay);
     scene.background = skyColor;
     if (scene.fog) scene.fog.color.copy(skyColor);
@@ -734,9 +738,10 @@ window.missionWorld = {
         }
 
         // Create ground plane for mission (flat surface matching grid/goal)
+        const isWorld2 = mission.id >= 6;
         const groundGeo = new THREE.PlaneGeometry(100, 100);
         const groundMat = new THREE.MeshStandardMaterial({ 
-            color: 0x1e293b, // Dark slate
+            color: isWorld2 ? 0x14532d : 0x1e293b, // Dark Forest Green for World 2, Dark Slate for World 1
             roughness: 0.8,
             metalness: 0.2
         });
@@ -746,9 +751,81 @@ window.missionWorld = {
         environmentGroup.add(ground);
 
         // Add a grid helper
-        const gridHelper = new THREE.GridHelper(100, 50, 0x475569, 0x334155);
+        const gridHelper = new THREE.GridHelper(100, 50, isWorld2 ? 0x15803d : 0x475569, isWorld2 ? 0x14532d : 0x334155);
         gridHelper.position.y = 0.02;
         environmentGroup.add(gridHelper);
+
+        // Spawn decorative trees and bushes for World 2
+        if (isWorld2) {
+            // Materials for park elements
+            const trkMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.9 });
+            const leaMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.6, flatShading: true });
+            const bshMat = new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.8, flatShading: true });
+
+            // Seeded random for deterministic tree placement in World 2 missions
+            let w2Seed = mission.id * 10;
+            function w2Random() {
+                let t = (w2Seed += 0x6d2b79f5);
+                t = Math.imul(t ^ (t >>> 15), t | 1);
+                t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+                return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+            }
+
+            // Create simple helper to position shapes
+            const meshAt = function(geo, mat, x, y, z) {
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.position.set(x, y, z);
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                return mesh;
+            };
+
+            for (let i = 0; i < 30; i++) {
+                // Place trees around the borders (outside the central area where the robot moves)
+                let tx, tz;
+                if (w2Random() < 0.5) {
+                    tx = (w2Random() < 0.5 ? -1 : 1) * (w2Random() * 25 + 15); // 15 to 40
+                    tz = (w2Random() - 0.5) * 80;
+                } else {
+                    tx = (w2Random() - 0.5) * 80;
+                    tz = (w2Random() < 0.5 ? -1 : 1) * (w2Random() * 25 + 15); // 15 to 40
+                }
+
+                // Check overlap with target and robot startPos
+                let tooClose = false;
+                if (mission.goalPos && Math.hypot(tx - mission.goalPos.x, tz - mission.goalPos.z) < 6) tooClose = true;
+                if (Math.hypot(tx - mission.startPos.x, tz - mission.startPos.z) < 6) tooClose = true;
+                if (mission.collectibles) {
+                    mission.collectibles.forEach(col => {
+                        if (Math.hypot(tx - col.x, tz - col.z) < 4) tooClose = true;
+                    });
+                }
+                if (tooClose) continue;
+
+                const tree = new THREE.Group();
+                const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 1.5, 5), trkMat);
+                trunk.position.y = 0.75;
+                trunk.castShadow = true;
+                tree.add(trunk);
+
+                if (w2Random() < 0.5) {
+                    // Pine Tree
+                    tree.add(meshAt(new THREE.ConeGeometry(1.2, 2.0, 6), leaMat, 0, 2.0, 0));
+                    tree.add(meshAt(new THREE.ConeGeometry(0.9, 1.5, 6), leaMat, 0, 3.0, 0));
+                } else {
+                    // Round Tree / Bush
+                    tree.add(meshAt(new THREE.DodecahedronGeometry(1.0), bshMat, 0, 2.0, 0));
+                }
+
+                const s = w2Random() * 0.4 + 0.8;
+                tree.scale.set(s, s, s);
+                tree.position.set(tx, 0, tz);
+                environmentGroup.add(tree);
+
+                // Add to obstacles list for collisions
+                obstacles.push({ x: tx, z: tz, radius: 1.0 * s });
+            }
+        }
 
         // Spawn Goal Pos if defined
         if (mission.goalPos) {
@@ -827,22 +904,50 @@ window.missionWorld = {
                 scene.add(group);
                 
                 const def = { color: 0x94a3b8, emissive: 0x475569, name: "Schrottteil", emoji: col.icon || '⚙️' };
-                collectibles.push({ mesh: group, x: col.x, z: col.z, type: col.type, def: def });
+                collectibles.push({ mesh: group, x: col.x, z: col.z, type: col.type, color: col.color, def: def });
+            });
+        }
+
+        // Spawn color zones on the ground
+        if (mission.colorZones) {
+            mission.colorZones.forEach(zone => {
+                const geo = new THREE.RingGeometry(zone.radius ? zone.radius - 0.2 : 1.8, zone.radius || 2.0, 32);
+                const colorHex = zone.color === 'blue' ? 0x2563eb : (zone.color === 'red' ? 0xdc2626 : 0x16a34a);
+                const mat = new THREE.MeshBasicMaterial({ 
+                    color: colorHex, 
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: 0.6
+                });
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.rotation.x = Math.PI / 2; // Flat on the ground
+                mesh.position.set(zone.x, 0.02, zone.z);
+                scene.add(mesh);
             });
         }
 
         // Apply Fog/Darkness (Mission 4)
         if (typeof scene !== 'undefined' && scene.fog) {
+            const isWorld2 = mission.id >= 6;
             if (mission.fogEnabled) {
                 scene.fog.color.setHex(0x020617); // Dark blue/black
-                scene.fog.near = 1;
-                scene.fog.far = 15;
+                if (scene.fog.isFogExp2) {
+                    scene.fog.density = 0.08;
+                } else {
+                    scene.fog.near = 1;
+                    scene.fog.far = 15;
+                }
                 if (typeof renderer !== 'undefined') renderer.setClearColor(0x020617, 1);
             } else {
-                scene.fog.color.setHex(0xe2e8f0);
-                scene.fog.near = 20;
-                scene.fog.far = 100;
-                if (typeof renderer !== 'undefined') renderer.setClearColor(0xe2e8f0, 1);
+                const fogColor = isWorld2 ? 0xbae6fd : 0xe2e8f0; // sky-blue for World 2, light slate/gray for World 1
+                scene.fog.color.setHex(fogColor);
+                if (scene.fog.isFogExp2) {
+                    scene.fog.density = isWorld2 ? 0.008 : 0.012; // Thinner fog for a wide view in World 2
+                } else {
+                    scene.fog.near = isWorld2 ? 30 : 20;
+                    scene.fog.far = isWorld2 ? 120 : 100;
+                }
+                if (typeof renderer !== 'undefined') renderer.setClearColor(fogColor, 1);
             }
         }
 
