@@ -2297,3 +2297,36 @@ body {
 #worlds-preview-modal .close-btn:hover {
   background: rgba(255, 255, 255, 0.25) !important;
 }
+
+/* World Separators in Mission Hub */
+.world-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 15px 0;
+  position: relative;
+  z-index: 2;
+}
+
+.world-separator-badge {
+  background: linear-gradient(135deg, #0f172a, #065f46); /* Dark slate to emerald */
+  border: 2px solid #10b981; /* Green/mint border */
+  color: #ffffff;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
+  text-transform: uppercase;
+  font-family: 'Inter', sans-serif;
+  user-select: none;
+}
+
+.world-separator-icon {
+  font-size: 1.1rem;
+}
