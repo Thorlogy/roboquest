@@ -964,6 +964,9 @@ function init() {
                 else if (action === 'IF_COLOR') blockType = 'if_color';
                 else if (action === 'ELSE') blockType = 'else_branch';
                 else if (action === 'END_IF') blockType = 'end_if_branch';
+                else if (action === 'MOTOR_FWD') blockType = 'motor';
+                else if (action === 'MOTOR_BWD') blockType = 'motor';
+                else if (action === 'MOTOR_STOP') blockType = 'motor';
 
                 // We mock the block methods needed by rStep
                 const bMock = { 
