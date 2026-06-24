@@ -18,18 +18,20 @@ class SimpleCoding {
 
         // Block-Definitionen (alle Welt-1 & Welt-2 Blöcke)
         this.blockDefs = {
-            'MOVE_FWD':    { icon: '⬆️', label: 'Vor',      type: 'move',   unlock: 1 },
-            'MOVE_BWD':    { icon: '⬇️', label: 'Zurück',   type: 'move',   unlock: 1 },
-            'TURN_LEFT':   { icon: '⟲',  label: 'Links',    type: 'move',   unlock: 2 },
-            'TURN_RIGHT':  { icon: '⟳',  label: 'Rechts',   type: 'move',   unlock: 2 },
+            'MOVE_FWD':    { icon: '⬆️', label: 'Fahre Strecke (Vor)', type: 'move',   unlock: 1 },
+            'MOVE_BWD':    { icon: '⬇️', label: 'Fahre Strecke (Zurück)', type: 'move', unlock: 1 },
+            'TURN_LEFT':   { icon: '⟲',  label: 'Links drehen',    type: 'move',   unlock: 2 },
+            'TURN_RIGHT':  { icon: '⟳',  label: 'Rechts drehen',   type: 'move',   unlock: 2 },
+            'MOTOR_FWD':   { icon: '🚀', label: 'Motor an: Vorwärts', type: 'motor', unlock: 8 },
+            'MOTOR_BWD':   { icon: '🚀', label: 'Motor an: Rückwärts', type: 'motor', unlock: 8 },
+            'MOTOR_STOP':  { icon: '🛑', label: 'Motor: Stopp', type: 'motor', unlock: 8 },
             'GRAB':        { icon: '🖐️', label: 'Greifen',  type: 'action', unlock: 3 },
             'DROP':        { icon: '👇', label: 'Ablegen', type: 'action', unlock: 3 },
             'REPEAT_ALL':  { icon: '🔁', label: 'Wiederhole alles', type: 'loop', unlock: 4 },
             'LOOP_END':    { icon: '🔁', label: 'Schleife Ende', type: 'loop', unlock: 4 },
             'SCAN':        { icon: '📡', label: 'Ultraschallsensor: Distanz prüfen', type: 'action', unlock: 5 },
-            'WAIT_UNTIL_COLOR': { icon: '⏳', label: 'Farbsensor: Fahre bis Farbe', type: 'sensor', unlock: 8 },
+            'WAIT_UNTIL':  { icon: '⏳', label: 'Warte bis', type: 'sensor', unlock: 8 },
             'IF_COLOR':    { icon: '❓', label: 'Farbsensor: Wenn Farbe', type: 'condition', unlock: 9 },
-            'WAIT_UNTIL_TOUCH': { icon: '🧱', label: 'Tastsensor: Fahre bis Hindernis', type: 'sensor', unlock: 9 },
             'ELSE':        { icon: '❔', label: 'Sonst', type: 'condition', unlock: 9 },
             'END_IF':      { icon: '❓', label: 'Ende Wenn', type: 'condition', unlock: 9 },
         };
@@ -42,8 +44,8 @@ class SimpleCoding {
 
         // Kategorien (Solarpunk Style)
         this.categoryMap = {
-            'Aktion': { color: '#d97706', blocks: ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'GRAB', 'DROP'] },
-            'Sensoren': { color: '#2e7d32', blocks: ['SCAN', 'WAIT_UNTIL_COLOR', 'WAIT_UNTIL_TOUCH'] },
+            'Aktion': { color: '#d97706', blocks: ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'MOTOR_FWD', 'MOTOR_BWD', 'MOTOR_STOP', 'GRAB', 'DROP'] },
+            'Sensoren': { color: '#2e7d32', blocks: ['SCAN', 'WAIT_UNTIL'] },
             'Kontrolle': { color: '#0284c7', blocks: ['REPEAT_ALL', 'LOOP_END'] },
             'Logik': { color: '#7c3aed', blocks: ['IF_COLOR', 'ELSE', 'END_IF'] }
         };
@@ -489,7 +491,9 @@ class SimpleCoding {
 
         // Sicherstellen, dass ein Standardparameter existiert
         if (block.param === undefined) {
-            if (block.action === 'WAIT_UNTIL_COLOR' || block.action === 'IF_COLOR') {
+            if (block.action === 'WAIT_UNTIL') {
+                block.param = 'color_blue';
+            } else if (block.action === 'IF_COLOR') {
                 block.param = 'blue';
             } else {
                 block.param = 1;
@@ -507,12 +511,21 @@ class SimpleCoding {
                     <button class="stepper-btn btn-plus">+</button>
                 </div>
             `;
-        } else if (block.action === 'WAIT_UNTIL_COLOR' || block.action === 'IF_COLOR') {
+        } else if (block.action === 'IF_COLOR') {
             const val = block.param || 'blue';
             stepperHTML = `
                 <select class="block-select" style="margin-left: 8px; background: #ffffff; border: 1px solid #bbf7d0; border-radius: 4px; padding: 2px 4px; color: #064e3b; font-size: 0.9rem; font-family: inherit; pointer-events: auto; outline: none; cursor: pointer;">
                     <option value="blue" ${val === 'blue' ? 'selected' : ''}>Blau 🔵</option>
                     <option value="red" ${val === 'red' ? 'selected' : ''}>Rot 🔴</option>
+                </select>
+            `;
+        } else if (block.action === 'WAIT_UNTIL') {
+            const val = block.param || 'color_blue';
+            stepperHTML = `
+                <select class="block-select" style="margin-left: 8px; background: #ffffff; border: 1px solid #bbf7d0; border-radius: 4px; padding: 2px 4px; color: #064e3b; font-size: 0.9rem; font-family: inherit; pointer-events: auto; outline: none; cursor: pointer;">
+                    <option value="color_blue" ${val === 'color_blue' ? 'selected' : ''}>Farbe: Blau 🔵</option>
+                    <option value="color_red" ${val === 'color_red' ? 'selected' : ''}>Farbe: Rot 🔴</option>
+                    <option value="touch" ${val === 'touch' ? 'selected' : ''}>Hindernis (Tastsensor) 🧱</option>
                 </select>
             `;
         }

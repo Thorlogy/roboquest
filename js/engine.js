@@ -479,6 +479,23 @@ function rStep() {
         if (ctx.state === 0) { ctx.state = 1; if (evaluateSensorBlock(b.getInputTargetBlock('IF_COND'))) rPush(b.getInputTargetBlock('DO_IF')); else rPush(b.getInputTargetBlock('DO_ELSE')); return rStep(); }
         else { rStack.pop(); rPush(b.getNextBlock()); return rStep(); }
     }
+    else if (b.type === 'motor') {
+        if (b.action === 'MOTOR_FWD') {
+            programMotorState.forward = true;
+            programMotorState.backward = false;
+        } else if (b.action === 'MOTOR_BWD') {
+            programMotorState.backward = true;
+            programMotorState.forward = false;
+        } else if (b.action === 'MOTOR_STOP') {
+            programMotorState.forward = false;
+            programMotorState.backward = false;
+            programMotorState.left = false;
+            programMotorState.right = false;
+        }
+        rStack.pop();
+        rPush(b.getNextBlock());
+        return rStep();
+    }
     else if (b.type === 'wait_seconds') {
         if (ctx.state === 0) { ctx.totalDist = parseFloat(b.getFieldValue('SECONDS')) || 1; ctx.state = 1; document.getElementById('sensor-output').innerText = '⏱ Warte ' + ctx.totalDist + 's...'; return { action: 'wait', id: b.id, duration: ctx.totalDist }; }
         else { rStack.pop(); rPush(b.getNextBlock()); return rStep(); }
@@ -492,49 +509,43 @@ function rStep() {
         }
         return { action: 'waitUntil', id: b.id, conditionBlock: b.getInputTargetBlock('CONDITION') };
     }
-    else if (b.type === 'wait_until_color') {
+    else if (b.type === 'wait_until') {
         if (ctx.state === 0) {
             ctx.state = 1;
             ctx.waitTimer = 0;
-            programMotorState.forward = true;
         }
         ctx.waitTimer = (ctx.waitTimer || 0) + 0.016;
-        if (ctx.waitTimer > 15) {
-            document.getElementById('sensor-output').innerText = '⏳ Timeout: Farbe nie erkannt!';
-            programMotorState.forward = false;
-            rStack.pop();
-            return rStep();
-        }
-        const colorUnder = getColorUnderRobot();
-        if (colorUnder === b.param) {
-            programMotorState.forward = false;
-            document.getElementById('sensor-output').innerText = '⏳ Farbe ' + b.param.toUpperCase() + ' erkannt!';
-            rStack.pop();
-            return rStep();
-        }
-        return { action: 'wait', id: b.id, duration: 0.1 };
-    }
-    else if (b.type === 'wait_until_touch') {
-        if (ctx.state === 0) {
-            ctx.state = 1;
-            ctx.waitTimer = 0;
-            programMotorState.forward = true;
-        }
-        ctx.waitTimer = (ctx.waitTimer || 0) + 0.016;
-        if (ctx.waitTimer > 15) {
-            document.getElementById('sensor-output').innerText = '🧱 Timeout: Hindernis nie erreicht!';
-            programMotorState.forward = false;
+        if (ctx.waitTimer > 30) {
+            document.getElementById('sensor-output').innerText = '⏳ Timeout: Bedingung nie erfüllt!';
             rStack.pop();
             rPush(b.getNextBlock());
             return rStep();
         }
-        if (sensorUltrasonic() <= 2.5) {
-            programMotorState.forward = false;
-            document.getElementById('sensor-output').innerText = '🧱 Hindernis erkannt!';
+
+        let conditionMet = false;
+        let message = '';
+
+        if (b.param === 'touch') {
+            if (sensorUltrasonic() <= 2.5) {
+                conditionMet = true;
+                message = '🧱 Hindernis erkannt!';
+            }
+        } else if (b.param.startsWith('color_')) {
+            const targetColor = b.param.split('_')[1];
+            const colorUnder = getColorUnderRobot();
+            if (colorUnder === targetColor) {
+                conditionMet = true;
+                message = '⏳ Farbe ' + targetColor.toUpperCase() + ' erkannt!';
+            }
+        }
+
+        if (conditionMet) {
+            document.getElementById('sensor-output').innerText = message;
             rStack.pop();
             rPush(b.getNextBlock());
             return rStep();
         }
+        
         return { action: 'wait', id: b.id, duration: 0.1 };
     }
     else if (b.type === 'if_color') {
@@ -949,8 +960,7 @@ function init() {
                 else if (action === 'GRAB') blockType = 'gripper_action';
                 else if (action === 'DROP') blockType = 'gripper_action';
                 else if (action === 'SCAN') blockType = 'scan_object';
-                else if (action === 'WAIT_UNTIL_COLOR') blockType = 'wait_until_color';
-                else if (action === 'WAIT_UNTIL_TOUCH') blockType = 'wait_until_touch';
+                else if (action === 'WAIT_UNTIL') blockType = 'wait_until';
                 else if (action === 'IF_COLOR') blockType = 'if_color';
                 else if (action === 'ELSE') blockType = 'else_branch';
                 else if (action === 'END_IF') blockType = 'end_if_branch';

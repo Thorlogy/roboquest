@@ -192,14 +192,14 @@ class MissionManager {
             {
                 id: 8,
                 title: 'Warten auf Blau',
-                adaIntro: 'Wir haben Müll geladen! Nutze den neuen Block ⏳ Warte bis Farbe: Blau, um bis zur blauen Recyclingtonne vorzufahren und den Müll dort abzuladen!',
+                adaIntro: 'Wir haben Müll geladen! Neu: Der Roboter-Motor läuft jetzt asynchron! Schalte den "Motor an: Vorwärts", nutze "Warte bis" (wähle Farbe Blau aus dem Dropdown) zum Pausieren des Programms, und setze dann "Motor: Stopp" gefolgt von "Ablegen".',
                 adaSuccess: 'Wunderbar! ROBO hat den Müll zielgenau bei der blauen Recyclingtonne abgeliefert!',
                 adaQuestion: {
-                    text: 'Wie weiß ROBO, wann er stoppen muss?',
-                    options: ['Der Farbsensor meldet die Farbe Blau unter ihm', 'ROBO schätzt die Strecke ab', 'Er stoppt zufällig'],
+                    text: 'Warum müssen wir den Motor am Ende manuell stoppen?',
+                    options: ['Weil der Motor sonst endlos weiterläuft', 'Weil der Farbsensor kaputt ist', 'Damit die Batterie geschont wird'],
                     correct: 0
                 },
-                unlockedBlocks: ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'GRAB', 'WAIT_UNTIL_COLOR'],
+                unlockedBlocks: ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'GRAB', 'DROP', 'WAIT_UNTIL', 'MOTOR_FWD', 'MOTOR_BWD', 'MOTOR_STOP'],
                 silverLimit: 4,
                 startPos: { x: 0, z: 0, rot: Math.PI },
                 goalPos: { x: 0, z: -10 },
@@ -216,14 +216,14 @@ class MissionManager {
             {
                 id: 9,
                 title: 'Der Tastsensor',
-                adaIntro: 'Der Weg ist blockiert! Nutze deinen neuen Tastsensor: Ziehe den Block "Fahre bis Hindernis" in dein Programm. Der Roboter fährt automatisch vorwärts, bis er anstößt. Drehe dich dann nach rechts und fahre ins Ziel.',
-                adaSuccess: 'Fantastisch! Du bist sicher am Hindernis vorbeigesteuert.',
+                adaIntro: 'Der Weg ist blockiert! Schalte den Motor ein ("Motor an: Vorwärts") und nutze den Sensor ("Warte bis", wähle Hindernis). Stoppe dann den Motor, drehe dich nach rechts und fahre ins Ziel.',
+                adaSuccess: 'Fantastisch! Du bist sicher am Hindernis vorbeigesteuert und hast die asynchrone Motorsteuerung verstanden.',
                 adaQuestion: {
-                    text: 'Was passiert, wenn der Tastsensor ein Hindernis erkennt?',
-                    options: ['Der Roboter hält automatisch an', 'Der Roboter fliegt darüber', 'Der Roboter hupt'],
+                    text: 'Was macht der Block "Warte bis Hindernis"?',
+                    options: ['Er pausiert das Programm, bis der Sensor auslöst', 'Er schaltet den Motor ab', 'Er lässt den Roboter rückwärts fahren'],
                     correct: 0
                 },
-                unlockedBlocks: ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'WAIT_UNTIL_TOUCH'],
+                unlockedBlocks: ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'WAIT_UNTIL', 'MOTOR_FWD', 'MOTOR_BWD', 'MOTOR_STOP'],
                 silverLimit: 4,
                 startPos: { x: 0, z: 0, rot: Math.PI },
                 goalPos: { x: 5, z: -11.5 },
