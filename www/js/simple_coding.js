@@ -23,11 +23,13 @@ class SimpleCoding {
             'TURN_LEFT':   { icon: '⟲',  label: 'Links',    type: 'move',   unlock: 2 },
             'TURN_RIGHT':  { icon: '⟳',  label: 'Rechts',   type: 'move',   unlock: 2 },
             'GRAB':        { icon: '🖐️', label: 'Greifen',  type: 'action', unlock: 3 },
+            'DROP':        { icon: '👇', label: 'Ablegen', type: 'action', unlock: 3 },
             'REPEAT_ALL':  { icon: '🔁', label: 'Wiederhole alles', type: 'loop', unlock: 4 },
             'LOOP_END':    { icon: '🔁', label: 'Schleife Ende', type: 'loop', unlock: 4 },
-            'SCAN':        { icon: '🔍', label: 'Scannen',  type: 'action', unlock: 5 },
-            'WAIT_UNTIL_COLOR': { icon: '⏳', label: 'Warte bis', type: 'sensor', unlock: 8 },
-            'IF_COLOR':    { icon: '❓', label: 'Wenn Farbe', type: 'condition', unlock: 9 },
+            'SCAN':        { icon: '📡', label: 'Ultraschallsensor: Distanz prüfen', type: 'action', unlock: 5 },
+            'WAIT_UNTIL_COLOR': { icon: '⏳', label: 'Farbsensor: Fahre bis Farbe', type: 'sensor', unlock: 8 },
+            'IF_COLOR':    { icon: '❓', label: 'Farbsensor: Wenn Farbe', type: 'condition', unlock: 9 },
+            'WAIT_UNTIL_TOUCH': { icon: '🧱', label: 'Tastsensor: Fahre bis Hindernis', type: 'sensor', unlock: 9 },
             'ELSE':        { icon: '❔', label: 'Sonst', type: 'condition', unlock: 9 },
             'END_IF':      { icon: '❓', label: 'Ende Wenn', type: 'condition', unlock: 9 },
         };
@@ -35,7 +37,17 @@ class SimpleCoding {
         // DOM-Referenzen
         this.editorBar = document.getElementById('simple-coding-bar');
         this.codeArea = document.getElementById('code-area');
+        this.paletteCategories = document.getElementById('palette-categories');
         this.paletteBar = document.getElementById('palette-bar');
+
+        // Kategorien (Solarpunk Style)
+        this.categoryMap = {
+            'Aktion': { color: '#d97706', blocks: ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'GRAB', 'DROP'] },
+            'Sensoren': { color: '#2e7d32', blocks: ['SCAN', 'WAIT_UNTIL_COLOR', 'WAIT_UNTIL_TOUCH'] },
+            'Kontrolle': { color: '#0284c7', blocks: ['REPEAT_ALL', 'LOOP_END'] },
+            'Logik': { color: '#7c3aed', blocks: ['IF_COLOR', 'ELSE', 'END_IF'] }
+        };
+        this.currentCategory = 'Aktion';
 
         this.init();
     }
@@ -242,10 +254,51 @@ class SimpleCoding {
     }
 
     setupPalette() {
+        if (this.paletteCategories) {
+            this.paletteCategories.innerHTML = '';
+            for (const [catName, catData] of Object.entries(this.categoryMap)) {
+                // Prüfen ob die Kategorie freigeschaltete Blöcke enthält
+                const hasUnlockedBlocks = catData.blocks.some(b => this.unlockedBlocks.includes(b));
+                if (!hasUnlockedBlocks) continue; // Zeige Kategorie nicht an, wenn komplett gesperrt
+
+                const tab = document.createElement('button');
+                tab.className = 'palette-category-tab';
+                if (this.currentCategory === catName) tab.classList.add('active');
+                tab.style.backgroundColor = catData.color;
+                tab.textContent = catName;
+                tab.addEventListener('click', () => {
+                    this.currentCategory = catName;
+                    this.setupPalette();
+                });
+                this.paletteCategories.appendChild(tab);
+            }
+        }
+
         if (!this.paletteBar) return;
         this.paletteBar.innerHTML = '';
 
+        // Falls die aktuelle Kategorie leer ist, wähle die erste verfügbare
+        if (this.categoryMap[this.currentCategory]) {
+            const hasUnlockedInCurrent = this.categoryMap[this.currentCategory].blocks.some(b => this.unlockedBlocks.includes(b));
+            if (!hasUnlockedInCurrent) {
+                for (const catName of Object.keys(this.categoryMap)) {
+                    if (this.categoryMap[catName].blocks.some(b => this.unlockedBlocks.includes(b))) {
+                        this.currentCategory = catName;
+                        if (this.paletteCategories) {
+                            this.setupPalette(); // re-render tabs
+                            return;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
         for (const [action, def] of Object.entries(this.blockDefs)) {
+            // Nur Blöcke der aktuellen Kategorie anzeigen
+            const cat = this.categoryMap[this.currentCategory];
+            if (cat && !cat.blocks.includes(action)) continue;
+
             const el = document.createElement('div');
             el.className = 'palette-block';
             el.dataset.action = action;

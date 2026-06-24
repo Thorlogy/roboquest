@@ -215,31 +215,27 @@ class MissionManager {
             },
             {
                 id: 9,
-                title: 'Der intelligente Müllsortierer',
-                adaIntro: 'Jetzt wird es anspruchsvoll! Auf dem Weg liegen rote und blaue Müllteile. Scanne sie und nutze Wenn/Dann/Sonst: Wenn es blau ist, bring es nach links, sonst nach rechts!',
-                adaSuccess: 'Hervorragend! Alle Müllteile wurden vollautomatisch nach Farbe vorsortiert!',
+                title: 'Der Tastsensor',
+                adaIntro: 'Der Weg ist blockiert! Nutze deinen neuen Tastsensor: Ziehe den Block "Fahre bis Hindernis" in dein Programm. Der Roboter fährt automatisch vorwärts, bis er anstößt. Drehe dich dann nach rechts und fahre ins Ziel.',
+                adaSuccess: 'Fantastisch! Du bist sicher am Hindernis vorbeigesteuert.',
                 adaQuestion: {
-                    text: 'Warum ist Wenn/Dann wichtig für schlaue Roboter?',
-                    options: ['Weil sie so auf unterschiedliche Situationen reagieren können', 'Weil der Code dadurch bunter wird', 'Gar nicht'],
+                    text: 'Was passiert, wenn der Tastsensor ein Hindernis erkennt?',
+                    options: ['Der Roboter hält automatisch an', 'Der Roboter fliegt darüber', 'Der Roboter hupt'],
                     correct: 0
                 },
-                unlockedBlocks: ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'GRAB', 'REPEAT_ALL', 'IF_COLOR', 'ELSE', 'END_IF'],
-                silverLimit: 10,
+                unlockedBlocks: ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'WAIT_UNTIL_TOUCH'],
+                silverLimit: 4,
                 startPos: { x: 0, z: 0, rot: Math.PI },
-                goalPos: { x: 0, z: -15 },
+                goalPos: { x: 5, z: -11.5 },
                 goalRadius: 2.5,
-                obstacles: [],
-                colorZones: [
-                    { x: -5, z: -5, radius: 2.5, color: 'blue' },
-                    { x: 5, z: -5, radius: 2.5, color: 'red' }
+                obstacles: [
+                    { x: 0, z: -15, w: 5.0, d: 2.0, h: 2.5, color: 0x333333 }
                 ],
-                collectibles: [
-                    { x: 0, z: -5, type: 'scrap', icon: '🥤', color: 'blue' },
-                    { x: 0, z: -10, type: 'scrap', icon: '🔋', color: 'red' }
-                ],
-                requiredCollectibles: 2,
+                colorZones: [],
+                collectibles: [],
+                requiredCollectibles: 0,
                 fogEnabled: false,
-                description: 'Sortiere Müll nach Farbe: Blau links, Rot rechts.'
+                description: 'Fahre bis zum Hindernis, drehe dich und fahre ins Ziel.'
             },
             {
                 id: 10,

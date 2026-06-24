@@ -514,6 +514,29 @@ function rStep() {
         }
         return { action: 'wait', id: b.id, duration: 0.1 };
     }
+    else if (b.type === 'wait_until_touch') {
+        if (ctx.state === 0) {
+            ctx.state = 1;
+            ctx.waitTimer = 0;
+            programMotorState.forward = true;
+        }
+        ctx.waitTimer = (ctx.waitTimer || 0) + 0.016;
+        if (ctx.waitTimer > 15) {
+            document.getElementById('sensor-output').innerText = '🧱 Timeout: Hindernis nie erreicht!';
+            programMotorState.forward = false;
+            rStack.pop();
+            rPush(b.getNextBlock());
+            return rStep();
+        }
+        if (sensorUltrasonic() <= 2.5) {
+            programMotorState.forward = false;
+            document.getElementById('sensor-output').innerText = '🧱 Hindernis erkannt!';
+            rStack.pop();
+            rPush(b.getNextBlock());
+            return rStep();
+        }
+        return { action: 'wait', id: b.id, duration: 0.1 };
+    }
     else if (b.type === 'if_color') {
         if (ctx.state === 0) {
             ctx.state = 1;
@@ -924,8 +947,10 @@ function init() {
                 else if (action === 'TURN_LEFT') blockType = 'turn_robot';
                 else if (action === 'TURN_RIGHT') blockType = 'turn_robot';
                 else if (action === 'GRAB') blockType = 'gripper_action';
+                else if (action === 'DROP') blockType = 'gripper_action';
                 else if (action === 'SCAN') blockType = 'scan_object';
                 else if (action === 'WAIT_UNTIL_COLOR') blockType = 'wait_until_color';
+                else if (action === 'WAIT_UNTIL_TOUCH') blockType = 'wait_until_touch';
                 else if (action === 'IF_COLOR') blockType = 'if_color';
                 else if (action === 'ELSE') blockType = 'else_branch';
                 else if (action === 'END_IF') blockType = 'end_if_branch';
@@ -945,7 +970,11 @@ function init() {
                             if (action === 'TURN_RIGHT') return 'RIGHT';
                         }
                         if (field === 'DISTANCE') return distance;
-                        if (field === 'ACTION') return 'TOGGLE';
+                        if (field === 'ACTION') {
+                            if (action === 'GRAB') return 'CLOSE';
+                            if (action === 'DROP') return 'OPEN';
+                            return 'TOGGLE';
+                        }
                         return null;
                     },
                     getNextBlock: function() { return null; }
