@@ -27,6 +27,7 @@ class SimpleCoding {
             'MOTOR_STOP':  { icon: '🛑', label: 'Motor: Stopp', type: 'motor', unlock: 8 },
             'GRAB':        { icon: '🖐️', label: 'Greifen',  type: 'action', unlock: 3 },
             'DROP':        { icon: '👇', label: 'Ablegen', type: 'action', unlock: 3 },
+            'WAIT_SEC':    { icon: '⏱️', label: 'Warte x Sekunden', type: 'wait', unlock: 8 },
             'REPEAT_ALL':  { icon: '🔁', label: 'Wiederhole alles', type: 'loop', unlock: 4 },
             'LOOP_END':    { icon: '🔁', label: 'Schleife Ende', type: 'loop', unlock: 4 },
             'SCAN':        { icon: '📡', label: 'Ultraschallsensor: Distanz prüfen', type: 'action', unlock: 5 },
@@ -45,8 +46,8 @@ class SimpleCoding {
         // Kategorien (Solarpunk Style)
         this.categoryMap = {
             'Aktion': { color: '#d97706', blocks: ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'MOTOR_FWD', 'MOTOR_BWD', 'MOTOR_STOP', 'GRAB', 'DROP'] },
-            'Sensoren': { color: '#2e7d32', blocks: ['SCAN', 'WAIT_UNTIL'] },
-            'Kontrolle': { color: '#0284c7', blocks: ['REPEAT_ALL', 'LOOP_END'] },
+            'Sensoren': { color: '#2e7d32', blocks: ['SCAN'] },
+            'Kontrolle': { color: '#0284c7', blocks: ['WAIT_SEC', 'WAIT_UNTIL', 'REPEAT_ALL', 'LOOP_END'] },
             'Logik': { color: '#7c3aed', blocks: ['IF_COLOR', 'ELSE', 'END_IF'] }
         };
         this.currentCategory = 'Aktion';
@@ -217,6 +218,16 @@ class SimpleCoding {
                 this.clearProgram();
             });
         }
+        
+        const btnHint = document.getElementById('btn-hint');
+        if (btnHint) {
+            btnHint.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (window.missionManager) {
+                    window.missionManager.showHint();
+                }
+            });
+        }
 
         // Erstes Rendern
         this.setMode('b');
@@ -328,8 +339,16 @@ class SimpleCoding {
         const def = this.blockDefs[action];
         if (!def) return;
 
+        let defaultParam = undefined;
+        if (action === 'IF_COLOR' || action === 'WAIT_UNTIL') {
+            defaultParam = 'color_blue';
+        } else if (action === 'MOVE_FWD' || action === 'MOVE_BWD' || action === 'TURN_LEFT' || action === 'TURN_RIGHT' || action === 'WAIT_SEC') {
+            defaultParam = 1;
+        }
+
         const block = {
             action: action,
+            param: defaultParam,
             icon: def.icon,
             label: def.label,
             type: def.type,
@@ -501,9 +520,9 @@ class SimpleCoding {
         }
 
         let stepperHTML = '';
-        const hasParam = ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'REPEAT_ALL'].includes(block.action);
+        const hasParam = ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'REPEAT_ALL', 'WAIT_SEC'].includes(block.action);
         if (hasParam) {
-            const displayVal = block.action.startsWith('TURN') ? (block.param * 90) + '°' : block.param;
+            const displayVal = block.action.startsWith('TURN') ? (block.param * 90) + '°' : (block.action === 'WAIT_SEC' ? block.param + 's' : block.param);
             stepperHTML = `
                 <div class="block-stepper">
                     <button class="stepper-btn btn-minus">-</button>
@@ -590,7 +609,7 @@ class SimpleCoding {
                     e.stopPropagation();
                     if (block.param > 1) {
                         block.param--;
-                        const displayVal = block.action.startsWith('TURN') ? (block.param * 90) + '°' : block.param;
+                        const displayVal = block.action.startsWith('TURN') ? (block.param * 90) + '°' : (block.action === 'WAIT_SEC' ? block.param + 's' : block.param);
                         valSpan.textContent = displayVal;
                     }
                 });
@@ -602,7 +621,7 @@ class SimpleCoding {
                     const maxVal = block.action.startsWith('TURN') ? 4 : 10;
                     if (block.param < maxVal) {
                         block.param++;
-                        const displayVal = block.action.startsWith('TURN') ? (block.param * 90) + '°' : block.param;
+                        const displayVal = block.action.startsWith('TURN') ? (block.param * 90) + '°' : (block.action === 'WAIT_SEC' ? block.param + 's' : block.param);
                         valSpan.textContent = displayVal;
                     }
                 });

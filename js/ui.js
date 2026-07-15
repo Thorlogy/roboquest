@@ -42,6 +42,34 @@ function setupDPad() {
     // Handbook UI Logic
     const hbModal = document.getElementById('handbook-modal');
     if (hbModal) {
+        // Tab Switching Logic
+        const tabBtns = document.querySelectorAll('.hb-tab-btn');
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => {
+                    b.classList.remove('active');
+                    b.style.background = 'transparent';
+                    b.style.fontWeight = 'normal';
+                    b.style.border = '1px solid rgba(16,185,129,0.5)';
+                });
+                btn.classList.add('active');
+                btn.style.background = 'rgba(16,185,129,0.2)';
+                btn.style.fontWeight = 'bold';
+                btn.style.border = '1px solid #10b981';
+
+                const targetId = btn.getAttribute('data-target');
+                document.querySelectorAll('.hb-tab-content').forEach(tc => {
+                    tc.style.display = 'none';
+                    tc.classList.remove('active');
+                });
+                const targetContent = document.getElementById(targetId);
+                if (targetContent) {
+                    targetContent.style.display = targetId === 'hb-dictionary' ? 'flex' : 'block';
+                    targetContent.classList.add('active');
+                }
+            });
+        });
+
         const btnOpen = document.getElementById('handbook-btn');
         if (btnOpen) {
             btnOpen.addEventListener('click', () => {
@@ -49,6 +77,7 @@ function setupDPad() {
                     hbModal.style.display = 'none';
                 } else {
                     if (window.closeAllModals) window.closeAllModals();
+                    if (window.populateDictionary) window.populateDictionary();
                     hbModal.style.display = 'flex';
                 }
             });
@@ -58,6 +87,7 @@ function setupDPad() {
         if (navBtnHandbook) {
             navBtnHandbook.addEventListener('click', () => {
                 if (window.closeAllModals) window.closeAllModals();
+                if (window.populateDictionary) window.populateDictionary();
                 hbModal.style.display = 'flex';
             });
         }
@@ -80,6 +110,19 @@ function setupDPad() {
                 if (targetContent) targetContent.style.display = 'block';
             });
         });
+
+        const btnToMenu = document.getElementById('btn-to-menu');
+        if (btnToMenu) {
+            btnToMenu.addEventListener('click', () => {
+                if (window.missionManager && window.missionManager.showHub) {
+                    window.missionManager.showHub();
+                } else {
+                    const intro = document.getElementById('intro-overlay');
+                    if (intro) intro.style.display = 'flex';
+                }
+                if (window.engineManager) window.engineManager.pause();
+            });
+        }
     }
 
     // Load persisted settings
@@ -520,3 +563,131 @@ function setupDPad() {
         handleSwipe();
     }, { passive: true });
 }
+
+window.populateDictionary = function() {
+    const sidebar = document.getElementById('dict-sidebar');
+    const content = document.getElementById('dict-content');
+    if (!sidebar || !content) return;
+
+    const dictData = [
+        {
+            id: 'move',
+            title: 'Fahren & Drehen',
+            icon: '⬆️',
+            color: '#d97706',
+            desc: 'Der Robo hat Ketten, fast wie ein cooler kleiner Bagger! Mit diesen Blöcken steuerst du seine Motoren. Du sagst ihm: "Fahr so viele Schritte" oder "Dreh dich". Er rechnet dann blitzschnell aus, wie lange die Motoren dafür drehen müssen, damit er exakt dort ankommt, wo du ihn hinhaben willst!',
+            kidsUrl: 'https://thorlogy.github.io/kids_university_robotik/#k2',
+            kidsText: '🎓 Nerds & Entdecker: Willst du wissen, wie genau Räder und Ketten funktionieren? Schau ins Kapitel "Bewegung"!'
+        },
+        {
+            id: 'sensor_scan',
+            title: 'Ultraschall-Scanner',
+            icon: '📡',
+            color: '#2e7d32',
+            desc: 'Der Ultraschall-Scanner ist wie das Auge einer Fledermaus! Er schickt unsichtbare Töne los. Wenn diese Töne gegen eine Kiste prallen, kommen sie als Echo zurück. Je schneller das Echo zurück ist, desto näher ist das Hindernis. So weiß der Roboter genau: "Aha! Da ist was im Weg!"',
+            kidsUrl: 'https://thorlogy.github.io/kids_university_robotik/#k3',
+            kidsText: '🎓 Nerds & Entdecker: Fledermäuse und Ultraschall – Wie genau geht das? Schau ins Kapitel "Sensoren"!'
+        },
+        {
+            id: 'sensor_touch',
+            title: 'Tastsensor',
+            icon: '👆',
+            color: '#0284c7',
+            desc: 'Stell dir vor, du gehst im Dunkeln und streckst die Arme aus. Wenn du gegen eine Wand stößt, merkst du das sofort und bleibst stehen. Genau das macht der Tastsensor! Mit dem "Warte bis"-Block sagst du dem Roboter: "Fahr einfach mutig los und mach erst den nächsten Schritt, wenn du anstößt!"',
+            kidsUrl: 'https://thorlogy.github.io/kids_university_robotik/#k3',
+            kidsText: '🎓 Nerds & Entdecker: Warum Fühlen manchmal schlauer als Sehen sein kann, erfährst du im Kapitel "Sensoren"!'
+        },
+        {
+            id: 'logic',
+            title: 'Kontroll-Blöcke',
+            icon: '🧠',
+            color: '#0284c7',
+            desc: 'Ein Roboter macht immer nur exakt das, was du sagst. Er ist eigentlich total stur! Mit Kontroll-Blöcken wie "Warte bis" bringst du ihm das Denken bei. Plötzlich kann er Situationen abwarten und selbst entscheiden, wann es weitergeht!',
+            kidsUrl: 'https://thorlogy.github.io/kids_university_robotik/#k5',
+            kidsText: '🎓 Nerds & Entdecker: Wie bringt man Maschinen echte Entscheidungen bei? Klick ins Kapitel "Entscheidungen"!'
+        }
+    ];
+
+    sidebar.innerHTML = '';
+    
+    const renderContent = (item) => {
+        content.innerHTML = `
+            <div style="background: rgba(255,255,255,0.8); border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: left;">
+                <h2 style="color: ${item.color}; margin-top: 0; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 2rem;">${item.icon}</span> ${item.title}
+                </h2>
+                <div style="font-size: 1.1rem; line-height: 1.6; color: #334155; margin-bottom: 25px;">
+                    ${item.desc}
+                </div>
+                <div style="background: #f8fafc; border-left: 4px solid #09d8ff; padding: 15px; border-radius: 0 8px 8px 0; font-size: 0.95rem;">
+                    <p style="margin: 0 0 10px 0; font-weight: 600; color: #0f172a;">
+                        ${item.kidsText}
+                    </p>
+                    <a href="${item.kidsUrl}" target="_blank" style="display: inline-block; background: #0ea5e9; color: white; text-decoration: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; transition: background 0.2s;">
+                        🚀 Ab ins Cyber-Lab!
+                    </a>
+                </div>
+            </div>
+        `;
+    };
+
+    dictData.forEach((item, index) => {
+        const btn = document.createElement('div');
+        btn.id = 'dict-item-' + item.id;
+        btn.innerHTML = `<strong>${item.icon}</strong> <span style="margin-left:8px;">${item.title}</span>`;
+        btn.style.padding = '12px 15px';
+        btn.style.marginBottom = '8px';
+        btn.style.borderRadius = '8px';
+        btn.style.cursor = 'pointer';
+        btn.style.color = '#334155';
+        btn.style.transition = 'all 0.2s';
+        btn.style.border = '1px solid transparent';
+        
+        btn.onmouseover = () => { if(btn.dataset.active !== 'true') btn.style.background = 'rgba(0,0,0,0.05)'; };
+        btn.onmouseout = () => { if(btn.dataset.active !== 'true') btn.style.background = 'transparent'; };
+        
+        btn.onclick = () => {
+            Array.from(sidebar.children).forEach(c => {
+                c.dataset.active = 'false';
+                c.style.background = 'transparent';
+                c.style.border = '1px solid transparent';
+                c.style.fontWeight = 'normal';
+                c.style.color = '#334155';
+            });
+            btn.dataset.active = 'true';
+            btn.style.background = `rgba(0,0,0,0.03)`;
+            btn.style.border = `1px solid ${item.color}`;
+            btn.style.color = item.color;
+            btn.style.fontWeight = 'bold';
+            renderContent(item);
+        };
+        sidebar.appendChild(btn);
+        
+        if (index === 0) btn.click();
+    });
+};
+
+window.openHandbook = function(topic) {
+    // Open Handbook Modal
+    const hbModal = document.getElementById('handbook-modal');
+    if (hbModal) hbModal.style.display = 'flex';
+    
+    // Switch to Dictionary tab
+    const tabBtns = document.querySelectorAll('.hb-tab-btn');
+    tabBtns.forEach(btn => {
+        if (btn.getAttribute('data-target') === 'hb-dictionary') {
+            btn.click();
+        }
+    });
+
+    // Select the specific topic
+    if (topic) {
+        setTimeout(() => {
+            const topicBtn = document.getElementById('dict-item-' + topic);
+            if (topicBtn) {
+                topicBtn.click();
+                topicBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 100);
+    }
+};

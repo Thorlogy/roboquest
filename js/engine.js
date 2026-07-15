@@ -416,7 +416,11 @@ function rStep() {
     }
 
     if (b.type === 'move_robot') {
-        if (ctx.state === 0) { ctx.totalDist = parseInt(b.getFieldValue('DISTANCE'), 10) || 1; ctx.state = 1; }
+        if (ctx.state === 0) { 
+            ctx.totalDist = parseInt(b.getFieldValue('DISTANCE'), 10) || 1; 
+            ctx.state = 1; 
+            programMotorState = { forward: false, backward: false, left: false, right: false };
+        }
         if (ctx.state <= ctx.totalDist) { ctx.state++; return { action: b.getFieldValue('DIRECTION') === 'BACKWARD' ? 'moveBackward' : 'move', id: b.id }; }
         else { rStack.pop(); rPush(b.getNextBlock()); return rStep(); }
     }
@@ -440,7 +444,11 @@ function rStep() {
         } else { rStack.pop(); rPush(b.getNextBlock()); return rStep(); }
     }
     else if (b.type === 'turn_robot') {
-        if (ctx.state === 0) { ctx.totalDist = parseInt(b.getFieldValue('DISTANCE'), 10) || 1; ctx.state = 1; }
+        if (ctx.state === 0) { 
+            ctx.totalDist = parseInt(b.getFieldValue('DISTANCE'), 10) || 1; 
+            ctx.state = 1; 
+            programMotorState = { forward: false, backward: false, left: false, right: false };
+        }
         if (ctx.state <= ctx.totalDist) { ctx.state++; return { action: b.getFieldValue('DIRECTION') === 'LEFT' ? 'turnLeft' : 'turnRight', id: b.id }; }
         else { rStack.pop(); rPush(b.getNextBlock()); return rStep(); }
     }
@@ -526,7 +534,7 @@ function rStep() {
         let message = '';
 
         if (b.param === 'touch') {
-            if (sensorUltrasonic() <= 2.5) {
+            if (sensorTouch()) {
                 conditionMet = true;
                 message = '🧱 Hindernis erkannt!';
             }
@@ -540,10 +548,13 @@ function rStep() {
         }
 
         if (conditionMet) {
+            window.debugSensorText = '';
             document.getElementById('sensor-output').innerText = message;
             rStack.pop();
             rPush(b.getNextBlock());
             return rStep();
+        } else {
+            window.debugSensorText = '🐛 Debug: Warte auf ' + b.param;
         }
         
         return { action: 'wait', id: b.id, duration: 0.1 };
@@ -892,6 +903,7 @@ function init() {
             document.getElementById('sensor-output').innerText = '▶ Programm gestartet (' + queue.length + ' Befehle)';
             window.executingMode = 'simple';
             this._executingIndex = -1;
+            this.lastExecutedQueue = queue; // Store for mission validation
             
             // "Klammer-Schleife" Logik
             let expandedQueue = [];
@@ -961,7 +973,8 @@ function init() {
                 else if (action === 'DROP') blockType = 'gripper_action';
                 else if (action === 'SCAN') blockType = 'scan_object';
                 else if (action === 'WAIT_UNTIL') blockType = 'wait_until';
-                else if (action === 'IF_COLOR') blockType = 'if_color';
+                else if (action === 'WAIT_SEC') blockType = 'wait_sec';
+                else if (action === 'IF_COLOR') blockType = 'logic_if_else';
                 else if (action === 'ELSE') blockType = 'else_branch';
                 else if (action === 'END_IF') blockType = 'end_if_branch';
                 else if (action === 'MOTOR_FWD') blockType = 'motor';
@@ -1063,6 +1076,34 @@ function init() {
         programMotorState = { forward: false, backward: false, left: false, right: false };
         if (window.highlightBlock) window.highlightBlock(null);
     });
+
+    document.getElementById('btn-reset-pos').addEventListener('click', () => {
+        document.getElementById('btn-stop').click();
+        if (window.missionManager && window.missionManager.currentMission) {
+            window.missionManager.loadMission(window.missionManager.currentMission.id);
+            document.getElementById('sensor-output').innerText = '🔄 Mission zurückgesetzt!';
+        } else if (window.roverGroup) {
+            window.roverGroup.position.set(0, 0.2, 0); 
+            window.roverGroup.rotation.set(0, 0, 0);
+            document.getElementById('sensor-output').innerText = '🔄 Roboter zurückgesetzt!';
+        }
+    });
+
+    const editorResetBtn = document.getElementById('btn-reset-pos-editor');
+    if (editorResetBtn) {
+        editorResetBtn.addEventListener('click', () => {
+            document.getElementById('btn-stop-editor').click(); // stop code
+            document.getElementById('btn-reset-pos').click();   // reset pos
+        });
+    }
+
+    const worldResetBtn = document.getElementById('btn-reset-pos-world');
+    if (worldResetBtn) {
+        worldResetBtn.addEventListener('click', () => {
+            document.getElementById('btn-stop').click(); // stop code
+            document.getElementById('btn-reset-pos').click();   // reset pos
+        });
+    }
 
     // Category sidebar buttons
     document.querySelectorAll('.cat-btn').forEach(btn => {

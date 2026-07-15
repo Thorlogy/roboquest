@@ -170,13 +170,20 @@ function buildEnvironment() {
         return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     }
 
+    let isCyberLab = false;
+    if (window.missionManager && window.missionManager.currentMission) {
+        if (window.missionManager.currentMission.id >= 100) {
+            isCyberLab = true;
+        }
+    }
+
+    const groundColor = isCyberLab ? 0x0a1428 : 0x4ade80;
+    const pathColor = isCyberLab ? 0x09d8ff : 0x8b5a2b;
+
     const groundGeo = new THREE.PlaneGeometry(900, 900, 150, 150);
     const pos = groundGeo.attributes.position;
     for(let i=0; i < pos.count; i++) {
-        // Here we explicitly DO NOT use getTerrainYGlobal for vertex heights initially
-        // because we want block built to be separate meshes, but we DO want dug holes to be in the mesh!
         let ty = getTerrainVisualYGlobal(pos.getX(i), -pos.getY(i));
-        // Apply dig only to visual mesh
         for (const mod of worldModifications) {
             if (mod.type === 'dig') {
                 const dist = Math.hypot(pos.getX(i) - mod.x, -pos.getY(i) - mod.z);
@@ -186,8 +193,16 @@ function buildEnvironment() {
         pos.setZ(i, ty);
     }
     groundGeo.computeVertexNormals();
-    const ground = new THREE.Mesh(groundGeo, new THREE.MeshStandardMaterial({ color: 0x4ade80, flatShading: true }));
-    ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true;
+    
+    let groundMat;
+    if (isCyberLab) {
+        groundMat = new THREE.MeshStandardMaterial({ color: groundColor, flatShading: true, wireframe: true, transparent: true, opacity: 0.3 });
+    } else {
+        groundMat = new THREE.MeshStandardMaterial({ color: groundColor, flatShading: true });
+    }
+    
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI / 2; ground.receiveShadow = !isCyberLab;
     environmentGroup.add(ground);
 
     // Main path
@@ -197,8 +212,14 @@ function buildEnvironment() {
         pathPos.setZ(i, getTerrainVisualYGlobal(pathPos.getX(i), -pathPos.getY(i)) + 0.1);
     }
     pathGeo.computeVertexNormals();
-    const path = new THREE.Mesh(pathGeo, new THREE.MeshStandardMaterial({ color: 0x8b5a2b, flatShading: true }));
-    path.rotation.x = -Math.PI / 2; path.receiveShadow = true;
+    
+    const path = new THREE.Mesh(pathGeo, new THREE.MeshStandardMaterial({ 
+        color: pathColor, 
+        flatShading: true,
+        emissive: isCyberLab ? 0x09d8ff : 0x000000,
+        emissiveIntensity: isCyberLab ? 0.5 : 0
+    }));
+    path.rotation.x = -Math.PI / 2; path.receiveShadow = !isCyberLab;
     environmentGroup.add(path);
 
     // River Water Plane (Dirty by default)
@@ -524,7 +545,6 @@ window.cleanWater = function() {
 // ════════════════════════════════════════════════════════════════
 let chargingStations = [];
 const CHARGING_STATION_POSITIONS = [
-    { x: 0, z: 0 },         // Start area
     { x: -140, z: 160 },    // Expanded map points
     { x: 160, z: -150 },    
     { x: -130, z: -200 }    
@@ -738,20 +758,39 @@ window.missionWorld = {
         }
 
         // Create ground plane for mission (flat surface matching grid/goal)
-        const isWorld2 = mission.id >= 6;
+        const isWorld2 = mission.id >= 6 && mission.id < 100;
+        const isCyberLab = mission.id >= 100;
+        
         const groundGeo = new THREE.PlaneGeometry(100, 100);
-        const groundMat = new THREE.MeshStandardMaterial({ 
-            color: isWorld2 ? 0x14532d : 0x1e293b, // Dark Forest Green for World 2, Dark Slate for World 1
-            roughness: 0.8,
-            metalness: 0.2
-        });
+        let groundMat;
+        
+        if (isCyberLab) {
+            groundMat = new THREE.MeshStandardMaterial({ 
+                color: 0x0a1428, 
+                flatShading: true, 
+                wireframe: true, 
+                transparent: true, 
+                opacity: 0.3 
+            });
+        } else {
+            groundMat = new THREE.MeshStandardMaterial({ 
+                color: isWorld2 ? 0x14532d : 0x1e293b, // Dark Forest Green for World 2, Dark Slate for World 1
+                roughness: 0.8,
+                metalness: 0.2
+            });
+        }
+        
         const ground = new THREE.Mesh(groundGeo, groundMat);
         ground.rotation.x = -Math.PI / 2;
-        ground.receiveShadow = true;
+        ground.receiveShadow = !isCyberLab;
         environmentGroup.add(ground);
 
         // Add a grid helper
-        const gridHelper = new THREE.GridHelper(100, 50, isWorld2 ? 0x15803d : 0x475569, isWorld2 ? 0x14532d : 0x334155);
+        let gridColor1 = 0x475569, gridColor2 = 0x334155;
+        if (isWorld2) { gridColor1 = 0x15803d; gridColor2 = 0x14532d; }
+        if (isCyberLab) { gridColor1 = 0x09d8ff; gridColor2 = 0x0a1428; }
+        
+        const gridHelper = new THREE.GridHelper(100, 50, gridColor1, gridColor2);
         gridHelper.position.y = 0.02;
         environmentGroup.add(gridHelper);
 

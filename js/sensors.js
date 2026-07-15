@@ -9,7 +9,7 @@ function sensorTouch() {
     const rx = roverGroup.position.x, rz = roverGroup.position.z;
     const yaw = roverGroup.rotation.y;
     const fDX = Math.sin(yaw), fDZ = Math.cos(yaw);
-    return checkCollision(rx + fDX * 2.5, rz + fDZ * 2.5, yaw);
+    return checkCollision(rx + fDX * 0.5, rz + fDZ * 0.5, yaw);
 }
 
 function checkSensorObstacle() {

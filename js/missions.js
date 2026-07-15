@@ -11,6 +11,37 @@ class MissionManager {
         // MISSIONS-DATEN: Welt 1 (GDD Kap. 4.5)
         // ═══════════════════════════════════════════════
         this.missions = [
+            // ═══════════════════════════════════════════════
+            // MISSIONS-DATEN: Welt 0 (Cyber-Lab / Kids-Uni)
+            // ═══════════════════════════════════════════════
+            {
+                id: 101,
+                title: 'Das EVA-Prinzip',
+                adaIntro: 'Willkommen im Cyber-Lab! Hier testen wir das EVA-Prinzip: Eingabe, Verarbeitung, Ausgabe. Lass den Roboter vorwärts fahren und warten, bis er an die Wand stößt!',
+                adaSuccess: 'Perfekt! Tastsensor (Eingabe) -> Warten (Verarbeitung) -> Stoppen (Ausgabe). So "denken" Maschinen!',
+                adaQuestion: {
+                    text: 'Welcher Teil vom EVA-Prinzip ist der Tastsensor?',
+                    options: ['Eingabe', 'Verarbeitung', 'Ausgabe'],
+                    correct: 0
+                },
+                hints: [
+                    "Schau dir den Tastsensor genauer an. Er kann merken, wenn ein Hindernis im Weg ist.",
+                    "Du brauchst insgesamt 3 Blöcke. Einer davon ist 'Warte bis'.",
+                    "Lass den Roboter vorwärts fahren. Füge dann den Warte-Block ein und wähle das Hindernis aus. Danach muss er stoppen."
+                ],
+                handbookLink: 'WAIT_UNTIL',
+                unlockedBlocks: ['MOTOR_FWD', 'WAIT_UNTIL', 'MOTOR_STOP'],
+                requiredBlocks: ['WAIT_UNTIL'],
+                silverLimit: 3,
+                startPos: { x: 0, z: 0, rot: Math.PI },
+                goalPos: { x: 0, z: -12 },
+                goalRadius: 2,
+                obstacles: [
+                    { x: 0, z: -13, w: 10, d: 1, h: 4, color: 0x09d8ff } // Cyber-wall obstacle
+                ],
+                plants: [],
+                deco: []
+            },
             {
                 id: 1,
                 title: 'Erste Schritte',
@@ -21,6 +52,12 @@ class MissionManager {
                     options: ['Weil ich den Vor-Befehl gegeben habe', 'Weil ROBO selbst denken kann', 'Zufall'],
                     correct: 0
                 },
+                hints: [
+                    "Das grüne Zielfeld ist direkt vor dir.",
+                    "Nutze den Block 'Vor', damit der Roboter nach vorne fährt.",
+                    "Manchmal musst du 'Vor' mehrmals hintereinander klicken, wenn es weit weg ist!"
+                ],
+                handbookLink: 'MOVE_FWD',
                 unlockedBlocks: ['MOVE_FWD', 'MOVE_BWD'],
                 silverLimit: 3,
                 // Welt-Setup
@@ -49,7 +86,7 @@ class MissionManager {
                 goalPos: { x: 6, z: -6 },
                 goalRadius: 2,
                 obstacles: [
-                    { x: 0, z: -3, w: 4, d: 1, h: 2, color: 0x8b5e3c } // Kiste
+                    { x: 0, z: -5, w: 4, d: 1, h: 2, color: 0x8b5e3c } // Kiste
                 ],
                 collectibles: [],
                 requiredCollectibles: 0,
@@ -361,6 +398,7 @@ class MissionManager {
         this.currentMission = mission;
         this.missionActive = true;
         this._collectedItems = 0;
+        this.hintIndex = 0;
 
         // Blöcke freischalten
         if (window.simpleCoding) {
@@ -387,7 +425,21 @@ class MissionManager {
 
         // Ada-Intro & Feature-Tutorial
         let hasTutorial = false;
-        if (missionId > 1 && window.ada) {
+        
+        // Cyber-Lab Mission 101 Intro
+        if (missionId === 101 && window.ada) {
+            hasTutorial = true;
+            setTimeout(() => {
+                window.ada.introduceFeature(
+                    "Willkommen im Cyber-Lab!",
+                    "Hier testen wir wichtige Grundlagen der Robotik. Das wichtigste Prinzip jeder Maschine ist das <b>EVA-Prinzip</b>: Eingabe, Verarbeitung, Ausgabe.<br><br><b>Deine Aufgabe:</b><br>Baue ein Programm, bei dem der Roboter dauerhaft <b>vorwärts fährt</b>, dann <b>wartet bis er ein Hindernis berührt</b> (Tastsensor = Eingabe) und sich danach direkt <b>stoppt</b>.",
+                    () => {
+                        window.ada.say(mission.adaIntro);
+                    }
+                );
+            }, 500);
+        }
+        else if (missionId > 1 && window.ada) {
             const prevMission = this.missions.find(m => m.id === missionId - 1);
             if (prevMission) {
                 const newBlocks = mission.unlockedBlocks.filter(b => !prevMission.unlockedBlocks.includes(b));
@@ -447,6 +499,35 @@ class MissionManager {
         }
     }
 
+    showHint() {
+        if (!this.currentMission || !this.missionActive) return;
+        const hints = this.currentMission.hints;
+        
+        if (!hints || hints.length === 0) {
+            if (window.ada) window.ada.say("Für diese Mission gibt es leider keine speziellen Tipps. Du schaffst das!");
+            return;
+        }
+
+        // Show the current hint
+        const hintText = hints[this.hintIndex];
+        
+        // Prepare HTML for the handbook link if applicable
+        let linkHtml = "";
+        if (this.currentMission.handbookLink) {
+            // We use onclick attribute to trigger the global openHandbook function
+            linkHtml = `<br><br><button onclick="openHandbook('${this.currentMission.handbookLink}')" style="background:#10b981; color:white; border:none; padding:8px 12px; border-radius:15px; cursor:pointer; font-weight:bold; font-size:0.9rem;">📖 Im Handbuch nachlesen</button>`;
+        }
+
+        if (window.ada) {
+            window.ada.say(`💡 <b>Tipp ${this.hintIndex + 1}/${hints.length}:</b><br>${hintText}${linkHtml}`);
+        }
+
+        // Advance hint index for next time (cap at the last hint)
+        if (this.hintIndex < hints.length - 1) {
+            this.hintIndex++;
+        }
+    }
+
     // ═══════════════════════════════════════════════
     // MISSION-ABSCHLUSS PRÜFEN
     // ═══════════════════════════════════════════════
@@ -484,6 +565,20 @@ class MissionManager {
             }
 
             if (dist <= m.goalRadius) {
+                // Check if mission requires specific blocks
+                if (m.requiredBlocks && window.gameEngine && window.gameEngine.lastExecutedQueue) {
+                    const usedBlocks = window.gameEngine.lastExecutedQueue.map(b => b.action);
+                    for (let reqBlock of m.requiredBlocks) {
+                        if (!usedBlocks.includes(reqBlock)) {
+                            const sensorOut = document.getElementById('sensor-output');
+                            if (sensorOut) {
+                                sensorOut.innerText = '❌ Ziel erreicht, aber nicht alle nötigen Blöcke verwendet!';
+                            }
+                            return false;
+                        }
+                    }
+                }
+
                 this._completeMission();
                 return true;
             }
@@ -630,8 +725,23 @@ class MissionManager {
         stationsContainer.innerHTML = '';
 
         for (let i = 0; i < this.missions.length; i++) {
-            // Insert separator at the very beginning (index 0, mission 1)
-            if (i === 0) {
+            const mission = this.missions[i];
+            
+            // Insert separator before Cyber-Lab (Mission 101)
+            if (mission.id === 101) {
+                const sep = document.createElement('div');
+                sep.className = 'world-separator';
+                sep.innerHTML = `
+                    <div class="world-separator-badge" style="background: linear-gradient(135deg, #0f172a, #1e293b); border-color: #09d8ff; box-shadow: 0 4px 12px rgba(9, 216, 255, 0.15);">
+                        <span class="world-separator-icon">🔬</span>
+                        <span class="world-separator-text" style="color: #09d8ff;">Welt 0: Cyber-Lab (Theorie)</span>
+                    </div>
+                `;
+                stationsContainer.appendChild(sep);
+            }
+            
+            // Insert separator before World 1 (Mission 1)
+            if (mission.id === 1) {
                 const sep = document.createElement('div');
                 sep.className = 'world-separator';
                 sep.innerHTML = `
@@ -643,8 +753,8 @@ class MissionManager {
                 stationsContainer.appendChild(sep);
             }
             
-            // Insert separator before World 2 (index 5, mission 6)
-            if (i === 5) {
+            // Insert separator before World 2 (Mission 6)
+            if (mission.id === 6) {
                 const sep = document.createElement('div');
                 sep.className = 'world-separator';
                 sep.innerHTML = `
@@ -656,11 +766,10 @@ class MissionManager {
                 stationsContainer.appendChild(sep);
             }
 
-            const mission = this.missions[i];
             const result = this.progress.missionResults[mission.id];
-            const isUnlocked = mission.id <= this.progress.highestMission;
+            const isUnlocked = mission.id === 101 || mission.id <= this.progress.highestMission;
             const isCompleted = result && result.completed;
-            const isNext = mission.id === this.progress.highestMission && !isCompleted;
+            const isNext = mission.id === this.progress.highestMission && !isCompleted && mission.id !== 101;
 
             const row = document.createElement('div');
             row.className = 'hub-station-row ' + (i % 2 === 0 ? 'left' : 'right');

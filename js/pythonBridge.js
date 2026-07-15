@@ -103,8 +103,8 @@ window.compileEcoBotSkulptAPI = function() {
     });
 
     // Sensors
-    mod.obstacle_ahead = new window.Sk.builtin.func(function() { return new window.Sk.builtin.bool(sensorUltrasonic() < 15); });
-    mod.touch_sensor = new window.Sk.builtin.func(function() { return new window.Sk.builtin.bool(sensorUltrasonic() < 3); });
+    mod.obstacle_ahead = new window.Sk.builtin.func(function() { return new window.Sk.builtin.bool(checkSensorObstacle()); });
+    mod.touch_sensor = new window.Sk.builtin.func(function() { return new window.Sk.builtin.bool(sensorTouch()); });
     mod.ultrasonic = new window.Sk.builtin.func(function() { return new window.Sk.builtin.int_(Math.round(sensorUltrasonic())); });
     mod.camera = new window.Sk.builtin.func(function() { return new window.Sk.builtin.bool(sensorCameraObjectName() !== 'Nichts'); });
     mod.camera_object = new window.Sk.builtin.func(function() { return new window.Sk.builtin.str(sensorCameraObjectName()); });

@@ -6,7 +6,7 @@
     <title>RoboQuest 3D - Waldabenteuer</title>
     <meta name="description" content="Steuere den Eco-Bot durch den Wald, entdecke Geheimnisse und löse Story-Quests!">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=75">
+    <link rel="stylesheet" href="css/style.css?v=88">
     <!-- SortableJS für Drag & Drop -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <!-- Three.js -->
@@ -65,9 +65,10 @@
                 </div>
             </div>
             <div class="hud-top-right">
+                <button class="hud-icon-btn" id="btn-to-menu" title="Zurück zum Menü (🏠)" style="font-size: 0.9rem; width: auto; padding: 0 10px; gap: 5px;">🏠 <span style="font-weight:600;">Menü</span></button>
+                <button class="hud-icon-btn" id="handbook-btn" title="Handbuch / Story öffnen (📖)" style="font-size: 0.9rem; width: auto; padding: 0 10px; gap: 5px;">📖 <span style="font-weight:600;">Handbuch</span></button>
                 <button class="hud-icon-btn" id="cam-toggle-btn" title="Kamera-Ansicht wechseln (Folgen / Freies Fliegen)"></button>
                 <button class="hud-icon-btn" id="btn-open-missions" title="Aktuelle Mission anzeigen (🎯)">🎯</button>
-                <button class="hud-icon-btn" id="handbook-btn" title="Handbuch / Story öffnen (📖)">📖</button>
                 <button class="hud-icon-btn" id="btn-settings" title="Einstellungen öffnen (⚙️)">⚙️</button>
             </div>
         </div>
@@ -103,13 +104,16 @@
             </div>
 
             <!-- Sensor Overlay -->
-            <div class="sensor-overlay glass-panel">
+            <div class="sensor-overlay glass-panel" style="pointer-events: none; display: flex; flex-direction: column;">
                 <div class="overlay-header">
-                    <span>▼</span> Sensor Ausgabe:
+                    <span>▼</span> System-Status:
                 </div>
                 <div class="overlay-body" id="sensor-output">
                     Eco-Bot bereit. Nutze WASD zum Steuern oder klicke links [⚏] zum Programmieren!
                 </div>
+                <button id="btn-reset-pos-world" title="Roboter zur Startposition zurücksetzen (📍)" style="pointer-events: auto; background-color: #475569; color: white; border: none; padding: 8px; font-weight: bold; cursor: pointer; border-radius: 0 0 8px 8px; font-family: inherit; font-size: 0.85rem; display: flex; justify-content: center; align-items: center; gap: 5px; transition: background-color 0.2s;">
+                    📍 Zurücksetzen
+                </button>
             </div>
 
             <!-- D-Pad (Touch + Click) -->
@@ -124,7 +128,8 @@
             <!-- Bottom Control Bar -->
             <div class="bottom-bar">
                 <button id="btn-run" class="action-btn" title="Programm starten (▶)">▶</button>
-                <button id="btn-stop" class="action-btn stop" title="Programm stoppen & Roboter zurücksetzen (■)">■</button>
+                <button id="btn-stop" class="action-btn stop" title="Programm stoppen (■)">■</button>
+                <button id="btn-reset-pos" class="action-btn" style="background-color: #64748b;" title="Roboter zur Startposition zurücksetzen (⏪)">⏪</button>
             </div>
 
             <!-- Success Overlay -->
@@ -162,17 +167,32 @@
             <!-- Handbook / Codex Modal -->
             <div class="handbook-modal glass-panel" id="handbook-modal" style="display:none;">
                 <div class="handbook-header">
-                    <h2>📖 RoboQuest Story</h2>
+                    <h2 style="margin:0; display:flex; align-items:center; gap:15px;">
+                        📖 Handbuch
+                        <div class="handbook-tabs" style="display:flex; gap:10px; margin-left: 20px;">
+                            <button class="hb-tab-btn active" data-target="hb-story" style="background: rgba(16,185,129,0.2); border: 1px solid #10b981; padding: 5px 15px; border-radius: 15px; color: #064e3b; cursor: pointer; font-weight: bold;">Story</button>
+                            <button class="hb-tab-btn" data-target="hb-dictionary" style="background: transparent; border: 1px solid rgba(16,185,129,0.5); padding: 5px 15px; border-radius: 15px; color: #064e3b; cursor: pointer;">Blöcke & Sensoren</button>
+                        </div>
+                    </h2>
                     <button class="close-btn" id="btn-close-handbook" title="Handbuch schließen">✖</button>
                 </div>
-                <div class="handbook-body">
-                    <div class="handbook-content" style="width: 100%; border-left: none; padding: 30px;">
-                        <div class="hb-tab-content active" id="hb-story">
-                            <h3>Die Welt von RoboQuest</h3>
-                            <p>Im Jahr 2150 blüht die Erde wieder auf – dank der solaren Energienetze und der <strong>Solarpunk-Technologie</strong>. Doch eine kleine Fehlfunktion bedroht das Gleichgewicht der Natur.</p>
-                            <p>Du steuerst <strong>ROBO</strong>, einen kleinen Eco-Bot, der die Schaltkreise der Natur reparieren und dabei die Sprache der Zukunft lernen soll – Programmieren!</p>
-                            <p>Die Solarpunk-Zukunft verbindet Natur, Technologie und Gemeinschaft. Statt fossiler Brennstoffe nutzt diese Welt saubere Energiequellen wie Wind, Wasser und Sonne. Die Metropolen sind überwuchert mit grünen Pflanzen, vertikalen Gärten und leuchtenden Solar-Paneelen.</p>
-                            <p>Trotz dieser Utopie braucht das System Pflege: Manche alte Maschinen sind verrostet, Flüsse müssen gereinigt und neue Wälder gepflanzt werden. Hier kommst du ins Spiel!</p>
+                <div class="handbook-body" style="height: calc(100% - 60px);">
+                    <!-- Tab 1: Story -->
+                    <div class="hb-tab-content active" id="hb-story" style="width: 100%; padding: 30px; overflow-y: auto; height: 100%; box-sizing: border-box;">
+                        <h3>Die Welt von RoboQuest</h3>
+                        <p>Im Jahr 2150 blüht die Erde wieder auf – dank der solaren Energienetze und der <strong>Solarpunk-Technologie</strong>. Doch eine kleine Fehlfunktion bedroht das Gleichgewicht der Natur.</p>
+                        <p>Du steuerst <strong>ROBO</strong>, einen kleinen Eco-Bot, der die Schaltkreise der Natur reparieren und dabei die Sprache der Zukunft lernen soll – Programmieren!</p>
+                        <p>Die Solarpunk-Zukunft verbindet Natur, Technologie und Gemeinschaft. Statt fossiler Brennstoffe nutzt diese Welt saubere Energiequellen wie Wind, Wasser und Sonne. Die Metropolen sind überwuchert mit grünen Pflanzen, vertikalen Gärten und leuchtenden Solar-Paneelen.</p>
+                        <p>Trotz dieser Utopie braucht das System Pflege: Manche alte Maschinen sind verrostet, Flüsse müssen gereinigt und neue Wälder gepflanzt werden. Hier kommst du ins Spiel!</p>
+                    </div>
+                    <!-- Tab 2: Lexikon -->
+                    <div class="hb-tab-content" id="hb-dictionary" style="display: none; width: 100%; height: 100%; display: flex; flex-direction: row;">
+                        <div class="hb-sidebar" id="dict-sidebar" style="width: 220px; border-right: 1px solid rgba(16, 185, 129, 0.2); overflow-y: auto; padding: 10px; box-sizing: border-box;">
+                            <!-- Dynamically filled with block list -->
+                        </div>
+                        <div class="handbook-content" id="dict-content" style="flex: 1; padding: 20px 30px; overflow-y: auto; box-sizing: border-box;">
+                            <h3>📚 Lexikon der Blöcke</h3>
+                            <p style="color: #475569;">Wähle links einen Block aus der Liste, um mehr über seine Funktion zu erfahren.</p>
                         </div>
                     </div>
                 </div>
@@ -288,7 +308,9 @@
         <div class="editor-actions">
             <button class="editor-btn btn-clear" id="btn-clear-editor" title="Alle Programmschritte löschen (🗑️)">🗑️</button>
             <button class="editor-btn btn-play" id="btn-play" title="Programm ausführen / Roboter starten (▶)">▶ Start</button>
-            <button class="editor-btn btn-stop" id="btn-stop-editor" title="Programm stoppen / Zurücksetzen (⏹)">⏹</button>
+            <button class="editor-btn btn-stop" id="btn-stop-editor" title="Programm stoppen (⏹)">⏹</button>
+            <button class="editor-btn btn-reset-pos" id="btn-reset-pos-editor" title="Roboter zur Startposition zurücksetzen (📍)" style="background-color: #64748b; color: white;">📍</button>
+            <button class="editor-btn" id="btn-hint" title="Tipp geben lassen (💡)" style="background-color: #f59e0b; color: white; padding: 0 10px; font-weight: bold;">💡 Tipp</button>
         </div>
     </div>
 
@@ -345,18 +367,18 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"
             integrity="sha384-wagZhIFgY4hD+7awjQjR4e2E294y6J2HSnd8eTNc15ZubTeQeVRZwhQJ+W6hnBsf"
             crossorigin="anonymous"></script>
-    <script src="js/simple_coding.js?v=75"></script>
-    <script src="js/ada.js?v=75"></script>
-    <script src="js/missions.js?v=75"></script>
-    <script src="js/config.js?v=75"></script>
-    <script src="js/audio.js?v=75"></script>
-    <script src="js/effects.js?v=75"></script>
-    <script src="js/sensors.js?v=75"></script>
-    <script src="js/quests.js?v=75"></script>
-    <script src="js/world.js?v=75"></script>
-    <script src="js/robot.js?v=75"></script>
-    <script src="js/pythonBridge.js?v=75"></script>
-    <script src="js/ui.js?v=75"></script>
-    <script src="js/engine.js?v=75"></script>
+    <script src="js/simple_coding.js?v=88"></script>
+    <script src="js/ada.js?v=88"></script>
+    <script src="js/missions.js?v=88"></script>
+    <script src="js/config.js?v=88"></script>
+    <script src="js/audio.js?v=88"></script>
+    <script src="js/effects.js?v=88"></script>
+    <script src="js/sensors.js?v=88"></script>
+    <script src="js/quests.js?v=88"></script>
+    <script src="js/world.js?v=88"></script>
+    <script src="js/robot.js?v=88"></script>
+    <script src="js/pythonBridge.js?v=88"></script>
+    <script src="js/ui.js?v=88"></script>
+    <script src="js/engine.js?v=88"></script>
 </body>
 </html>
