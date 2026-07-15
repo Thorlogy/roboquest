@@ -43,6 +43,95 @@ class MissionManager {
                 deco: []
             },
             {
+                id: 102,
+                title: 'Die Logik-Kreuzung',
+                adaIntro: 'Manchmal muss ROBO sich entscheiden. Liegt ein blauer Ring auf dem Boden, biege links ab. Sonst biege rechts ab!',
+                adaSuccess: 'Logik pur! So funktionieren Computer-Programme mit "Wenn ... Dann"-Entscheidungen.',
+                adaQuestion: {
+                    text: 'Welche Blöcke brauchten wir für die Entscheidung?',
+                    options: ['Wenn, Sonst, Ende', 'Start und Stopp', 'Nur den Motor-Block'],
+                    correct: 0
+                },
+                hints: [
+                    "Platziere zuerst den 'Wenn Farbe Blau'-Block.",
+                    "Unter das 'Wenn' packst du den 'Drehe Links'-Block.",
+                    "Unter das 'Sonst' kommt der 'Drehe Rechts'-Block, danach muss die Bedingung mit 'Ende Wenn' beendet werden. Fahre am Ende vorwärts!"
+                ],
+                handbookLink: 'IF_COLOR',
+                unlockedBlocks: ['MOVE_FWD', 'IF_COLOR', 'ELSE', 'END_IF', 'TURN_LEFT', 'TURN_RIGHT'],
+                requiredBlocks: ['IF_COLOR', 'END_IF'],
+                silverLimit: 8,
+                startPos: { x: 0, z: 0, rot: Math.PI }, // Facing -z
+                goalPos: { x: -6, z: 0 }, // Goal is to the left (-x)
+                goalRadius: 2,
+                colorZones: [
+                    { x: 0, z: 0, radius: 2.5, color: 'blue' } // Robot starts on blue
+                ],
+                obstacles: [
+                    { x: 0, z: -4, w: 6, d: 2, h: 4, color: 0x09d8ff }, // Wall in front
+                    { x: 6, z: 0, w: 2, d: 6, h: 4, color: 0x09d8ff }  // Wall on the right
+                ],
+                plants: [],
+                deco: []
+            },
+            {
+                id: 103,
+                title: 'Der Endlos-Flur',
+                adaIntro: 'Warum 10 Blöcke bauen, wenn 3 reichen? Nutze eine Schleife, um eine Aktion mehrfach auszuführen.',
+                adaSuccess: 'Super! Schleifen sparen Zeit und machen den Code übersichtlich.',
+                adaQuestion: {
+                    text: 'Was macht die Schleife?',
+                    options: ['Sie wiederholt alle Blöcke darin', 'Sie beendet das Programm', 'Sie macht den Roboter schneller'],
+                    correct: 0
+                },
+                hints: [
+                    "Beginne dein Programm mit dem Block 'Wiederhole alles'.",
+                    "Packe danach einen 'Fahre Strecke (Vor)'-Block und beende es mit 'Schleife Ende'.",
+                    "Alles was zwischen 'Wiederhole alles' und 'Schleife Ende' liegt, wird immer wieder ausgeführt."
+                ],
+                handbookLink: 'REPEAT_ALL',
+                unlockedBlocks: ['MOVE_FWD', 'REPEAT_ALL', 'LOOP_END'],
+                requiredBlocks: ['REPEAT_ALL', 'LOOP_END'],
+                silverLimit: 4,
+                startPos: { x: 0, z: 0, rot: Math.PI },
+                goalPos: { x: 0, z: -20 },
+                goalRadius: 3,
+                obstacles: [
+                    { x: -3, z: -10, w: 1, d: 25, h: 4, color: 0x09d8ff }, // Left wall
+                    { x: 3, z: -10, w: 1, d: 25, h: 4, color: 0x09d8ff }  // Right wall
+                ],
+                plants: [],
+                deco: []
+            },
+            {
+                id: 104,
+                title: 'Der Radar-Check',
+                adaIntro: 'Statt gegen die Wand zu fahren (Tastsensor), wollen wir vorher messen. Nutze den Scan-Block, um Entfernungen zu messen!',
+                adaSuccess: 'Radar-Messung abgeschlossen. Du hast gelernt, wie der Ultraschallsensor funktioniert.',
+                adaQuestion: {
+                    text: 'Wie schallt der Sensor?',
+                    options: ['Ultraschallwellen prallen am Objekt ab', 'Er macht ein Foto', 'Er riecht das Objekt'],
+                    correct: 0
+                },
+                hints: [
+                    "Fahre nah an das Hindernis heran (z.B. 2-mal Vor).",
+                    "Nutze dann den 'Ultraschallsensor: Distanz prüfen' (Scan) Block.",
+                    "Beobachte oben rechts im HUD die gemessene Entfernung!"
+                ],
+                handbookLink: 'SCAN',
+                unlockedBlocks: ['MOVE_FWD', 'SCAN', 'WAIT_SEC'],
+                requiredBlocks: ['SCAN'],
+                silverLimit: 5,
+                startPos: { x: 0, z: 0, rot: Math.PI },
+                goalPos: { x: 0, z: -4 },
+                goalRadius: 2,
+                obstacles: [
+                    { x: 0, z: -8, w: 6, d: 1, h: 4, color: 0x09d8ff }
+                ],
+                plants: [],
+                deco: []
+            },
+            {
                 id: 1,
                 title: 'Erste Schritte',
                 adaIntro: 'ROBO muss zum grünen Feld fahren! Tippe auf ⬆️ Vor, um einen Befehl hinzuzufügen.',
