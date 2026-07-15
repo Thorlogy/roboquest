@@ -1347,6 +1347,8 @@ function updateLiveSensors() {
         
         document.getElementById('dash-val-rot').innerText = rot + '°';
         document.getElementById('dash-val-tilt').innerText = sensorTilt() + '°';
+        document.getElementById('dash-val-light').innerText = light + ' %';
+        document.getElementById('dash-val-cam').innerText = nearest || 'Nichts';
     }
 }
 
