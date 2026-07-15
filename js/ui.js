@@ -693,18 +693,20 @@ window.openHandbook = function(topic) {
 };
 
 // --- Live Sensor Dashboard ---
-const btnLiveSensors = document.getElementById('btn-live-sensors');
-const sensorDashboard = document.getElementById('sensor-dashboard');
-const btnCloseSensorDash = document.getElementById('btn-close-sensor-dash');
+document.addEventListener('DOMContentLoaded', () => {
+    const btnLiveSensors = document.getElementById('btn-live-sensors');
+    const sensorDashboard = document.getElementById('sensor-dashboard');
+    const btnCloseSensorDash = document.getElementById('btn-close-sensor-dash');
 
-if (btnLiveSensors && sensorDashboard && btnCloseSensorDash) {
-    btnLiveSensors.addEventListener('click', (e) => {
-        e.stopPropagation();
-        sensorDashboard.classList.remove('hidden');
-    });
+    if (btnLiveSensors && sensorDashboard && btnCloseSensorDash) {
+        btnLiveSensors.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sensorDashboard.classList.remove('hidden');
+        });
 
-    btnCloseSensorDash.addEventListener('click', () => {
-        sensorDashboard.classList.add('hidden');
-    });
-}
+        btnCloseSensorDash.addEventListener('click', () => {
+            sensorDashboard.classList.add('hidden');
+        });
+    }
+});
 
