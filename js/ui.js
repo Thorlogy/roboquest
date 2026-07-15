@@ -691,3 +691,20 @@ window.openHandbook = function(topic) {
         }, 100);
     }
 };
+
+// --- Live Sensor Dashboard ---
+const btnLiveSensors = document.getElementById('btn-live-sensors');
+const sensorDashboard = document.getElementById('sensor-dashboard');
+const btnCloseSensorDash = document.getElementById('btn-close-sensor-dash');
+
+if (btnLiveSensors && sensorDashboard && btnCloseSensorDash) {
+    btnLiveSensors.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sensorDashboard.classList.remove('hidden');
+    });
+
+    btnCloseSensorDash.addEventListener('click', () => {
+        sensorDashboard.classList.add('hidden');
+    });
+}
+

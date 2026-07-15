@@ -1334,6 +1334,20 @@ function updateLiveSensors() {
         
         out.innerText = lines.join('\n');
     }
+    
+    // --- Live Sensor Dashboard ---
+    const dashboard = document.getElementById('sensor-dashboard');
+    if (dashboard && !dashboard.classList.contains('hidden')) {
+        document.getElementById('dash-val-ultra').innerText = dist + ' cm';
+        document.getElementById('dash-val-touch').innerText = touch ? 'Ja' : 'Nein';
+        
+        const colorVal = getColorUnderRobot();
+        const colorEmojis = { 'blue': 'Blau', 'red': 'Rot', 'green': 'Grün', 'none': 'Keine' };
+        document.getElementById('dash-val-color').innerText = colorEmojis[colorVal] || 'Keine';
+        
+        document.getElementById('dash-val-rot').innerText = rot + '°';
+        document.getElementById('dash-val-tilt').innerText = sensorTilt() + '°';
+    }
 }
 
 function animate() {

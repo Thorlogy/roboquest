@@ -115,6 +115,9 @@
                     <button id="btn-reset-pos-world" title="Roboter zur Startposition zurücksetzen (📍)" style="flex: 1; background-color: #475569; color: white; border: none; border-right: 1px solid rgba(255,255,255,0.2); padding: 8px; font-weight: bold; cursor: pointer; border-radius: 0 0 0 8px; font-family: inherit; font-size: 0.85rem; display: flex; justify-content: center; align-items: center; gap: 5px; transition: background-color 0.2s;">
                         📍 Zurücksetzen
                     </button>
+                    <button id="btn-live-sensors" title="Live-Sensordaten anzeigen (📡)" style="flex: 1; background-color: #0284c7; color: white; border: none; border-right: 1px solid rgba(255,255,255,0.2); padding: 8px; font-weight: bold; cursor: pointer; border-radius: 0; font-family: inherit; font-size: 0.85rem; display: flex; justify-content: center; align-items: center; gap: 5px; transition: background-color 0.2s;">
+                        📡 Sensoren
+                    </button>
                     <button id="btn-hint" title="Tipp geben lassen (💡)" style="flex: 1; background-color: #f59e0b; color: white; border: none; padding: 8px; font-weight: bold; cursor: pointer; border-radius: 0 0 8px 0; font-family: inherit; font-size: 0.85rem; display: flex; justify-content: center; align-items: center; gap: 5px; transition: background-color 0.2s;">
                         💡 Tipp
                     </button>
@@ -383,6 +386,52 @@
     <script src="js/robot.js?v=88"></script>
     <script src="js/pythonBridge.js?v=88"></script>
     <script src="js/ui.js?v=88"></script>
+
+    <!-- Live Sensor Dashboard -->
+    <div id="sensor-dashboard" class="sensor-dashboard-panel hidden">
+        <div class="sensor-dash-header">
+            <h3>📡 Live-Sensordaten</h3>
+            <button id="btn-close-sensor-dash" class="btn-close-dash">✕</button>
+        </div>
+        <div class="sensor-dash-grid">
+            <div class="sensor-card">
+                <div class="sensor-icon">📏</div>
+                <div class="sensor-info">
+                    <div class="sensor-name">Ultraschall</div>
+                    <div class="sensor-val" id="dash-val-ultra">-- cm</div>
+                </div>
+            </div>
+            <div class="sensor-card">
+                <div class="sensor-icon">👆</div>
+                <div class="sensor-info">
+                    <div class="sensor-name">Tastsensor</div>
+                    <div class="sensor-val" id="dash-val-touch">--</div>
+                </div>
+            </div>
+            <div class="sensor-card">
+                <div class="sensor-icon">🎨</div>
+                <div class="sensor-info">
+                    <div class="sensor-name">Untergrund</div>
+                    <div class="sensor-val" id="dash-val-color">--</div>
+                </div>
+            </div>
+            <div class="sensor-card">
+                <div class="sensor-icon">🔄</div>
+                <div class="sensor-info">
+                    <div class="sensor-name">Kompass</div>
+                    <div class="sensor-val" id="dash-val-rot">-- °</div>
+                </div>
+            </div>
+            <div class="sensor-card">
+                <div class="sensor-icon">⛰️</div>
+                <div class="sensor-info">
+                    <div class="sensor-name">Neigung</div>
+                    <div class="sensor-val" id="dash-val-tilt">-- °</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="js/engine.js?v=88"></script>
 </body>
 </html>
