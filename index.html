@@ -111,9 +111,14 @@
                 <div class="overlay-body" id="sensor-output">
                     Eco-Bot bereit. Nutze WASD zum Steuern oder klicke links [⚏] zum Programmieren!
                 </div>
-                <button id="btn-reset-pos-world" title="Roboter zur Startposition zurücksetzen (📍)" style="pointer-events: auto; background-color: #475569; color: white; border: none; padding: 8px; font-weight: bold; cursor: pointer; border-radius: 0 0 8px 8px; font-family: inherit; font-size: 0.85rem; display: flex; justify-content: center; align-items: center; gap: 5px; transition: background-color 0.2s;">
-                    📍 Zurücksetzen
-                </button>
+                <div style="display: flex; flex-direction: row; pointer-events: auto;">
+                    <button id="btn-reset-pos-world" title="Roboter zur Startposition zurücksetzen (📍)" style="flex: 1; background-color: #475569; color: white; border: none; border-right: 1px solid rgba(255,255,255,0.2); padding: 8px; font-weight: bold; cursor: pointer; border-radius: 0 0 0 8px; font-family: inherit; font-size: 0.85rem; display: flex; justify-content: center; align-items: center; gap: 5px; transition: background-color 0.2s;">
+                        📍 Zurücksetzen
+                    </button>
+                    <button id="btn-hint" title="Tipp geben lassen (💡)" style="flex: 1; background-color: #f59e0b; color: white; border: none; padding: 8px; font-weight: bold; cursor: pointer; border-radius: 0 0 8px 0; font-family: inherit; font-size: 0.85rem; display: flex; justify-content: center; align-items: center; gap: 5px; transition: background-color 0.2s;">
+                        💡 Tipp
+                    </button>
+                </div>
             </div>
 
             <!-- D-Pad (Touch + Click) -->
@@ -283,8 +288,8 @@
     </div>
 
     <!-- Ada Sprechblase (GDD 2: Mentorin) -->
-    <div id="ada-bubble" class="ada-bubble" style="display:none; position: relative;">
-        <button id="ada-close-btn" style="position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">✖</button>
+    <div id="ada-bubble" class="ada-bubble" style="display:none; position: relative; padding-right: 40px;">
+        <button id="ada-close-btn" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.1); color: #333; border: none; border-radius: 4px; width: 28px; height: 28px; font-weight: bold; font-family: sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: background 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.2)'" onmouseout="this.style.background='rgba(0,0,0,0.1)'">✕</button>
         <div class="ada-avatar" id="ada-avatar">👩‍🔬</div>
         <div class="ada-text" id="ada-text"></div>
     </div>
@@ -310,8 +315,6 @@
             <button class="editor-btn btn-clear" id="btn-clear-editor" title="Alle Programmschritte löschen (🗑️)">🗑️</button>
             <button class="editor-btn btn-play" id="btn-play" title="Programm ausführen / Roboter starten (▶)">▶ Start</button>
             <button class="editor-btn btn-stop" id="btn-stop-editor" title="Programm stoppen (⏹)">⏹</button>
-            <button class="editor-btn btn-reset-pos" id="btn-reset-pos-editor" title="Roboter zur Startposition zurücksetzen (📍)" style="background-color: #64748b; color: white;">📍</button>
-            <button class="editor-btn" id="btn-hint" title="Tipp geben lassen (💡)" style="background-color: #f59e0b; color: white; padding: 0 10px; font-weight: bold;">💡 Tipp</button>
         </div>
     </div>
 
