@@ -20,17 +20,19 @@ class Ada {
         // Vorherige Timer löschen
         clearTimeout(this.dismissTimer);
 
-        this.bubbleText.textContent = text;
+        this.bubbleText.innerHTML = text; // Use innerHTML to allow links
         this.bubble.style.display = 'flex';
         this.bubble.classList.remove('ada-exit');
         this.bubble.classList.add('ada-enter');
         this.isVisible = true;
 
-        // Tipp zum Wegtippen
-        this.bubble.onclick = () => this.dismiss();
-
-        // Auto-Dismiss
-        this.dismissTimer = setTimeout(() => this.dismiss(), duration);
+        // X Button zum Wegtippen
+        const closeBtn = document.getElementById('ada-close-btn');
+        if (closeBtn) {
+            closeBtn.onclick = () => this.dismiss();
+        }
+        
+        // Kein automatisches Ausblenden mehr, damit man in Ruhe lesen kann.
     }
 
     dismiss() {
