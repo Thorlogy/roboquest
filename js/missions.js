@@ -589,7 +589,10 @@ class MissionManager {
     }
 
     showHint() {
-        if (!this.currentMission || !this.missionActive) return;
+        if (!this.currentMission || !this.missionActive) {
+            if (window.ada) window.ada.say("Du befindest dich im freien Erkundungs-Modus! Hier gibt es keine Missionen. Schau dich um oder klicke oben links auf das Menü, um eine Mission zu starten.");
+            return;
+        }
         const hints = this.currentMission.hints;
         
         if (!hints || hints.length === 0) {
