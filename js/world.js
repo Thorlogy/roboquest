@@ -170,15 +170,44 @@ function buildEnvironment() {
         return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     }
 
+    let currentWorld = 1;
     let isCyberLab = false;
     if (window.missionManager && window.missionManager.currentMission) {
-        if (window.missionManager.currentMission.id >= 100) {
-            isCyberLab = true;
-        }
+        const mid = window.missionManager.currentMission.id;
+        if (mid >= 100) isCyberLab = true;
+        else if (mid >= 16) currentWorld = 4; // Smart City
+        else if (mid >= 11) currentWorld = 3; // Windpark
+        else if (mid >= 6) currentWorld = 2;  // Stadtpark
+        else currentWorld = 1;                // Schrottplatz
+    } else if (window.missionManager && window.missionManager.progress && window.missionManager.progress.currentWorld) {
+        currentWorld = window.missionManager.progress.currentWorld;
     }
 
-    const groundColor = isCyberLab ? 0x0a1428 : 0x4ade80;
-    const pathColor = isCyberLab ? 0x09d8ff : 0x8b5a2b;
+    let groundColor = 0x4ade80;
+    let pathColor = 0x8b5a2b;
+    let emissiveColor = 0x000000;
+    let emissiveInt = 0;
+
+    if (isCyberLab) {
+        groundColor = 0x0a1428;
+        pathColor = 0x09d8ff;
+        emissiveColor = 0x09d8ff;
+        emissiveInt = 0.5;
+    } else if (currentWorld === 4) {
+        groundColor = 0x0f172a;
+        pathColor = 0x38bdf8;
+        emissiveColor = 0x38bdf8;
+        emissiveInt = 0.4;
+    } else if (currentWorld === 3) {
+        groundColor = 0x22c55e;
+        pathColor = 0x78716c;
+    } else if (currentWorld === 2) {
+        groundColor = 0x4ade80;
+        pathColor = 0xd6d3d1;
+    } else {
+        groundColor = 0x854d0e;
+        pathColor = 0x713f12;
+    }
 
     const groundGeo = new THREE.PlaneGeometry(900, 900, 150, 150);
     const pos = groundGeo.attributes.position;
@@ -216,10 +245,10 @@ function buildEnvironment() {
     const path = new THREE.Mesh(pathGeo, new THREE.MeshStandardMaterial({ 
         color: pathColor, 
         flatShading: true,
-        emissive: isCyberLab ? 0x09d8ff : 0x000000,
-        emissiveIntensity: isCyberLab ? 0.5 : 0
+        emissive: emissiveColor,
+        emissiveIntensity: emissiveInt
     }));
-    path.rotation.x = -Math.PI / 2; path.receiveShadow = !isCyberLab;
+    path.rotation.x = -Math.PI / 2; path.receiveShadow = !isCyberLab && currentWorld !== 4;
     environmentGroup.add(path);
 
     // River Water Plane (Dirty by default)

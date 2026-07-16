@@ -341,6 +341,22 @@ function evaluateSensorBlock(block) {
     }
 }
 
+function getCompassHeading() {
+    const rot = sensorRotation();
+    if (rot >= 135 && rot <= 225) return 'north';
+    if (rot >= 315 || rot <= 45) return 'south';
+    if (rot > 45 && rot < 135) return 'east';
+    if (rot > 225 && rot < 315) return 'west';
+    return 'north';
+}
+
+function getTiltAngle() {
+    const tilt = sensorTilt();
+    if (tilt > 5) return 'up';
+    if (tilt < -5) return 'down';
+    return 'flat';
+}
+
 // ════════════════════════════════════════════════════════════════
 // AST INTERPRETER (rStep)
 // ════════════════════════════════════════════════════════════════
@@ -517,7 +533,7 @@ function rStep() {
         }
         return { action: 'waitUntil', id: b.id, conditionBlock: b.getInputTargetBlock('CONDITION') };
     }
-    else if (b.type === 'wait_until') {
+    else if (b.type === 'wait_until' || b.type === 'wait_until_compass' || b.type === 'wait_until_tilt') {
         if (ctx.state === 0) {
             ctx.state = 1;
             ctx.waitTimer = 0;
@@ -533,12 +549,24 @@ function rStep() {
         let conditionMet = false;
         let message = '';
 
-        if (b.param === 'touch') {
+        if (b.action === 'WAIT_UNTIL_COMPASS') {
+            const currentHeading = getCompassHeading();
+            if (currentHeading === b.param) {
+                conditionMet = true;
+                message = '🧭 Ausrichtung ' + b.param.toUpperCase() + ' erreicht!';
+            }
+        } else if (b.action === 'WAIT_UNTIL_TILT') {
+            const currentTilt = getTiltAngle();
+            if (currentTilt === b.param) {
+                conditionMet = true;
+                message = '⚖️ Neigung ' + b.param.toUpperCase() + ' erreicht!';
+            }
+        } else if (b.param === 'touch') {
             if (sensorTouch()) {
                 conditionMet = true;
                 message = '🧱 Hindernis erkannt!';
             }
-        } else if (b.param.startsWith('color_')) {
+        } else if (b.param && b.param.startsWith('color_')) {
             const targetColor = b.param.split('_')[1];
             const colorUnder = getColorUnderRobot();
             if (colorUnder === targetColor) {
@@ -973,6 +1001,8 @@ function init() {
                 else if (action === 'DROP') blockType = 'gripper_action';
                 else if (action === 'SCAN') blockType = 'scan_object';
                 else if (action === 'WAIT_UNTIL') blockType = 'wait_until';
+                else if (action === 'WAIT_UNTIL_COMPASS') blockType = 'wait_until_compass';
+                else if (action === 'WAIT_UNTIL_TILT') blockType = 'wait_until_tilt';
                 else if (action === 'WAIT_SEC') blockType = 'wait_sec';
                 else if (action === 'IF_COLOR') blockType = 'logic_if_else';
                 else if (action === 'ELSE') blockType = 'else_branch';

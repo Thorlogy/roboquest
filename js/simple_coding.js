@@ -35,6 +35,8 @@ class SimpleCoding {
             'IF_COLOR':    { icon: '❓', label: 'Farbsensor: Wenn Farbe', type: 'condition', unlock: 9 },
             'ELSE':        { icon: '❔', label: 'Sonst', type: 'condition', unlock: 9 },
             'END_IF':      { icon: '❓', label: 'Ende Wenn', type: 'condition', unlock: 9 },
+            'WAIT_UNTIL_COMPASS': { icon: '🧭', label: 'Warte bis: Kompass', type: 'sensor', unlock: 11 },
+            'WAIT_UNTIL_TILT': { icon: '⚖️', label: 'Warte bis: Neigung', type: 'sensor', unlock: 12 },
         };
 
         // DOM-Referenzen
@@ -47,7 +49,7 @@ class SimpleCoding {
         this.categoryMap = {
             'Aktion': { color: '#d97706', blocks: ['MOVE_FWD', 'MOVE_BWD', 'TURN_LEFT', 'TURN_RIGHT', 'MOTOR_FWD', 'MOTOR_BWD', 'MOTOR_STOP', 'GRAB', 'DROP'] },
             'Sensoren': { color: '#2e7d32', blocks: ['SCAN'] },
-            'Kontrolle': { color: '#0284c7', blocks: ['WAIT_SEC', 'WAIT_UNTIL', 'REPEAT_ALL', 'LOOP_END'] },
+            'Kontrolle': { color: '#0284c7', blocks: ['WAIT_SEC', 'WAIT_UNTIL', 'WAIT_UNTIL_COMPASS', 'WAIT_UNTIL_TILT', 'REPEAT_ALL', 'LOOP_END'] },
             'Logik': { color: '#7c3aed', blocks: ['IF_COLOR', 'ELSE', 'END_IF'] }
         };
         this.currentCategory = 'Aktion';
@@ -512,6 +514,10 @@ class SimpleCoding {
         if (block.param === undefined) {
             if (block.action === 'WAIT_UNTIL') {
                 block.param = 'color_blue';
+            } else if (block.action === 'WAIT_UNTIL_COMPASS') {
+                block.param = 'north';
+            } else if (block.action === 'WAIT_UNTIL_TILT') {
+                block.param = 'up';
             } else if (block.action === 'IF_COLOR') {
                 block.param = 'blue';
             } else {
@@ -545,6 +551,25 @@ class SimpleCoding {
                     <option value="color_blue" ${val === 'color_blue' ? 'selected' : ''}>Farbe: Blau 🔵</option>
                     <option value="color_red" ${val === 'color_red' ? 'selected' : ''}>Farbe: Rot 🔴</option>
                     <option value="touch" ${val === 'touch' ? 'selected' : ''}>Hindernis (Tastsensor) 🧱</option>
+                </select>
+            `;
+        } else if (block.action === 'WAIT_UNTIL_COMPASS') {
+            const val = block.param || 'north';
+            stepperHTML = `
+                <select class="block-select" style="margin-left: 8px; background: #ffffff; border: 1px solid #bbf7d0; border-radius: 4px; padding: 2px 4px; color: #064e3b; font-size: 0.9rem; font-family: inherit; pointer-events: auto; outline: none; cursor: pointer;">
+                    <option value="north" ${val === 'north' ? 'selected' : ''}>Ausrichtung: Norden ⬆️</option>
+                    <option value="south" ${val === 'south' ? 'selected' : ''}>Ausrichtung: Süden ⬇️</option>
+                    <option value="east" ${val === 'east' ? 'selected' : ''}>Ausrichtung: Osten ➡️</option>
+                    <option value="west" ${val === 'west' ? 'selected' : ''}>Ausrichtung: Westen ⬅️</option>
+                </select>
+            `;
+        } else if (block.action === 'WAIT_UNTIL_TILT') {
+            const val = block.param || 'up';
+            stepperHTML = `
+                <select class="block-select" style="margin-left: 8px; background: #ffffff; border: 1px solid #bbf7d0; border-radius: 4px; padding: 2px 4px; color: #064e3b; font-size: 0.9rem; font-family: inherit; pointer-events: auto; outline: none; cursor: pointer;">
+                    <option value="up" ${val === 'up' ? 'selected' : ''}>Bergauf 🏔️</option>
+                    <option value="down" ${val === 'down' ? 'selected' : ''}>Bergab ⛷️</option>
+                    <option value="flat" ${val === 'flat' ? 'selected' : ''}>Eben ➖</option>
                 </select>
             `;
         }

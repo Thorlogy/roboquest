@@ -697,12 +697,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnLiveSensors = document.getElementById('btn-live-sensors');
     const sensorDashboard = document.getElementById('sensor-dashboard');
     const btnCloseSensorDash = document.getElementById('btn-close-sensor-dash');
+    const sensorOutput = document.getElementById('sensor-output');
 
     if (btnLiveSensors && sensorDashboard && btnCloseSensorDash) {
-        btnLiveSensors.addEventListener('click', (e) => {
+        const openDash = (e) => {
             e.stopPropagation();
             sensorDashboard.classList.remove('hidden');
-        });
+        };
+        btnLiveSensors.addEventListener('click', openDash);
+        if (sensorOutput) {
+            sensorOutput.addEventListener('click', openDash);
+        }
 
         btnCloseSensorDash.addEventListener('click', () => {
             sensorDashboard.classList.add('hidden');

@@ -133,9 +133,9 @@ class MissionManager {
             },
             {
                 id: 1,
-                title: 'Erste Schritte',
-                adaIntro: 'ROBO muss zum grünen Feld fahren! Tippe auf ⬆️ Vor, um einen Befehl hinzuzufügen.',
-                adaSuccess: 'Super! ROBO kann sich bewegen! Du hast ihm das beigebracht.',
+                title: 'Der alte Schrottplatz',
+                adaIntro: 'Willkommen auf dem alten Schrottplatz! Bevor wir die Welt begrünen können, müssen wir ROBOs Steuerung testen. Nutze den [Vorwärts]-Block, um ROBO zum grünen Zielfeld zu steuern.',
+                adaSuccess: 'Super! ROBOs Antrieb funktioniert. Lass uns diesen Ort aufräumen!',
                 adaQuestion: {
                     text: 'Warum ist ROBO zum Ziel gefahren?',
                     options: ['Weil ich den Vor-Befehl gegeben habe', 'Weil ROBO selbst denken kann', 'Zufall'],
@@ -161,9 +161,8 @@ class MissionManager {
             },
             {
                 id: 2,
-                title: 'Um die Ecke',
-                adaIntro: 'Ein Hindernis blockiert den Weg! Du musst abbiegen. Nutze ⟲ Links oder ⟳ Rechts.',
-                adaSuccess: 'Großartig! ROBO kann jetzt Hindernissen ausweichen!',
+                title: 'Schrott im Weg',
+                adaSuccess: 'Großartig! ROBO kann jetzt Hindernissen ausweichen. Das ist wichtig für die Navigation in der Natur!',
                 adaQuestion: {
                     text: 'Was hast du gerade gelernt?',
                     options: ['ROBO kann abbiegen, wenn ich Links/Rechts sage', 'ROBO sucht sich den Weg selbst', 'Hindernisse verschwinden von allein'],
@@ -184,9 +183,9 @@ class MissionManager {
             },
             {
                 id: 3,
-                title: 'Sammle 3 Schrotteile',
-                adaIntro: 'ROBO braucht Ersatzteile für die Reparatur! Sammle 3 Schrotteile mit 🖐️ Greifen.',
-                adaSuccess: 'Perfekt! ROBO wird Stück für Stück repariert. Du bist ein toller Ingenieur!',
+                title: 'Material-Recycling',
+                adaIntro: 'Um Solarzellen zu bauen, brauchen wir Rohstoffe! Sammle 3 herumliegende Schrotteile mit 🖐️ Greifen auf.',
+                adaSuccess: 'Perfekt! Wir recyceln diese Teile, um ROBO später upzugraden. Du bist ein toller Umwelt-Ingenieur!',
                 adaQuestion: {
                     text: 'Warum musste ROBO direkt beim Schrottteil stehen?',
                     options: ['Weil der Greifer nur ganz nah funktioniert', 'Weil ROBO Angst hat', 'Das war Zufall'],
@@ -235,9 +234,9 @@ class MissionManager {
             },
             {
                 id: 5,
-                title: 'Meisterprüfung Werkstatt',
-                adaIntro: 'Die letzte Prüfung! Kombiniere alles: Fahren, Abbiegen, Sammeln und Scannen. Zeig was du kannst!',
-                adaSuccess: 'Unglaublich! Du hast Welt 1 gemeistert! ROBO ist bereit für das nächste Abenteuer!',
+                title: 'Aufbruch zum Stadtpark',
+                adaIntro: 'Die letzte Recycling-Prüfung! Kombiniere alles: Fahren, Abbiegen und Sammeln. Dann können wir zum verlassenen Stadtpark aufbrechen!',
+                adaSuccess: 'Unglaublich! Du hast den alten Schrottplatz aufgeräumt. ROBO ist bereit für die nächste Etappe der Solarpunk-Reise!',
                 adaQuestion: {
                     text: 'Was hat dir am meisten geholfen?',
                     options: ['Alle Befehle zusammen kombinieren', 'Nur einen Befehl ganz oft nutzen', 'Gar nichts programmieren'],
@@ -263,9 +262,9 @@ class MissionManager {
             },
             {
                 id: 6,
-                title: 'Die Flaschen-Jagd',
-                adaIntro: 'Willkommen im Stadtpark! Er ist voller Plastikmüll. Nutze eine Schleife mit 🔁 Wiederhole alles, um alle 5 Flaschen in einer Reihe zu sammeln!',
-                adaSuccess: 'Fantastisch! Die Schleife hat perfekt funktioniert und die Flaschen sind sicher im Greifer!',
+                title: 'Die Park-Reinigung',
+                adaIntro: 'Willkommen im Stadtpark! Er ist voller Plastikmüll. Nutze eine Schleife mit 🔁 Wiederhole alles, um alle 5 Flaschen in einer Reihe zu sammeln, damit der Park wieder aufatmen kann!',
+                adaSuccess: 'Fantastisch! Die Schleife hat perfekt funktioniert und die Flaschen sind sicher im Greifer. Der Park sieht schon viel besser aus!',
                 adaQuestion: {
                     text: 'Welchen Vorteil bieten Schleifen?',
                     options: ['Sie machen den Code kürzer', 'Sie machen den Roboter schneller', 'Nichts'],
@@ -290,9 +289,9 @@ class MissionManager {
             },
             {
                 id: 7,
-                title: 'Slalom-Pfad',
-                adaIntro: 'Einige Parkbänke versperren uns den direkten Weg. Programmiere eine Schleife, die ROBO im Slalom um die Bänke führt!',
-                adaSuccess: 'Unglaublich! ROBO ist elegant um alle Bänke gefahren!',
+                title: 'Slalom um die Bäume',
+                adaIntro: 'Einige neu gepflanzte Setzlinge versperren uns den direkten Weg. Programmiere eine Schleife, die ROBO vorsichtig im Slalom um sie herum führt!',
+                adaSuccess: 'Unglaublich! ROBO ist elegant um die jungen Bäume gefahren, ohne sie zu beschädigen!',
                 adaQuestion: {
                     text: 'Was darf in einer Slalom-Schleife stehen?',
                     options: ['Sowohl Vorwärts- als auch Drehbefehle', 'Nur Vorwärtsbefehle', 'Nichts'],
@@ -313,7 +312,7 @@ class MissionManager {
                 ],
                 requiredCollectibles: 2,
                 fogEnabled: false,
-                description: 'Fahre Slalom um die Bänke, um den Müll zu sammeln.'
+                description: 'Fahre Slalom um die Setzlinge, um den Müll zu sammeln.'
             },
             {
                 id: 8,
@@ -341,9 +340,9 @@ class MissionManager {
             },
             {
                 id: 9,
-                title: 'Der Tastsensor',
-                adaIntro: 'Der Weg ist blockiert! Schalte den Motor ein ("Motor an: Vorwärts") und nutze den Sensor ("Warte bis", wähle Hindernis). Stoppe dann den Motor, drehe dich nach rechts und fahre ins Ziel.',
-                adaSuccess: 'Fantastisch! Du bist sicher am Hindernis vorbeigesteuert und hast die asynchrone Motorsteuerung verstanden.',
+                title: 'Sicherer Abstand',
+                adaIntro: 'Der Weg zum Recycling-Center ist durch Geröll blockiert! Schalte den Motor ein ("Motor an: Vorwärts") und nutze den Ultraschall-Sensor ("Warte bis Hindernis"). Stoppe den Motor rechtzeitig, drehe dich und fahre ins Ziel.',
+                adaSuccess: 'Fantastisch! Du hast die Sensoren clever genutzt. Die Natur dankt es dir!',
                 adaQuestion: {
                     text: 'Was macht der Block "Warte bis Hindernis"?',
                     options: ['Er pausiert das Programm, bis der Sensor auslöst', 'Er schaltet den Motor ab', 'Er lässt den Roboter rückwärts fahren'],
@@ -361,13 +360,13 @@ class MissionManager {
                 collectibles: [],
                 requiredCollectibles: 0,
                 fogEnabled: false,
-                description: 'Fahre bis zum Hindernis, drehe dich und fahre ins Ziel.'
+                description: 'Nutze den Ultraschallsensor, um nicht gegen das Geröll zu fahren.'
             },
             {
                 id: 10,
                 title: 'Meisterprüfung Park',
-                adaIntro: 'Die letzte Prüfung im Stadtpark! Kombiniere alles: Fahre die Wiese im S-Kurven-Muster ab, sammle den Müll und sortiere ihn an den Tonnen. Zeig, was du gelernt hast!',
-                adaSuccess: 'Unglaublich! Du hast den gesamten Stadtpark gereinigt! Er blüht wieder voll auf!',
+                adaIntro: 'Die letzte Prüfung im Stadtpark! Kombiniere alles: Fahre das Gelände ab, sammle den Müll und sortiere ihn an den Tonnen. Zeig, was du als Eco-Ingenieur draufhast!',
+                adaSuccess: 'Unglaublich! Du hast den gesamten Stadtpark gereinigt! Er blüht wieder voll auf! Nun geht es weiter zu den Windrädern...',
                 adaQuestion: {
                     text: 'Was hast du in Welt 2 gemeistert?',
                     options: ['Schleifen und Wenn/Dann-Bedingungen zur Automatisierung', 'Nur einfaches Geradeausfahren', 'Nichts'],
@@ -391,6 +390,242 @@ class MissionManager {
                 requiredCollectibles: 2,
                 fogEnabled: false,
                 description: 'Säuber die gesamte Wiese im systematischen Raster.'
+            },
+            {
+                id: 11,
+                title: 'Windräder ausrichten',
+                adaIntro: 'Willkommen in Akt 3: Der Solarpark! Damit die Windräder genug Strom produzieren, müssen sie nach Norden ausgerichtet werden. Nutze den neuen Kompass-Sensor!',
+                adaSuccess: 'Super! Das erste Windrad dreht sich im Wind. Der Kompass ist ein tolles Werkzeug zur Navigation.',
+                adaQuestion: {
+                    text: 'Welche Himmelsrichtung haben wir gesucht?',
+                    options: ['Norden', 'Süden', 'Oben'],
+                    correct: 0
+                },
+                unlockedBlocks: ['MOTOR_FWD', 'MOTOR_STOP', 'WAIT_UNTIL_COMPASS', 'TURN_LEFT', 'TURN_RIGHT'],
+                silverLimit: 3,
+                startPos: { x: 0, z: 0, rot: Math.PI / 2 },
+                goalPos: { x: 0, z: -10 },
+                goalRadius: 2.5,
+                obstacles: [],
+                collectibles: [],
+                requiredCollectibles: 0,
+                fogEnabled: false,
+                description: 'Nutze den Kompass, um nach Norden zu navigieren.'
+            },
+            {
+                id: 12,
+                title: 'Kompass-Slalom',
+                adaIntro: 'Das Gelände ist unübersichtlich. Folge genau dem Kompass: Erst nach Westen, dann nach Norden!',
+                adaSuccess: 'Perfekt navigiert! Ohne den Kompass hätten wir uns hier sicher verfahren.',
+                adaQuestion: {
+                    text: 'Wofür ist der Kompass gut?',
+                    options: ['Er zeigt absolute Himmelsrichtungen an', 'Er misst die Temperatur', 'Er findet Metall'],
+                    correct: 0
+                },
+                unlockedBlocks: ['MOTOR_FWD', 'MOTOR_STOP', 'TURN_LEFT', 'TURN_RIGHT', 'WAIT_UNTIL_COMPASS'],
+                silverLimit: 6,
+                startPos: { x: 0, z: 0, rot: Math.PI },
+                goalPos: { x: -10, z: -10 },
+                goalRadius: 3.0,
+                obstacles: [
+                    { x: 0, z: -5, w: 2, d: 2, h: 4, color: 0x8b5e3c },
+                    { x: -5, z: 0, w: 2, d: 2, h: 4, color: 0x8b5e3c }
+                ],
+                collectibles: [],
+                requiredCollectibles: 0,
+                fogEnabled: false,
+                description: 'Fahre im Slalom mit Hilfe der Kompassausrichtung ins Ziel.'
+            },
+            {
+                id: 13,
+                title: 'Aufstieg zum Plateau',
+                adaIntro: 'Der Weg wird steiler! Zum Glück hat ROBO einen Neigungssensor. Lass uns den Berg hochfahren. Stoppe den Motor, sobald das Gelände wieder eben wird!',
+                adaSuccess: 'Der Neigungssensor funktioniert einwandfrei. Wir sind oben angekommen!',
+                adaQuestion: {
+                    text: 'Wann hat der Roboter gestoppt?',
+                    options: ['Als die Neigung wieder "Eben" war', 'Als er gegen eine Wand fuhr', 'Nach 5 Sekunden'],
+                    correct: 0
+                },
+                unlockedBlocks: ['MOTOR_FWD', 'MOTOR_STOP', 'WAIT_UNTIL_TILT'],
+                silverLimit: 3,
+                startPos: { x: 0, z: 0, rot: Math.PI },
+                goalPos: { x: 0, z: -15 },
+                goalRadius: 3.0,
+                obstacles: [],
+                collectibles: [],
+                requiredCollectibles: 0,
+                fogEnabled: false,
+                description: 'Nutze den Neigungssensor, um oben auf dem Plateau zu stoppen.'
+            },
+            {
+                id: 14,
+                title: 'Talabfahrt',
+                adaIntro: 'Jetzt geht es auf der anderen Seite wieder hinab. Der Motor kann im Leerlauf rollen. Warte, bis es bergab geht, und bremse am Fuß des Hügels!',
+                adaSuccess: 'Sichere Abfahrt! Du hast die Neigung optimal genutzt, um Energie zu sparen.',
+                adaQuestion: {
+                    text: 'Was misst der Neigungssensor?',
+                    options: ['Die Steigung des Untergrunds', 'Die Lautstärke', 'Die Batterieladung'],
+                    correct: 0
+                },
+                unlockedBlocks: ['MOTOR_FWD', 'MOTOR_BWD', 'MOTOR_STOP', 'WAIT_UNTIL_TILT'],
+                silverLimit: 4,
+                startPos: { x: 0, z: -15, rot: Math.PI },
+                goalPos: { x: 0, z: -30 },
+                goalRadius: 3.0,
+                obstacles: [],
+                collectibles: [],
+                requiredCollectibles: 0,
+                fogEnabled: false,
+                description: 'Fahre das Tal hinab und stoppe im flachen Bereich.'
+            },
+            {
+                id: 15,
+                title: 'Das große Windpark-Rätsel',
+                adaIntro: 'Das letzte Windrad steht versteckt im Nebel auf einem Hügel im Osten. Nutze den Kompass, um die Richtung zu finden, und den Neigungssensor, um den Hügel zu erkennen!',
+                adaSuccess: 'Großartig! Der Windpark ist wieder komplett online. Du bist bereit für die Eco-City!',
+                adaQuestion: {
+                    text: 'Welche zwei Sensoren haben wir kombiniert?',
+                    options: ['Kompass und Neigungssensor', 'Farbsensor und Ultraschall', 'Tastsensor und Kamera'],
+                    correct: 0
+                },
+                unlockedBlocks: ['MOTOR_FWD', 'MOTOR_STOP', 'TURN_RIGHT', 'TURN_LEFT', 'WAIT_UNTIL_COMPASS', 'WAIT_UNTIL_TILT'],
+                silverLimit: 6,
+                startPos: { x: 0, z: 0, rot: Math.PI },
+                goalPos: { x: 15, z: 0 },
+                goalRadius: 3.0,
+                obstacles: [],
+                collectibles: [],
+                requiredCollectibles: 0,
+                fogEnabled: true,
+                description: 'Finde das letzte Windrad mit Kompass und Neigungssensor im Nebel.'
+            },
+            {
+                id: 16,
+                title: 'Willkommen in der Smart City',
+                adaIntro: 'Akt 4: Die Smart Eco-City! Alles hier ist vernetzt. Ein Solarfeld muss gereinigt werden. Folge dem leuchtenden Pfad.',
+                adaSuccess: 'Die Solar-Panels glänzen wieder! Sauberer Strom für die Stadt.',
+                adaQuestion: {
+                    text: 'Was produziert ein Solar-Panel?',
+                    options: ['Elektrische Energie aus Sonnenlicht', 'Windenergie', 'Wasser'],
+                    correct: 0
+                },
+                unlockedBlocks: ['MOVE_FWD', 'TURN_RIGHT', 'TURN_LEFT', 'IF_COLOR', 'ELSE', 'END_IF'],
+                silverLimit: 5,
+                startPos: { x: 0, z: 0, rot: Math.PI },
+                goalPos: { x: 0, z: -12 },
+                goalRadius: 2.0,
+                colorZones: [
+                    { x: 0, z: -6, radius: 2.0, color: 'blue' }
+                ],
+                obstacles: [],
+                collectibles: [],
+                requiredCollectibles: 0,
+                fogEnabled: false,
+                description: 'Folge dem Weg und navigiere durch das Solarfeld.'
+            },
+            {
+                id: 17,
+                title: 'Der Liefer-Roboter',
+                adaIntro: 'In der Eco-City gibt es smarte Lieferungen. Hol ein wichtiges Ersatzteil vom Depot ab und bringe es zum Verteilerzentrum.',
+                adaSuccess: 'Lieferung erfolgreich! Effiziente Logistik ist extrem wichtig für grüne Städte.',
+                adaQuestion: {
+                    text: 'Wieso sind smarte Lieferungen umweltfreundlich?',
+                    options: ['Sie optimieren Routen und sparen Energie', 'Sie sind immer schneller', 'Sie fliegen in der Luft'],
+                    correct: 0
+                },
+                unlockedBlocks: ['MOVE_FWD', 'TURN_RIGHT', 'TURN_LEFT', 'GRAB', 'DROP', 'SCAN'],
+                silverLimit: 8,
+                startPos: { x: 0, z: 0, rot: Math.PI },
+                goalPos: { x: 10, z: -10 },
+                goalRadius: 2.0,
+                obstacles: [
+                    { x: 5, z: -5, w: 2, d: 2, h: 2, color: 0x8b5e3c }
+                ],
+                collectibles: [
+                    { x: 0, z: -5, type: 'scrap', icon: '📦' }
+                ],
+                requiredCollectibles: 1,
+                fogEnabled: false,
+                description: 'Sammle das Paket und bringe es ins Ziel.'
+            },
+            {
+                id: 18,
+                title: 'Stau-Umfahrung',
+                adaIntro: 'Auf der Hauptstraße gibt es einen Stau! Nutze den Ultraschallsensor, um den Stau frühzeitig zu erkennen und abzubiegen.',
+                adaSuccess: 'Gut ausgewichen! Smarte Städte brauchen smarte Verkehrsführung.',
+                adaQuestion: {
+                    text: 'Wie hat der Roboter den Stau erkannt?',
+                    options: ['Mit dem Ultraschallsensor', 'Mit dem Kompass', 'Mit dem Neigungssensor'],
+                    correct: 0
+                },
+                unlockedBlocks: ['MOTOR_FWD', 'MOTOR_STOP', 'WAIT_UNTIL', 'TURN_LEFT', 'TURN_RIGHT'],
+                silverLimit: 6,
+                startPos: { x: 0, z: 0, rot: Math.PI },
+                goalPos: { x: -8, z: -12 },
+                goalRadius: 3.0,
+                obstacles: [
+                    { x: 0, z: -8, w: 4, d: 2, h: 3, color: 0xff0000 }
+                ],
+                collectibles: [],
+                requiredCollectibles: 0,
+                fogEnabled: false,
+                description: 'Fahre vorwärts, bis du ein Hindernis scannst, und weiche dann aus.'
+            },
+            {
+                id: 19,
+                title: 'Die leuchtenden Datenpfade',
+                adaIntro: 'Wir müssen Daten physisch durch die Stadt leiten. Folge den blauen Lichtpfaden auf dem Boden.',
+                adaSuccess: 'Datenübertragung abgeschlossen! Das war wie ein Labyrinth.',
+                adaQuestion: {
+                    text: 'Wie folgen wir dem blauen Pfad?',
+                    options: ['Mit dem Farbsensor', 'Mit der Kamera', 'Mit GPS'],
+                    correct: 0
+                },
+                unlockedBlocks: ['MOTOR_FWD', 'MOTOR_STOP', 'IF_COLOR', 'ELSE', 'END_IF', 'TURN_LEFT', 'TURN_RIGHT', 'REPEAT_ALL', 'LOOP_END'],
+                silverLimit: 10,
+                startPos: { x: 0, z: 0, rot: Math.PI },
+                goalPos: { x: 12, z: -12 },
+                goalRadius: 2.0,
+                colorZones: [
+                    { x: 0, z: -6, radius: 2.0, color: 'blue' },
+                    { x: 6, z: -6, radius: 2.0, color: 'blue' }
+                ],
+                obstacles: [],
+                collectibles: [],
+                requiredCollectibles: 0,
+                fogEnabled: false,
+                description: 'Finde den Weg über die blauen Markierungen zum Ziel.'
+            },
+            {
+                id: 20,
+                title: 'Eco-City Finale',
+                adaIntro: 'Die ultimative Herausforderung! Ein Sturm hat die Eco-City durcheinander gebracht. Nutze Sensoren, um dich im Nebel zurechtzufinden, sammle verwehte Solarmodule und repariere den zentralen Generator!',
+                adaSuccess: 'HERZLICHEN GLÜCKWUNSCH! Du hast die Smart Eco-City gerettet und bewiesen, dass Technologie und Natur im Einklang funktionieren können!',
+                adaQuestion: {
+                    text: 'Was ist das Hauptziel einer Solarpunk-Welt?',
+                    options: ['Harmonie zwischen Natur und nachhaltiger Technologie', 'Nur noch in Wäldern zu leben ohne Technik', 'Möglichst viele Fabriken zu bauen'],
+                    correct: 0
+                },
+                unlockedBlocks: ['MOTOR_FWD', 'MOTOR_STOP', 'TURN_LEFT', 'TURN_RIGHT', 'WAIT_UNTIL_COMPASS', 'WAIT_UNTIL_TILT', 'WAIT_UNTIL', 'GRAB', 'SCAN', 'REPEAT_ALL', 'LOOP_END', 'IF_COLOR', 'ELSE', 'END_IF'],
+                silverLimit: 15,
+                startPos: { x: 0, z: 0, rot: Math.PI },
+                goalPos: { x: 0, z: -25 },
+                goalRadius: 4.0,
+                colorZones: [
+                    { x: 0, z: -10, radius: 2.0, color: 'blue' }
+                ],
+                obstacles: [
+                    { x: 5, z: -15, w: 2, d: 2, h: 3, color: 0x555555 },
+                    { x: -5, z: -15, w: 2, d: 2, h: 3, color: 0x555555 }
+                ],
+                collectibles: [
+                    { x: 0, z: -5, type: 'scrap', icon: '🔋' },
+                    { x: 5, z: -10, type: 'scrap', icon: '☀️' },
+                    { x: -5, z: -20, type: 'scrap', icon: '⚙️' }
+                ],
+                requiredCollectibles: 3,
+                fogEnabled: true,
+                description: 'Sammle 3 wichtige Teile im Nebel und erreiche das Zentrum der Eco-City.'
             }
         ];
     }
@@ -405,7 +640,7 @@ class MissionManager {
                 const parsed = JSON.parse(data);
                 if (parsed && typeof parsed === 'object') {
                     if (!parsed.missionResults) parsed.missionResults = {};
-                    parsed.highestMission = 10; // FORCED TO UNLOCK ALL MISSIONS (1-10)
+                    parsed.highestMission = 20; // FORCED TO UNLOCK ALL MISSIONS (1-20)
                     if (parsed.currentWorld === undefined) parsed.currentWorld = 1;
                     return parsed;
                 }
@@ -413,7 +648,7 @@ class MissionManager {
         } catch(e) { console.warn('Progress load failed:', e); }
         return {
             currentWorld: 1,
-            highestMission: 10, // FORCED TO UNLOCK ALL MISSIONS (1-10)
+            highestMission: 20, // FORCED TO UNLOCK ALL MISSIONS (1-20)
             missionResults: {}  // { "1": { completed: true, stars: 2, blockCount: 4 }, ... }
         };
     }

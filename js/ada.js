@@ -132,6 +132,7 @@ class Ada {
         }
 
         toast.innerHTML = `
+            <button class="toast-close-btn" style="position: absolute; top: 8px; right: 8px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-weight: bold; font-family: sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: background 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.2);" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">✕</button>
             <div class="toast-avatar">👩‍🔬</div>
             <div class="toast-content">
                 <h4>🎉 ${title}</h4>
@@ -143,12 +144,17 @@ class Ada {
         toast.classList.remove('hide');
         toast.classList.add('show');
 
-        // Nach 5 Sekunden ausblenden
-        setTimeout(() => {
-            toast.classList.remove('show');
-            toast.classList.add('hide');
-            if (onComplete) onComplete();
-        }, 5000);
+        // X Button zum Wegtippen
+        const closeBtn = toast.querySelector('.toast-close-btn');
+        if (closeBtn) {
+            closeBtn.onclick = () => {
+                toast.classList.remove('show');
+                toast.classList.add('hide');
+                if (onComplete) onComplete();
+            };
+        }
+        
+        // Kein automatisches Ausblenden mehr.
     }
 
     // ═══════════════════════════════════════════════

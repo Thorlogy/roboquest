@@ -105,22 +105,12 @@
 
             <!-- Sensor Overlay -->
             <div class="sensor-overlay glass-panel" style="pointer-events: none; display: flex; flex-direction: column;">
-                <div class="overlay-header">
+                <div class="overlay-header" style="pointer-events: auto;">
                     <span>▼</span> System-Status:
+                    <span id="btn-live-sensors" style="float:right; cursor:pointer; background: rgba(9,216,255,0.2); padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;" title="Live-Sensordaten">📡 Sensoren anzeigen</span>
                 </div>
-                <div class="overlay-body" id="sensor-output">
+                <div class="overlay-body" id="sensor-output" style="cursor: pointer; pointer-events: auto;" title="Klicke für detaillierte Sensordaten">
                     Eco-Bot bereit. Nutze WASD zum Steuern oder klicke links [⚏] zum Programmieren!
-                </div>
-                <div style="display: flex; flex-direction: row; pointer-events: auto;">
-                    <button id="btn-reset-pos-world" title="Roboter zur Startposition zurücksetzen (📍)" style="flex: 1; background-color: #475569; color: white; border: none; border-right: 1px solid rgba(255,255,255,0.2); padding: 8px; font-weight: bold; cursor: pointer; border-radius: 0 0 0 8px; font-family: inherit; font-size: 0.85rem; display: flex; justify-content: center; align-items: center; gap: 5px; transition: background-color 0.2s;">
-                        📍 Zurücksetzen
-                    </button>
-                    <button id="btn-live-sensors" title="Live-Sensordaten anzeigen (📡)" style="flex: 1; background-color: #0284c7; color: white; border: none; border-right: 1px solid rgba(255,255,255,0.2); padding: 8px; font-weight: bold; cursor: pointer; border-radius: 0; font-family: inherit; font-size: 0.85rem; display: flex; justify-content: center; align-items: center; gap: 5px; transition: background-color 0.2s;">
-                        📡 Sensoren
-                    </button>
-                    <button id="btn-hint" title="Tipp geben lassen (💡)" style="flex: 1; background-color: #f59e0b; color: white; border: none; padding: 8px; font-weight: bold; cursor: pointer; border-radius: 0 0 8px 0; font-family: inherit; font-size: 0.85rem; display: flex; justify-content: center; align-items: center; gap: 5px; transition: background-color 0.2s;">
-                        💡 Tipp
-                    </button>
                 </div>
             </div>
 
@@ -292,7 +282,7 @@
 
     <!-- Ada Sprechblase (GDD 2: Mentorin) -->
     <div id="ada-bubble" class="ada-bubble" style="display:none; position: relative; padding-right: 40px;">
-        <button id="ada-close-btn" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.1); color: #333; border: none; border-radius: 4px; width: 28px; height: 28px; font-weight: bold; font-family: sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: background 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.2)'" onmouseout="this.style.background='rgba(0,0,0,0.1)'">✕</button>
+        <button id="ada-close-btn" style="position: absolute; top: 8px; right: 8px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-weight: bold; font-family: sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: background 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.2);" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">✕</button>
         <div class="ada-avatar" id="ada-avatar">👩‍🔬</div>
         <div class="ada-text" id="ada-text"></div>
     </div>
