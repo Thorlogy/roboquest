@@ -502,7 +502,7 @@ class MissionManager {
             {
                 id: 16,
                 title: 'Willkommen in der Smart City',
-                adaIntro: 'Akt 4: Die Smart Eco-City! Alles hier ist vernetzt. Ein Solarfeld muss gereinigt werden. Folge dem leuchtenden Pfad.',
+                adaIntro: 'Akt 4: Die Eco-City! Die Haupt-KI der Stadt ist offline und alles steht still. Wir müssen die Infrastruktur reparieren, um die Stadtbewohner zu retten und die Balance zwischen Natur und Technologie wiederherzustellen! Dein erstes Ziel: Ein Solarfeld muss gereinigt werden. Folge dem leuchtenden Pfad.',
                 adaSuccess: 'Die Solar-Panels glänzen wieder! Sauberer Strom für die Stadt.',
                 adaQuestion: {
                     text: 'Was produziert ein Solar-Panel?',
@@ -564,7 +564,7 @@ class MissionManager {
                 goalPos: { x: -8, z: -12 },
                 goalRadius: 3.0,
                 obstacles: [
-                    { x: 0, z: -8, w: 4, d: 2, h: 3, color: 0xff0000 }
+                    { x: 0, z: -8, w: 2, d: 4.5, h: 2, type: 'car' }
                 ],
                 collectibles: [],
                 requiredCollectibles: 0,
@@ -599,8 +599,8 @@ class MissionManager {
             {
                 id: 20,
                 title: 'Eco-City Finale',
-                adaIntro: 'Die ultimative Herausforderung! Ein Sturm hat die Eco-City durcheinander gebracht. Nutze Sensoren, um dich im Nebel zurechtzufinden, sammle verwehte Solarmodule und repariere den zentralen Generator!',
-                adaSuccess: 'HERZLICHEN GLÜCKWUNSCH! Du hast die Smart Eco-City gerettet und bewiesen, dass Technologie und Natur im Einklang funktionieren können!',
+                adaIntro: 'Die ultimative Herausforderung! Das zentrale KI-System ist in einem Sturm beschädigt worden. Nutze Sensoren, um dich im Nebel zurechtzufinden, sammle wichtige Systemteile und reboote den zentralen Stadt-Server!',
+                adaSuccess: 'HERZLICHEN GLÜCKWUNSCH! Du hast die Smart Eco-City gerettet. Die KI ist wieder online und steuert die Natur-Technologie-Symbiose perfekt!',
                 adaQuestion: {
                     text: 'Was ist das Hauptziel einer Solarpunk-Welt?',
                     options: ['Harmonie zwischen Natur und nachhaltiger Technologie', 'Nur noch in Wäldern zu leben ohne Technik', 'Möglichst viele Fabriken zu bauen'],

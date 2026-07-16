@@ -151,6 +151,67 @@ function buildWindTurbine(x, z) {
     return turbine;
 }
 
+function buildSkyscraper(x, z, seed) {
+    const bldg = new THREE.Group();
+    const h = 10 + (seed % 15);
+    const w = 4 + (seed % 3);
+    const d = 4 + ((seed*2) % 3);
+    
+    const mat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8, metalness: 0.2 });
+    const core = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+    core.position.y = h/2;
+    bldg.add(core);
+    
+    // Add glowing windows
+    const glowMat = new THREE.MeshLambertMaterial({ color: 0x38bdf8, emissive: 0x0ea5e9, emissiveIntensity: 0.8 });
+    for(let wy = 2; wy < h-1; wy += 2) {
+        if ((seed * wy) % 3 === 0) {
+            const windowBar = new THREE.Mesh(new THREE.BoxGeometry(w+0.1, 0.4, d+0.1), glowMat);
+            windowBar.position.y = wy;
+            bldg.add(windowBar);
+        }
+    }
+    
+    bldg.position.set(x, getTerrainYGlobal(x, z), z);
+    return bldg;
+}
+
+function buildCar(x, z, seed) {
+    const car = new THREE.Group();
+    
+    const colors = [0xef4444, 0x3b82f6, 0xfacc15, 0x10b981, 0x64748b];
+    const cMat = new THREE.MeshStandardMaterial({ color: colors[Math.floor(seed) % colors.length] });
+    
+    const body = new THREE.Mesh(new THREE.BoxGeometry(2, 0.8, 4.5), cMat);
+    body.position.y = 0.6;
+    car.add(body);
+    
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.8, 2.5), new THREE.MeshStandardMaterial({ color: 0x334155 }));
+    roof.position.set(0, 1.4, -0.5);
+    car.add(roof);
+    
+    // headlights
+    const hlMat = new THREE.MeshLambertMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 1 });
+    const hl1 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.1), hlMat);
+    hl1.position.set(0.6, 0.6, -2.25);
+    car.add(hl1);
+    const hl2 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.1), hlMat);
+    hl2.position.set(-0.6, 0.6, -2.25);
+    car.add(hl2);
+    
+    // tail lights
+    const tlMat = new THREE.MeshLambertMaterial({ color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 0.8 });
+    const tl1 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.1), tlMat);
+    tl1.position.set(0.6, 0.6, 2.25);
+    car.add(tl1);
+    const tl2 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.1), tlMat);
+    tl2.position.set(-0.6, 0.6, 2.25);
+    car.add(tl2);
+    
+    car.position.set(x, getTerrainYGlobal(x, z), z);
+    return car;
+}
+
 /**
  * Erstellt die 3D-Umgebung inklusive Boden, Pfaden, Bäumen, Felsen und dem Labyrinth.
  * Ruft getTerrainYGlobal auf, um Objekte physikalisch korrekt am Boden zu platzieren.
@@ -425,8 +486,34 @@ function buildEnvironment() {
                 environmentGroup.add(bird);
                 window.birds.push(bird);
             }
+        } else if (currentWorld === 4) {
+            // Smart City logic
+            if (type < 0.2) {
+                const bldg = buildSkyscraper(rx, rz, type * 1000);
+                bldg.rotation.y = seededRandom() * Math.PI / 2;
+                environmentGroup.add(bldg);
+                obstacles.push({ x: rx, z: rz, radius: 4 });
+            } else if (type < 0.3) {
+                const c = buildCar(rx, rz, type * 1000);
+                c.rotation.y = (seededRandom() - 0.5) * Math.PI;
+                environmentGroup.add(c);
+                obstacles.push({ x: rx, z: rz, radius: 2.5 });
+            } else if (type < 0.4) {
+                // Info Terminals / Lamp posts
+                const lamp = new THREE.Group();
+                const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 4), new THREE.MeshStandardMaterial({color: 0x334155}));
+                pole.position.y = 2;
+                lamp.add(pole);
+                const light = new THREE.Mesh(new THREE.BoxGeometry(1, 0.2, 0.5), new THREE.MeshLambertMaterial({color: 0x38bdf8, emissive: 0x38bdf8, emissiveIntensity: 0.8}));
+                light.position.set(0.4, 4, 0);
+                lamp.add(light);
+                lamp.position.set(rx, tY, rz);
+                lamp.rotation.y = seededRandom() * Math.PI * 2;
+                environmentGroup.add(lamp);
+                obstacles.push({ x: rx, z: rz, radius: 0.5 });
+            }
         } else {
-            // ORIGINAL LOGIC für Welt 1, 2, 4
+            // ORIGINAL LOGIC für Welt 1, 2
             if (type < 0.35) {
                 const tree = new THREE.Group();
                 const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.6, 2, 5), trkMat);
@@ -1132,16 +1219,21 @@ window.missionWorld = {
 
         // Spawn obstacles
         if (mission.obstacles) {
-            mission.obstacles.forEach(obs => {
-                const obsGeo = new THREE.BoxGeometry(obs.w || 2, obs.h || 2, obs.d || 2);
-                const obsMat = new THREE.MeshStandardMaterial({ 
-                    color: obs.color || 0xd97706, // Amber/Orange-brown
-                    roughness: 0.6,
-                    metalness: 0.1
-                });
-                const obsMesh = new THREE.Mesh(obsGeo, obsMat);
-                const obsY = (obs.h || 2) / 2;
-                obsMesh.position.set(obs.x, obsY, obs.z);
+            mission.obstacles.forEach((obs, index) => {
+                let obsMesh;
+                if (obs.type === 'car') {
+                    obsMesh = buildCar(obs.x, obs.z, index * 10);
+                } else {
+                    const obsGeo = new THREE.BoxGeometry(obs.w || 2, obs.h || 2, obs.d || 2);
+                    const obsMat = new THREE.MeshStandardMaterial({ 
+                        color: obs.color || 0xd97706, // Amber/Orange-brown
+                        roughness: 0.6,
+                        metalness: 0.1
+                    });
+                    obsMesh = new THREE.Mesh(obsGeo, obsMat);
+                    const obsY = (obs.h || 2) / 2;
+                    obsMesh.position.set(obs.x, obsY, obs.z);
+                }
                 obsMesh.castShadow = true;
                 obsMesh.receiveShadow = true;
                 environmentGroup.add(obsMesh);
