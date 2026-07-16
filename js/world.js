@@ -917,7 +917,27 @@ window.missionWorld = {
         const isWorld4 = mission.id >= 16 && mission.id <= 20;
         const isCyberLab = mission.id >= 100;
         
-        const groundGeo = new THREE.PlaneGeometry(100, 100);
+        let groundGeo;
+        if (isWorld3 || isWorld4) {
+            groundGeo = new THREE.PlaneGeometry(900, 900, 150, 150);
+            const pos = groundGeo.attributes.position;
+            for(let i=0; i < pos.count; i++) {
+                let ty = window.getTerrainVisualYGlobal ? window.getTerrainVisualYGlobal(pos.getX(i), -pos.getY(i)) : 0;
+                if (window.worldModifications) {
+                    for (const mod of window.worldModifications) {
+                        if (mod.type === 'dig') {
+                            const dist = Math.hypot(pos.getX(i) - mod.x, -pos.getY(i) - mod.z);
+                            if (dist < 3.0) ty -= Math.cos((dist / 3.0) * (Math.PI / 2)) * 1.5;
+                        }
+                    }
+                }
+                pos.setZ(i, ty);
+            }
+            groundGeo.computeVertexNormals();
+        } else {
+            groundGeo = new THREE.PlaneGeometry(100, 100);
+        }
+
         let groundMat;
         
         if (isCyberLab) {
@@ -931,13 +951,14 @@ window.missionWorld = {
         } else {
             let col = 0x1e293b; // Default (World 1)
             if (isWorld2) col = 0x14532d; // Dark Forest Green
-            if (isWorld3) col = 0x15803d; // Green
-            if (isWorld4) col = 0x0f172a; // Darker slate
+            if (isWorld3) col = 0x22c55e; // Green
+            if (isWorld4) col = 0x4ade80; // Bright Green
             
             groundMat = new THREE.MeshStandardMaterial({ 
                 color: col,
                 roughness: 0.8,
-                metalness: 0.2
+                metalness: 0.2,
+                flatShading: (isWorld3 || isWorld4) // Make hills look low-poly like the open world
             });
         }
         
@@ -946,16 +967,32 @@ window.missionWorld = {
         ground.receiveShadow = !isCyberLab;
         environmentGroup.add(ground);
 
-        // Add a grid helper
-        let gridColor1 = 0x475569, gridColor2 = 0x334155;
-        if (isWorld2) { gridColor1 = 0x16a34a; gridColor2 = 0x14532d; }
-        if (isWorld3) { gridColor1 = 0x22c55e; gridColor2 = 0x15803d; }
-        if (isWorld4) { gridColor1 = 0x38bdf8; gridColor2 = 0x0ea5e9; }
-        if (isCyberLab) { gridColor1 = 0x09d8ff; gridColor2 = 0x0a1428; }
-        
-        const gridHelper = new THREE.GridHelper(100, 50, gridColor1, gridColor2);
-        gridHelper.position.y = 0.02;
-        environmentGroup.add(gridHelper);
+        // Add river for World 3 and 4
+        if (isWorld3 || isWorld4) {
+            const waterGeo = new THREE.PlaneGeometry(1200, 20, 100, 1);
+            const waterMat = new THREE.MeshPhysicalMaterial({ 
+                color: 0x0284c7, // Cleaner water for later worlds
+                transparent: true, 
+                opacity: 0.85,
+                roughness: 0.2,
+                metalness: 0.1 
+            });
+            const riverM = new THREE.Mesh(waterGeo, waterMat);
+            riverM.rotation.x = -Math.PI / 2;
+            riverM.position.set(0, -0.8, -35);
+            environmentGroup.add(riverM);
+        }
+
+        // Add a grid helper ONLY for earlier worlds
+        if (!isWorld3 && !isWorld4) {
+            let gridColor1 = 0x475569, gridColor2 = 0x334155;
+            if (isWorld2) { gridColor1 = 0x16a34a; gridColor2 = 0x14532d; }
+            if (isCyberLab) { gridColor1 = 0x09d8ff; gridColor2 = 0x0a1428; }
+            
+            const gridHelper = new THREE.GridHelper(100, 50, gridColor1, gridColor2);
+            gridHelper.position.y = 0.02;
+            environmentGroup.add(gridHelper);
+        }
 
         // Spawn decorative trees and bushes for World 2
         if (isWorld2) {

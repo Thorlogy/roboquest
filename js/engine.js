@@ -827,7 +827,8 @@ function getTerrainVisualYGlobal(x, z) {
 
 function getTerrainYGlobal(x, z) {
     if (window.missionManager && window.missionManager.missionActive) {
-        return 0.1;
+        const mid = window.missionManager.currentMission ? window.missionManager.currentMission.id : 0;
+        if (mid < 11 || mid >= 100) return 0.1; // Flat ground for World 1, 2 and CyberLab
     }
     let y = getTerrainVisualYGlobal(x, z);
     if (Math.abs(x) < 6.0 || isOnBranchPath(x, z)) {
