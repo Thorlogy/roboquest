@@ -415,71 +415,66 @@ function setupDPad() {
     const btnCloseWorlds = document.getElementById('btn-close-worlds');
 
     window.updateWorldsPreviewModal = function() {
-        if (!worldsPreviewModal) return;
         const content = worldsPreviewModal.querySelector('.modal-content');
         if (!content) return;
         
-        const progress = window.missionManager ? window.missionManager.progress : { highestMission: 1 };
-        const highest = progress.highestMission || 1;
+        let highest = 1;
+        if (window.missionManager) {
+            highest = window.missionManager.highestMission || window.missionManager.progress.highestMission;
+        }
         
         const w2Unlocked = highest >= 6;
+        const w3Unlocked = highest >= 11;
+        const w4Unlocked = highest >= 16;
         
         content.innerHTML = `
             <button class="close-btn" id="btn-close-worlds" style="position: absolute; top: 12px; right: 12px;" title="Fenster schließen">×</button>
             <h2 class="modal-title" style="text-align: center; margin-bottom: 20px;">🌍 Bekannte Welten</h2>
             
-            <!-- Welt 1 -->
             <div class="world-preview-card active-world" id="world-card-1" style="background: rgba(74,222,128,0.1); border-left: 4px solid #4ade80; padding: 15px; margin-bottom: 15px; border-radius: 8px; cursor: pointer;">
                 <h3 style="margin-top: 0; color: #4ade80;">Welt 1: Verlassene Werkstatt</h3>
-                <p style="margin-bottom: 0; font-size: 14px; opacity: 0.9;">Die erste Lektion in der Natur. Lerne grundlegende Bewegungen, sammle verstreuten Schrott und hilf Professor Ada.</p>
+                <p style="margin-bottom: 0; font-size: 14px; opacity: 0.9;">Lerne grundlegende Bewegungen und sammle Schrott.</p>
             </div>
             
-            <!-- Welt 2 -->
             <div class="world-preview-card ${w2Unlocked ? 'active-world' : 'locked-world'}" id="world-card-2" style="background: ${w2Unlocked ? 'rgba(74,222,128,0.1)' : 'rgba(255,255,255,0.05)'}; border-left: 4px solid ${w2Unlocked ? '#4ade80' : '#94a3b8'}; padding: 15px; margin-bottom: 15px; border-radius: 8px; opacity: ${w2Unlocked ? '1.0' : '0.6'}; cursor: ${w2Unlocked ? 'pointer' : 'default'};">
-                <h3 style="margin-top: 0; color: ${w2Unlocked ? '#4ade80' : '#94a3b8'};">${w2Unlocked ? '' : '🔒 '}Welt 2: Verschmutzter Stadtpark</h3>
-                <p style="margin-bottom: 0; font-size: 14px; opacity: 0.9;">Fokus auf Schleifen, Farbsensoren und Bedingungen. Sortiere den Müll, säubere die Wiesen und bringe den Stadtpark zum Erblühen.</p>
+                <h3 style="margin-top: 0; color: ${w2Unlocked ? '#4ade80' : '#94a3b8'};">${w2Unlocked ? '' : '🔒 '}Welt 2: Stadtpark</h3>
+                <p style="margin-bottom: 0; font-size: 14px; opacity: 0.9;">Fokus auf Schleifen, Farbsensoren und Bedingungen.</p>
             </div>
             
-            <!-- Welt 3 -->
-            <div class="world-preview-card locked-world" id="world-card-3" style="background: rgba(255,255,255,0.05); border-left: 4px solid #94a3b8; padding: 15px; margin-bottom: 15px; border-radius: 8px; opacity: 0.6; cursor: default;">
-                <h3 style="margin-top: 0; color: #94a3b8;">🔒 Welt 3: Küsten-Rettung (Demnächst)</h3>
-                <p style="margin-bottom: 0; font-size: 14px; opacity: 0.7;">Bedingungen (If/Else), Variablen und Feuchtigkeitssensoren. Hilf dabei, die Küste zu säubern und Schildkröten zu retten.</p>
+            <div class="world-preview-card ${w3Unlocked ? 'active-world' : 'locked-world'}" id="world-card-3" style="background: ${w3Unlocked ? 'rgba(74,222,128,0.1)' : 'rgba(255,255,255,0.05)'}; border-left: 4px solid ${w3Unlocked ? '#4ade80' : '#94a3b8'}; padding: 15px; margin-bottom: 15px; border-radius: 8px; opacity: ${w3Unlocked ? '1.0' : '0.6'}; cursor: ${w3Unlocked ? 'pointer' : 'default'};">
+                <h3 style="margin-top: 0; color: ${w3Unlocked ? '#4ade80' : '#94a3b8'};">${w3Unlocked ? '' : '🔒 '}Welt 3: Windpark</h3>
+                <p style="margin-bottom: 0; font-size: 14px; opacity: 0.9;">Kompass und Neigung nutzen, um Windräder zu aktivieren.</p>
             </div>
-            
-            <p style="text-align: center; font-size: 12px; opacity: 0.7; margin-top: 20px;">Schließe mehr Missionen ab, um neue Welten freizuschalten!</p>
+
+            <div class="world-preview-card ${w4Unlocked ? 'active-world' : 'locked-world'}" id="world-card-4" style="background: ${w4Unlocked ? 'rgba(74,222,128,0.1)' : 'rgba(255,255,255,0.05)'}; border-left: 4px solid ${w4Unlocked ? '#4ade80' : '#94a3b8'}; padding: 15px; margin-bottom: 15px; border-radius: 8px; opacity: ${w4Unlocked ? '1.0' : '0.6'}; cursor: ${w4Unlocked ? 'pointer' : 'default'};">
+                <h3 style="margin-top: 0; color: ${w4Unlocked ? '#4ade80' : '#94a3b8'};">${w4Unlocked ? '' : '🔒 '}Welt 4: Smart Eco-City</h3>
+                <p style="margin-bottom: 0; font-size: 14px; opacity: 0.9;">Komplexe Logik, um Datennetze und Solarpanels in der Cyber-Stadt zu reparieren.</p>
+            </div>
         `;
         
         // Re-bind close button
         const newCloseBtn = document.getElementById('btn-close-worlds');
         if (newCloseBtn) {
-            newCloseBtn.addEventListener('click', () => {
-                worldsPreviewModal.style.display = 'none';
-            });
+            newCloseBtn.addEventListener('click', () => { worldsPreviewModal.style.display = 'none'; });
         }
         
-        // Bind click on Welt 1
-        const w1Card = document.getElementById('world-card-1');
-        if (w1Card) {
-            w1Card.addEventListener('click', () => {
-                worldsPreviewModal.style.display = 'none';
-                if (window.missionManager) {
-                    window.missionManager.showHub();
-                }
-            });
-        }
-        
-        // Bind click on Welt 2
-        if (w2Unlocked) {
-            const w2Card = document.getElementById('world-card-2');
-            if (w2Card) {
-                w2Card.addEventListener('click', () => {
+        const bindCard = (id, missionId) => {
+            const card = document.getElementById(id);
+            if (card) {
+                card.addEventListener('click', () => {
                     worldsPreviewModal.style.display = 'none';
                     if (window.missionManager) {
-                        window.missionManager.loadMission(6);
+                        if (missionId === 1) window.missionManager.showHub();
+                        else window.missionManager.loadMission(missionId);
                     }
                 });
             }
-        }
+        };
+
+        bindCard('world-card-1', 1);
+        if (w2Unlocked) bindCard('world-card-2', 6);
+        if (w3Unlocked) bindCard('world-card-3', 11);
+        if (w4Unlocked) bindCard('world-card-4', 16);
     };
 
     if (btnNavMissions && worldsPreviewModal) {
