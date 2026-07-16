@@ -161,6 +161,7 @@ function buildEnvironment() {
     environmentGroup = new THREE.Group();
     obstacles = [];
     window.windTurbineBlades = [];
+    window.birds = [];
 
     // Seeded random for deterministic object placement so trees don't reshuffle
     let envSeed = 42;
@@ -408,6 +409,23 @@ function buildEnvironment() {
                 bush.position.set(rx, tY + 0.3, rz);
                 environmentGroup.add(bush);
             }
+            
+            // Randomly spawn some birds in the sky
+            if (type < 0.1 && window.birds.length < 15) {
+                const birdGeo = new THREE.ConeGeometry(0.2, 0.8, 3);
+                birdGeo.rotateX(Math.PI / 2);
+                const birdMat = new THREE.MeshBasicMaterial({ color: 0x1e293b });
+                const bird = new THREE.Mesh(birdGeo, birdMat);
+                bird.position.set(rx, tY + 15 + seededRandom() * 10, rz);
+                bird.rotation.y = seededRandom() * Math.PI * 2;
+                bird.userData = { 
+                    speedX: Math.cos(bird.rotation.y) * (0.05 + seededRandom() * 0.05),
+                    speedZ: -Math.sin(bird.rotation.y) * (0.05 + seededRandom() * 0.05),
+                    phase: seededRandom() * Math.PI * 2
+                };
+                environmentGroup.add(bird);
+                window.birds.push(bird);
+            }
         } else {
             // ORIGINAL LOGIC für Welt 1, 2, 4
             if (type < 0.35) {
@@ -619,6 +637,18 @@ function updateAtmosphere(delta, time) {
         f.position.y += Math.sin(time * f.userData.speed + f.userData.phase) * 0.01;
         f.material.opacity = 0.4 + Math.sin(time * 2 + f.userData.phase) * 0.4;
     });
+
+    if (window.birds && window.birds.length > 0) {
+        window.birds.forEach(b => {
+            b.position.x += b.userData.speedX;
+            b.position.z += b.userData.speedZ;
+            b.position.y += Math.sin(time * 5 + b.userData.phase) * 0.02; // Flapping effect
+            if (b.position.x > 50) b.position.x = -50;
+            if (b.position.x < -50) b.position.x = 50;
+            if (b.position.z > 50) b.position.z = -50;
+            if (b.position.z < -50) b.position.z = 50;
+        });
+    }
 
     if (window.windTurbineBlades) {
         window.windTurbineBlades.forEach(rotor => {

@@ -418,14 +418,16 @@ function setupDPad() {
         const content = worldsPreviewModal.querySelector('.modal-content');
         if (!content) return;
         
+        // Bestimme Fortschritt (highest unlocked)
         let highest = 1;
         if (window.missionManager) {
             highest = window.missionManager.highestMission || window.missionManager.progress.highestMission;
         }
         
-        const w2Unlocked = highest >= 6;
-        const w3Unlocked = highest >= 11;
-        const w4Unlocked = highest >= 16;
+        // Temporarily unlock all worlds for testing
+        const w2Unlocked = true;
+        const w3Unlocked = true;
+        const w4Unlocked = true;
         
         content.innerHTML = `
             <button class="close-btn" id="btn-close-worlds" style="position: absolute; top: 12px; right: 12px;" title="Fenster schließen">×</button>

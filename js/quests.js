@@ -609,6 +609,7 @@ function advanceToNextAct() {
 }
 
 function updateStoryUI() {
+    if (window.missionManager && window.missionManager.missionActive) return;
     const act = STORY_ACTS[storyState.currentAct];
     if (!act) {
         document.getElementById('story-act').innerText = "🏆 Abenteuer abgeschlossen!";
