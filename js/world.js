@@ -151,66 +151,55 @@ function buildWindTurbine(x, z) {
     return turbine;
 }
 
-function buildSkyscraper(x, z, seed) {
-    const bldg = new THREE.Group();
-    const h = 10 + (seed % 15);
-    const w = 4 + (seed % 3);
-    const d = 4 + ((seed*2) % 3);
+    function buildSkyscraper(x, z, seed) {
+        const bldg = new THREE.Group();
+        const h = 10 + (seed % 15);
+        const w = 4 + (seed % 3);
+        const d = 4 + ((seed*2) % 3);
+        
+        const mat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.3, metalness: 0.1 }); // Clean white building
+        const core = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+        core.position.y = h/2;
+        bldg.add(core);
+        
+        // Add green roofs (trees)
+        const leaP = new THREE.MeshStandardMaterial({ color: 0x16a34a, flatShading: true });
+        const roofTree = new THREE.Mesh(new THREE.DodecahedronGeometry(w * 0.4), leaP);
+        roofTree.position.set(0, h, 0);
+        bldg.add(roofTree);
     
-    const mat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8, metalness: 0.2 });
-    const core = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
-    core.position.y = h/2;
-    bldg.add(core);
-    
-    // Add glowing windows
-    const glowMat = new THREE.MeshLambertMaterial({ color: 0x38bdf8, emissive: 0x0ea5e9, emissiveIntensity: 0.8 });
-    for(let wy = 2; wy < h-1; wy += 2) {
-        if ((seed * wy) % 3 === 0) {
-            const windowBar = new THREE.Mesh(new THREE.BoxGeometry(w+0.1, 0.4, d+0.1), glowMat);
-            windowBar.position.y = wy;
-            bldg.add(windowBar);
+        // Add some hanging plants on the side
+        for(let wy = 3; wy < h-2; wy += 4) {
+            const bush = new THREE.Mesh(new THREE.SphereGeometry(0.8, 5, 5), leaP);
+            bush.position.set((seed%2===0)? w/2 : -w/2, wy, (seed%3===0)? d/2 : -d/2);
+            bldg.add(bush);
         }
+        
+        bldg.position.set(x, getTerrainYGlobal(x, z), z);
+        return bldg;
     }
     
-    bldg.position.set(x, getTerrainYGlobal(x, z), z);
-    return bldg;
-}
-
-function buildCar(x, z, seed) {
-    const car = new THREE.Group();
-    
-    const colors = [0xef4444, 0x3b82f6, 0xfacc15, 0x10b981, 0x64748b];
-    const cMat = new THREE.MeshStandardMaterial({ color: colors[Math.floor(seed) % colors.length] });
-    
-    const body = new THREE.Mesh(new THREE.BoxGeometry(2, 0.8, 4.5), cMat);
-    body.position.y = 0.6;
-    car.add(body);
-    
-    const roof = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.8, 2.5), new THREE.MeshStandardMaterial({ color: 0x334155 }));
-    roof.position.set(0, 1.4, -0.5);
-    car.add(roof);
-    
-    // headlights
-    const hlMat = new THREE.MeshLambertMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 1 });
-    const hl1 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.1), hlMat);
-    hl1.position.set(0.6, 0.6, -2.25);
-    car.add(hl1);
-    const hl2 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.1), hlMat);
-    hl2.position.set(-0.6, 0.6, -2.25);
-    car.add(hl2);
-    
-    // tail lights
-    const tlMat = new THREE.MeshLambertMaterial({ color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 0.8 });
-    const tl1 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.1), tlMat);
-    tl1.position.set(0.6, 0.6, 2.25);
-    car.add(tl1);
-    const tl2 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.1), tlMat);
-    tl2.position.set(-0.6, 0.6, 2.25);
-    car.add(tl2);
-    
-    car.position.set(x, getTerrainYGlobal(x, z), z);
-    return car;
-}
+    function buildDeliveryPod(x, z, seed) {
+        const pod = new THREE.Group();
+        
+        const cMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.2, metalness: 0.6 });
+        
+        const body = new THREE.Mesh(new THREE.CapsuleGeometry(1, 2.5, 4, 8), cMat);
+        body.rotation.z = Math.PI / 2;
+        body.position.y = 1.0;
+        pod.add(body);
+        
+        // Small glowing ring (hover engine)
+        const ringGeo = new THREE.RingGeometry(0.8, 1.2, 16);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.y = 0.2;
+        pod.add(ring);
+        
+        pod.position.set(x, getTerrainYGlobal(x, z), z);
+        return pod;
+    }
 
 /**
  * Erstellt die 3D-Umgebung inklusive Boden, Pfaden, Bäumen, Felsen und dem Labyrinth.
@@ -256,10 +245,10 @@ function buildEnvironment() {
         emissiveColor = 0x09d8ff;
         emissiveInt = 0.5;
     } else if (currentWorld === 4) {
-        groundColor = 0x0f172a;
-        pathColor = 0x38bdf8;
-        emissiveColor = 0x38bdf8;
-        emissiveInt = 0.4;
+        groundColor = 0x22c55e; // Satte Natur in der Stadt
+        pathColor = 0xe2e8f0;   // Helle, saubere Wege
+        emissiveColor = 0x000000;
+        emissiveInt = 0;
     } else if (currentWorld === 3) {
         groundColor = 0x22c55e;
         pathColor = 0x78716c;
@@ -487,21 +476,22 @@ function buildEnvironment() {
                 window.birds.push(bird);
             }
         } else if (currentWorld === 4) {
-            // Smart City logic
+            // Smart City logic (Solarpunk)
             if (type < 0.2) {
                 const bldg = buildSkyscraper(rx, rz, type * 1000);
                 bldg.rotation.y = seededRandom() * Math.PI / 2;
                 environmentGroup.add(bldg);
                 obstacles.push({ x: rx, z: rz, radius: 4 });
             } else if (type < 0.3) {
-                const c = buildCar(rx, rz, type * 1000);
+                // Occasional delivery pod on paths
+                const c = buildDeliveryPod(rx, rz, type * 1000);
                 c.rotation.y = (seededRandom() - 0.5) * Math.PI;
                 environmentGroup.add(c);
                 obstacles.push({ x: rx, z: rz, radius: 2.5 });
             } else if (type < 0.4) {
-                // Info Terminals / Lamp posts
+                // Info Terminals / Smart Trees
                 const lamp = new THREE.Group();
-                const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 4), new THREE.MeshStandardMaterial({color: 0x334155}));
+                const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 4), new THREE.MeshStandardMaterial({color: 0xf8fafc}));
                 pole.position.y = 2;
                 lamp.add(pole);
                 const light = new THREE.Mesh(new THREE.BoxGeometry(1, 0.2, 0.5), new THREE.MeshLambertMaterial({color: 0x38bdf8, emissive: 0x38bdf8, emissiveIntensity: 0.8}));
@@ -1039,7 +1029,7 @@ window.missionWorld = {
             let col = 0x1e293b; // Default (World 1)
             if (isWorld2) col = 0x14532d; // Dark Forest Green
             if (isWorld3) col = 0x22c55e; // Green
-            if (isWorld4) col = 0x4ade80; // Bright Green
+            if (isWorld4) col = 0x4ade80; // Bright Green (Solarpunk)
             
             groundMat = new THREE.MeshStandardMaterial({ 
                 color: col,
@@ -1221,8 +1211,18 @@ window.missionWorld = {
         if (mission.obstacles) {
             mission.obstacles.forEach((obs, index) => {
                 let obsMesh;
-                if (obs.type === 'car') {
-                    obsMesh = buildCar(obs.x, obs.z, index * 10);
+                if (obs.type === 'car' || obs.type === 'pod') {
+                    obsMesh = buildDeliveryPod(obs.x, obs.z, index * 10);
+                } else if (obs.type === 'tree') {
+                    obsMesh = new THREE.Group();
+                    const log = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.5, 0.5, obs.w || 4),
+                        new THREE.MeshStandardMaterial({ color: 0x5c4033 })
+                    );
+                    log.rotation.z = Math.PI / 2;
+                    log.position.y = 0.5;
+                    obsMesh.add(log);
+                    obsMesh.position.set(obs.x, 0, obs.z);
                 } else {
                     const obsGeo = new THREE.BoxGeometry(obs.w || 2, obs.h || 2, obs.d || 2);
                     const obsMat = new THREE.MeshStandardMaterial({ 

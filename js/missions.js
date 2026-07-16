@@ -502,8 +502,8 @@ class MissionManager {
             {
                 id: 16,
                 title: 'Willkommen in der Smart City',
-                adaIntro: 'Akt 4: Die Eco-City! Die Haupt-KI der Stadt ist offline und alles steht still. Wir müssen die Infrastruktur reparieren, um die Stadtbewohner zu retten und die Balance zwischen Natur und Technologie wiederherzustellen! Dein erstes Ziel: Ein Solarfeld muss gereinigt werden. Folge dem leuchtenden Pfad.',
-                adaSuccess: 'Die Solar-Panels glänzen wieder! Sauberer Strom für die Stadt.',
+                adaIntro: 'Akt 4: Die Solarpunk Eco-City! Alles hier blüht und ist grün, aber wir haben ein Problem: Die automatischen Reinigungsdrohnen sind ausgefallen. Fahre die Solarmodule ab, um den Staub abzuwischen, damit die saubere Energieversorgung der Stadt gesichert ist!',
+                adaSuccess: 'Die Solar-Panels glänzen wieder! Sauberer Strom für die Vertical Farms.',
                 adaQuestion: {
                     text: 'Was produziert ein Solar-Panel?',
                     options: ['Elektrische Energie aus Sonnenlicht', 'Windenergie', 'Wasser'],
@@ -525,9 +525,9 @@ class MissionManager {
             },
             {
                 id: 17,
-                title: 'Der Liefer-Roboter',
-                adaIntro: 'In der Eco-City gibt es smarte Lieferungen. Hol ein wichtiges Ersatzteil vom Depot ab und bringe es zum Verteilerzentrum.',
-                adaSuccess: 'Lieferung erfolgreich! Effiziente Logistik ist extrem wichtig für grüne Städte.',
+                title: 'Saatgut-Lieferung',
+                adaIntro: 'In der Eco-City gibt es smarte Lieferungen für die Vertical-Farming-Türme. Hol ein wichtiges Saatgut-Paket vom Depot ab und bringe es zum Verteilerzentrum.',
+                adaSuccess: 'Lieferung erfolgreich! Dank dir können bald neue Bäume auf den Dächern gepflanzt werden.',
                 adaQuestion: {
                     text: 'Wieso sind smarte Lieferungen umweltfreundlich?',
                     options: ['Sie optimieren Routen und sparen Energie', 'Sie sind immer schneller', 'Sie fliegen in der Luft'],
@@ -550,9 +550,9 @@ class MissionManager {
             },
             {
                 id: 18,
-                title: 'Stau-Umfahrung',
-                adaIntro: 'Auf der Hauptstraße gibt es einen Stau! Nutze den Ultraschallsensor, um den Stau frühzeitig zu erkennen und abzubiegen.',
-                adaSuccess: 'Gut ausgewichen! Smarte Städte brauchen smarte Verkehrsführung.',
+                title: 'Blockierter Radschnellweg',
+                adaIntro: 'Nach dem letzten starken Wind liegt ein riesiger Baumstamm auf dem Drohnen- und Radschnellweg! Nutze den Ultraschallsensor, um das Hindernis rechtzeitig zu erkennen und auszuweichen.',
+                adaSuccess: 'Gut ausgewichen! So bleibt der umweltfreundliche Verkehr im Fluss.',
                 adaQuestion: {
                     text: 'Wie hat der Roboter den Stau erkannt?',
                     options: ['Mit dem Ultraschallsensor', 'Mit dem Kompass', 'Mit dem Neigungssensor'],
@@ -564,7 +564,7 @@ class MissionManager {
                 goalPos: { x: -8, z: -12 },
                 goalRadius: 3.0,
                 obstacles: [
-                    { x: 0, z: -8, w: 2, d: 4.5, h: 2, type: 'car' }
+                    { x: 0, z: -8, w: 4.5, h: 2, type: 'tree' }
                 ],
                 collectibles: [],
                 requiredCollectibles: 0,
@@ -573,9 +573,9 @@ class MissionManager {
             },
             {
                 id: 19,
-                title: 'Die leuchtenden Datenpfade',
-                adaIntro: 'Wir müssen Daten physisch durch die Stadt leiten. Folge den blauen Lichtpfaden auf dem Boden.',
-                adaSuccess: 'Datenübertragung abgeschlossen! Das war wie ein Labyrinth.',
+                title: 'Die leuchtenden Bio-Pfade',
+                adaIntro: 'Wir müssen die Wasserpumpen der Stadt reaktivieren. Folge den leuchtenden Bio-Glasfaser-Pfaden im Gras.',
+                adaSuccess: 'Pumpen reaktiviert! Sauberes Wasser fließt wieder in die Stadtparks.',
                 adaQuestion: {
                     text: 'Wie folgen wir dem blauen Pfad?',
                     options: ['Mit dem Farbsensor', 'Mit der Kamera', 'Mit GPS'],
@@ -599,8 +599,8 @@ class MissionManager {
             {
                 id: 20,
                 title: 'Eco-City Finale',
-                adaIntro: 'Die ultimative Herausforderung! Das zentrale KI-System ist in einem Sturm beschädigt worden. Nutze Sensoren, um dich im Nebel zurechtzufinden, sammle wichtige Systemteile und reboote den zentralen Stadt-Server!',
-                adaSuccess: 'HERZLICHEN GLÜCKWUNSCH! Du hast die Smart Eco-City gerettet. Die KI ist wieder online und steuert die Natur-Technologie-Symbiose perfekt!',
+                adaIntro: 'Die ultimative Herausforderung! Die Klima-KI für die Gewächshäuser ist nach einem Sturm offline. Nutze deine Sensoren, finde die verwehten Ersatzteile im Nebel und stelle die Harmonie zwischen Natur und Technik wieder her!',
+                adaSuccess: 'HERZLICHEN GLÜCKWUNSCH! Du hast die Solarpunk-Stadt gerettet. Die Pflanzen blühen und die Menschen danken dir!',
                 adaQuestion: {
                     text: 'Was ist das Hauptziel einer Solarpunk-Welt?',
                     options: ['Harmonie zwischen Natur und nachhaltiger Technologie', 'Nur noch in Wäldern zu leben ohne Technik', 'Möglichst viele Fabriken zu bauen'],
