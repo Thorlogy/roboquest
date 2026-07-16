@@ -148,7 +148,6 @@ function buildWindTurbine(x, z) {
     turbine.add(rotor);
     turbine.position.set(x, getTerrainYGlobal(x, z), z);
     turbine.userData = { isRepaired: false, rotor: rotor, glowMat: mGlow };
-    scene.add(turbine);
     return turbine;
 }
 
@@ -603,11 +602,11 @@ function buildEnvironment() {
     foxes.forEach(f => scene.remove(f)); foxes = [];
     // for (let i=0; i<6; i++) foxes.push(buildFox(seededRandom() * 200 - 100, seededRandom() * 200 - 100));
     
-    // Spawn Wind Turbines
-    turbines.forEach(t => scene.remove(t)); turbines = [];
-    turbines.push(buildWindTurbine(60, 40));
-    turbines.push(buildWindTurbine(-80, 70));
-    turbines.push(buildWindTurbine(100, -80));
+    // Spawn Wind Turbines (Nur für spätere Welten, oder global)
+    turbines = [];
+    const t1 = buildWindTurbine(60, 40); environmentGroup.add(t1); turbines.push(t1);
+    const t2 = buildWindTurbine(-80, 70); environmentGroup.add(t2); turbines.push(t2);
+    const t3 = buildWindTurbine(100, -80); environmentGroup.add(t3); turbines.push(t3);
 
     scene.add(environmentGroup);
 }
@@ -913,7 +912,9 @@ window.missionWorld = {
         }
 
         // Create ground plane for mission (flat surface matching grid/goal)
-        const isWorld2 = mission.id >= 6 && mission.id < 100;
+        const isWorld2 = mission.id >= 6 && mission.id <= 10;
+        const isWorld3 = mission.id >= 11 && mission.id <= 15;
+        const isWorld4 = mission.id >= 16 && mission.id <= 20;
         const isCyberLab = mission.id >= 100;
         
         const groundGeo = new THREE.PlaneGeometry(100, 100);
@@ -928,8 +929,13 @@ window.missionWorld = {
                 opacity: 0.3 
             });
         } else {
+            let col = 0x1e293b; // Default (World 1)
+            if (isWorld2) col = 0x14532d; // Dark Forest Green
+            if (isWorld3) col = 0x15803d; // Green
+            if (isWorld4) col = 0x0f172a; // Darker slate
+            
             groundMat = new THREE.MeshStandardMaterial({ 
-                color: isWorld2 ? 0x14532d : 0x1e293b, // Dark Forest Green for World 2, Dark Slate for World 1
+                color: col,
                 roughness: 0.8,
                 metalness: 0.2
             });
@@ -942,7 +948,9 @@ window.missionWorld = {
 
         // Add a grid helper
         let gridColor1 = 0x475569, gridColor2 = 0x334155;
-        if (isWorld2) { gridColor1 = 0x15803d; gridColor2 = 0x14532d; }
+        if (isWorld2) { gridColor1 = 0x16a34a; gridColor2 = 0x14532d; }
+        if (isWorld3) { gridColor1 = 0x22c55e; gridColor2 = 0x15803d; }
+        if (isWorld4) { gridColor1 = 0x38bdf8; gridColor2 = 0x0ea5e9; }
         if (isCyberLab) { gridColor1 = 0x09d8ff; gridColor2 = 0x0a1428; }
         
         const gridHelper = new THREE.GridHelper(100, 50, gridColor1, gridColor2);
@@ -1018,6 +1026,48 @@ window.missionWorld = {
 
                 // Add to obstacles list for collisions
                 obstacles.push({ x: tx, z: tz, radius: 1.0 * s });
+            }
+        }
+        
+        // Spawn Wind Turbines in World 3 missions
+        if (isWorld3) {
+            window.windTurbineBlades = [];
+            
+            // Placed strategically outside the direct path
+            const positions = [
+                {x: -25, z: 20}, {x: 25, z: 15}, {x: -15, z: -35}, {x: 30, z: -25}
+            ];
+            
+            // Add goal turbine if available
+            if (mission.goalPos) {
+                positions.push({ x: mission.goalPos.x, z: mission.goalPos.z - 3 });
+            }
+
+            positions.forEach(pos => {
+                const t = buildWindTurbine(pos.x, pos.z);
+                t.position.y = 0.05; // Sit directly on grid
+                t.rotation.y = Math.random() * Math.PI;
+                if (t.userData.rotor) window.windTurbineBlades.push(t.userData.rotor);
+                environmentGroup.add(t);
+                obstacles.push({ x: pos.x, z: pos.z, radius: 2.0 });
+            });
+            
+            // Also spawn a few birds!
+            window.birds = [];
+            for (let i = 0; i < 8; i++) {
+                const birdGeo = new THREE.ConeGeometry(0.2, 0.8, 3);
+                birdGeo.rotateX(Math.PI / 2);
+                const birdMat = new THREE.MeshBasicMaterial({ color: 0x1e293b });
+                const bird = new THREE.Mesh(birdGeo, birdMat);
+                bird.position.set((Math.random() - 0.5) * 60, 15 + Math.random() * 10, (Math.random() - 0.5) * 60);
+                bird.rotation.y = Math.random() * Math.PI * 2;
+                bird.userData = { 
+                    speedX: Math.cos(bird.rotation.y) * (0.05 + Math.random() * 0.05),
+                    speedZ: -Math.sin(bird.rotation.y) * (0.05 + Math.random() * 0.05),
+                    phase: Math.random() * Math.PI * 2
+                };
+                environmentGroup.add(bird);
+                window.birds.push(bird);
             }
         }
 
