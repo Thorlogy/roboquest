@@ -1093,8 +1093,35 @@ class MissionManager {
                 stationsContainer.appendChild(sep);
             }
 
+            // Insert separator before World 3 (Mission 11)
+            if (mission.id === 11) {
+                const sep = document.createElement('div');
+                sep.className = 'world-separator';
+                sep.innerHTML = `
+                    <div class="world-separator-badge" style="background: linear-gradient(135deg, #0f172a, #1e293b); border-color: #3b82f6; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);">
+                        <span class="world-separator-icon">💨</span>
+                        <span class="world-separator-text" style="color: #60a5fa;">Welt 3: Windpark</span>
+                    </div>
+                `;
+                stationsContainer.appendChild(sep);
+            }
+            
+            // Insert separator before World 4 (Mission 16)
+            if (mission.id === 16) {
+                const sep = document.createElement('div');
+                sep.className = 'world-separator';
+                sep.innerHTML = `
+                    <div class="world-separator-badge" style="background: linear-gradient(135deg, #171717, #262626); border-color: #10b981; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+                        <span class="world-separator-icon">🏙️</span>
+                        <span class="world-separator-text" style="color: #34d399;">Welt 4: Smart Eco-City</span>
+                    </div>
+                `;
+                stationsContainer.appendChild(sep);
+            }
+
             const result = this.progress.missionResults[mission.id];
-            const isUnlocked = mission.id === 101 || mission.id <= this.progress.highestMission;
+            // Temporarily unlock all missions for testing
+            const isUnlocked = true; // mission.id === 101 || mission.id <= this.progress.highestMission;
             const isCompleted = result && result.completed;
             const isNext = mission.id === this.progress.highestMission && !isCompleted && mission.id !== 101;
 
@@ -1141,16 +1168,6 @@ class MissionManager {
             stationsContainer.appendChild(row);
         }
 
-        // Insert separator for World 3 at the end of the timeline
-        const sep3 = document.createElement('div');
-        sep3.className = 'world-separator';
-        sep3.innerHTML = `
-            <div class="world-separator-badge" style="background: linear-gradient(135deg, #0f172a, #1e293b); border-color: #475569; opacity: 0.65; box-shadow: none;">
-                <span class="world-separator-icon">🔒 🌊</span>
-                <span class="world-separator-text" style="color: #94a3b8;">Welt 3: Küsten-Rettung</span>
-            </div>
-        `;
-        stationsContainer.appendChild(sep3);
     }
 
     init() {
