@@ -160,6 +160,7 @@ function buildEnvironment() {
     if (environmentGroup) scene.remove(environmentGroup);
     environmentGroup = new THREE.Group();
     obstacles = [];
+    window.windTurbineBlades = [];
 
     // Seeded random for deterministic object placement so trees don't reshuffle
     let envSeed = 42;
@@ -321,52 +322,141 @@ function buildEnvironment() {
         if (tY < -2 && seededRandom() < 0.8) continue;
 
         const type = seededRandom();
-        if (type < 0.35) {
-            const tree = new THREE.Group();
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.6, 2, 5), trkMat);
-            trunk.position.y = 1; trunk.castShadow = true; tree.add(trunk);
-            tree.add(meshAt(new THREE.ConeGeometry(2.5, 4, 6), leaP, 0, 3, 0));
-            tree.add(meshAt(new THREE.ConeGeometry(2, 3, 6), leaP, 0, 5, 0));
-            const s = seededRandom()*0.5+0.7; tree.scale.set(s,s,s); tree.position.set(rx, tY, rz);
-            environmentGroup.add(tree); obstacles.push({ x: rx, z: rz, radius: 1.5*s });
-            // Shadow circle under tree
-            const shadowR = 3.5 * s;
-            const shadowGeo = new THREE.CircleGeometry(shadowR, 16);
-            const spos = shadowGeo.attributes.position;
-            for(let j=0; j<spos.count; j++) {
-                spos.setZ(j, getTerrainYGlobal(rx + spos.getX(j), rz - spos.getY(j)) - tY);
+        if (currentWorld === 3) {
+            // Windpark / Solarpark 3D Assets
+            if (type < 0.08) {
+                // Große Windräder
+                const turbine = new THREE.Group();
+                
+                // Turm
+                const towerGeo = new THREE.CylinderGeometry(0.5, 1.5, 20, 8);
+                const towerMat = new THREE.MeshStandardMaterial({ color: 0xffffff, flatShading: true });
+                const tower = new THREE.Mesh(towerGeo, towerMat);
+                tower.position.y = 10;
+                tower.castShadow = true;
+                turbine.add(tower);
+                
+                // Gondel (Nacelle)
+                const nacelleGeo = new THREE.BoxGeometry(2, 2.5, 5);
+                const nacelle = new THREE.Mesh(nacelleGeo, towerMat);
+                nacelle.position.set(0, 20, -1);
+                nacelle.castShadow = true;
+                turbine.add(nacelle);
+
+                // Rotor & Nabe
+                const rotor = new THREE.Group();
+                rotor.position.set(0, 20, 1.6);
+                
+                const hub = new THREE.Mesh(new THREE.SphereGeometry(1.2, 8, 8), towerMat);
+                rotor.add(hub);
+
+                // 3 Rotorblätter
+                const bladeGeo = new THREE.BoxGeometry(0.5, 16, 0.2);
+                bladeGeo.translate(0, 8, 0); // Offset pivot zur Nabe
+                const bladeMat = new THREE.MeshStandardMaterial({ color: 0xdddddd, flatShading: true });
+                
+                for(let b=0; b<3; b++) {
+                    const blade = new THREE.Mesh(bladeGeo, bladeMat);
+                    blade.rotation.z = (b * Math.PI * 2) / 3;
+                    rotor.add(blade);
+                }
+                
+                // Leichte Rotation der Turbine zum Wind
+                turbine.rotation.y = seededRandom() * Math.PI;
+                turbine.add(rotor);
+                window.windTurbineBlades.push(rotor);
+
+                const s = seededRandom()*0.5 + 0.8; 
+                turbine.scale.set(s,s,s); 
+                turbine.position.set(rx, tY, rz);
+                
+                environmentGroup.add(turbine); 
+                obstacles.push({ x: rx, z: rz, radius: 2.0*s });
+            } else if (type < 0.25) {
+                // Solarpanele (Arrays)
+                const panelGroup = new THREE.Group();
+                const standGeo = new THREE.CylinderGeometry(0.1, 0.1, 1);
+                const standMat = new THREE.MeshStandardMaterial({ color: 0x666666 });
+                const panelGeo = new THREE.BoxGeometry(4, 2.5, 0.1);
+                const panelMat = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness: 0.1, metalness: 0.8 });
+                
+                for(let p=0; p<3; p++) {
+                    const stand = new THREE.Mesh(standGeo, standMat);
+                    stand.position.set(p*4.5 - 4.5, 0.5, 0);
+                    panelGroup.add(stand);
+                    
+                    const panel = new THREE.Mesh(panelGeo, panelMat);
+                    panel.position.set(p*4.5 - 4.5, 1.2, 0);
+                    panel.rotation.x = -Math.PI / 6; // Angestellt zur Sonne
+                    panelGroup.add(panel);
+                }
+                
+                panelGroup.position.set(rx, tY, rz);
+                panelGroup.rotation.y = (seededRandom() - 0.5) * 0.5; 
+                environmentGroup.add(panelGroup);
+                obstacles.push({ x: rx, z: rz, radius: 7 });
+            } else if (type < 0.75) {
+                // Bergige Felsen
+                const rR = seededRandom()*2.5+0.8;
+                const rock = new THREE.Mesh(new THREE.IcosahedronGeometry(rR, 0), rckM);
+                rock.position.set(rx, tY+rR*0.4, rz); rock.castShadow = true;
+                environmentGroup.add(rock); obstacles.push({ x: rx, z: rz, radius: rR*0.8 });
+            } else {
+                // Kleine Büsche für die Wiesen
+                const bush = new THREE.Mesh(new THREE.SphereGeometry(1, 8, 8), leaB);
+                bush.scale.set(1.5+seededRandom(), 0.6+seededRandom()*0.4, 1.2+seededRandom());
+                bush.position.set(rx, tY + 0.3, rz);
+                environmentGroup.add(bush);
             }
-            const shadow = new THREE.Mesh(shadowGeo, new THREE.MeshBasicMaterial({ color: 0x0a1628, transparent: true, opacity: 0.35, side: THREE.DoubleSide }));
-            shadow.rotation.x = -Math.PI / 2;
-            shadow.position.set(rx, tY + 0.06, rz);
-            environmentGroup.add(shadow);
-        } else if (type < 0.55) {
-            const tree = new THREE.Group();
-            tree.add(meshAt(new THREE.CylinderGeometry(0.4, 0.5, 2, 5), trkMat, 0, 1, 0));
-            tree.add(meshAt(new THREE.DodecahedronGeometry(2), leaD, 0, 3, 0));
-            const s = seededRandom()*0.5+0.7; tree.scale.set(s,s,s); tree.position.set(rx, tY, rz);
-            environmentGroup.add(tree); obstacles.push({ x: rx, z: rz, radius: 1.5*s });
-            // Shadow circle under round tree
-            const shadowR2 = 3.0 * s;
-            const shadowGeo2 = new THREE.CircleGeometry(shadowR2, 16);
-            const spos2 = shadowGeo2.attributes.position;
-            for(let j=0; j<spos2.count; j++) {
-                spos2.setZ(j, getTerrainYGlobal(rx + spos2.getX(j), rz - spos2.getY(j)) - tY);
-            }
-            const shadow2 = new THREE.Mesh(shadowGeo2, new THREE.MeshBasicMaterial({ color: 0x0a1628, transparent: true, opacity: 0.3, side: THREE.DoubleSide }));
-            shadow2.rotation.x = -Math.PI / 2;
-            shadow2.position.set(rx, tY + 0.06, rz);
-            environmentGroup.add(shadow2);
-        } else if (type < 0.75) {
-            const rR = seededRandom()*1.2+0.4;
-            const rock = new THREE.Mesh(new THREE.IcosahedronGeometry(rR, 0), rckM);
-            rock.position.set(rx, tY+0.4, rz); rock.castShadow = true;
-            environmentGroup.add(rock); obstacles.push({ x: rx, z: rz, radius: rR*0.8 });
         } else {
-            const bush = new THREE.Mesh(new THREE.SphereGeometry(1, 8, 8), leaB);
-            bush.scale.set(1.5+seededRandom(), 0.6+seededRandom()*0.4, 1.2+seededRandom());
-            bush.position.set(rx, tY + 0.3, rz);
-            environmentGroup.add(bush);
+            // ORIGINAL LOGIC für Welt 1, 2, 4
+            if (type < 0.35) {
+                const tree = new THREE.Group();
+                const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.6, 2, 5), trkMat);
+                trunk.position.y = 1; trunk.castShadow = true; tree.add(trunk);
+                tree.add(meshAt(new THREE.ConeGeometry(2.5, 4, 6), leaP, 0, 3, 0));
+                tree.add(meshAt(new THREE.ConeGeometry(2, 3, 6), leaP, 0, 5, 0));
+                const s = seededRandom()*0.5+0.7; tree.scale.set(s,s,s); tree.position.set(rx, tY, rz);
+                environmentGroup.add(tree); obstacles.push({ x: rx, z: rz, radius: 1.5*s });
+                // Shadow circle under tree
+                const shadowR = 3.5 * s;
+                const shadowGeo = new THREE.CircleGeometry(shadowR, 16);
+                const spos = shadowGeo.attributes.position;
+                for(let j=0; j<spos.count; j++) {
+                    spos.setZ(j, getTerrainYGlobal(rx + spos.getX(j), rz - spos.getY(j)) - tY);
+                }
+                const shadow = new THREE.Mesh(shadowGeo, new THREE.MeshBasicMaterial({ color: 0x0a1628, transparent: true, opacity: 0.35, side: THREE.DoubleSide }));
+                shadow.rotation.x = -Math.PI / 2;
+                shadow.position.set(rx, tY + 0.06, rz);
+                environmentGroup.add(shadow);
+            } else if (type < 0.55) {
+                const tree = new THREE.Group();
+                tree.add(meshAt(new THREE.CylinderGeometry(0.4, 0.5, 2, 5), trkMat, 0, 1, 0));
+                tree.add(meshAt(new THREE.DodecahedronGeometry(2), leaD, 0, 3, 0));
+                const s = seededRandom()*0.5+0.7; tree.scale.set(s,s,s); tree.position.set(rx, tY, rz);
+                environmentGroup.add(tree); obstacles.push({ x: rx, z: rz, radius: 1.5*s });
+                // Shadow circle under round tree
+                const shadowR2 = 3.0 * s;
+                const shadowGeo2 = new THREE.CircleGeometry(shadowR2, 16);
+                const spos2 = shadowGeo2.attributes.position;
+                for(let j=0; j<spos2.count; j++) {
+                    spos2.setZ(j, getTerrainYGlobal(rx + spos2.getX(j), rz - spos2.getY(j)) - tY);
+                }
+                const shadow2 = new THREE.Mesh(shadowGeo2, new THREE.MeshBasicMaterial({ color: 0x0a1628, transparent: true, opacity: 0.3, side: THREE.DoubleSide }));
+                shadow2.rotation.x = -Math.PI / 2;
+                shadow2.position.set(rx, tY + 0.06, rz);
+                environmentGroup.add(shadow2);
+            } else if (type < 0.75) {
+                const rR = seededRandom()*1.2+0.4;
+                const rock = new THREE.Mesh(new THREE.IcosahedronGeometry(rR, 0), rckM);
+                rock.position.set(rx, tY+0.4, rz); rock.castShadow = true;
+                environmentGroup.add(rock); obstacles.push({ x: rx, z: rz, radius: rR*0.8 });
+            } else {
+                const bush = new THREE.Mesh(new THREE.SphereGeometry(1, 8, 8), leaB);
+                bush.scale.set(1.5+seededRandom(), 0.6+seededRandom()*0.4, 1.2+seededRandom());
+                bush.position.set(rx, tY + 0.3, rz);
+                environmentGroup.add(bush);
+            }
         }
 
         // --- NEW: EXTRA VEGETATION (Flowers & Mushrooms) ---
@@ -529,6 +619,12 @@ function updateAtmosphere(delta, time) {
         f.position.y += Math.sin(time * f.userData.speed + f.userData.phase) * 0.01;
         f.material.opacity = 0.4 + Math.sin(time * 2 + f.userData.phase) * 0.4;
     });
+
+    if (window.windTurbineBlades) {
+        window.windTurbineBlades.forEach(rotor => {
+            rotor.rotation.z += delta * 2.0; 
+        });
+    }
 
     // River flow effect
     if (riverMesh) {
